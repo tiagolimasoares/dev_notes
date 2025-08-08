@@ -23,7 +23,10 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
     
     <!-- Título da Página -->
-    <title>Portal de Notas HTML</title>
+    <title>Portal de Notas HTML - Design Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Stylesheet Principal -->
     <link rel="stylesheet" href="assets/css/style.css">
@@ -41,66 +44,69 @@
     <!-- <link rel="manifest" href="manifest.json"> -->
 </head>
 <body>
-    <!-- Skip Navigation para Acessibilidade -->
-    <a href="#main-content" class="skip-link">Pular para conteúdo principal</a>
     
     <!-- Container Principal -->
     <div class="container">
         <!-- Cabeçalho Principal -->
-        <header role="banner">
-            <h1 class="header-title">Portal de Notas HTML</h1>
-            <p class="header-subtitle">Sistema de Notas Pessoais - Acesso Rápido aos Seus Arquivos HTML</p>
+        <header class="header" role="banner">
+            <h1>Portal de Notas HTML</h1>
+            <p>Transforme seus estudos com organização inteligente e design premium</p>
         </header>
 
         <!-- Conteúdo Principal -->
         <main id="main-content" class="main-content" role="main">
             <!-- Seção de Estatísticas -->
-            <section class="stats-section" aria-labelledby="stats-title">
+            <section class="stats-container" aria-labelledby="stats-title">
                 <h2 id="stats-title" class="sr-only">Estatísticas do Portal</h2>
                 
-                <div class="stat-card" role="status" aria-live="polite">
-                    <span class="stat-number" id="total-files" aria-label="Total de notas">0</span>
-                    <span class="stat-label">Total de Notas</span>
-                </div>
-                
-                <div class="stat-card" role="status" aria-live="polite">
-                    <span class="stat-number" id="last-updated" aria-label="Última atualização">--</span>
-                    <span class="stat-label">Última Atualização</span>
+                <div class="stats-grid">
+                    <div class="stat-card" role="status" aria-live="polite">
+                        <div class="stat-value" id="total-files" aria-label="Total de notas">0</div>
+                        <div class="stat-label">Total de Notas</div>
+                    </div>
+                    
+                    <div class="stat-card" role="status" aria-live="polite">
+                        <div class="stat-value" id="last-updated" aria-label="Última atualização">--</div>
+                        <div class="stat-label">Última Atualização</div>
+                    </div>
                 </div>
             </section>
 
             <!-- Seção de Busca -->
-            <section class="search-section" aria-labelledby="search-title">
+            <section class="category-section" aria-labelledby="search-title">
                 <h2 id="search-title" class="sr-only">Buscar Notas</h2>
-                <label for="search-input" class="sr-only">Campo de busca</label>
-                <input 
-                    type="search" 
-                    id="search-input" 
-                    class="search-input" 
-                    placeholder="🔍 Buscar notas por nome ou conteúdo..."
-                    autocomplete="off"
-                    spellcheck="false"
-                    aria-describedby="search-description"
-                >
-                <div id="search-description" class="sr-only">
-                    Digite para filtrar as notas em tempo real
+                
+                <div class="search-container">
+                    <label for="search-input" class="sr-only">Campo de busca</label>
+                    <input 
+                        type="search" 
+                        id="search-input" 
+                        class="search-input" 
+                        placeholder="🔍 Buscar notas por nome ou conteúdo..."
+                        autocomplete="off"
+                        spellcheck="false"
+                        aria-describedby="search-description"
+                    >
+                    <div id="search-description" class="sr-only">
+                        Digite para filtrar as notas em tempo real
+                    </div>
                 </div>
-            </section>
 
-            <!-- Botão de Atualização -->
-            <div class="refresh-section">
+                <!-- Botão de Atualização -->
+                <div class="search-feedback" id="search-feedback" style="display: none;"></div>
+                
                 <button 
                     id="refresh-btn" 
-                    class="refresh-button"
+                    class="btn btn-primary"
                     type="button"
                     aria-describedby="refresh-description"
+                    style="margin-bottom: var(--spacing-md);"
                 >
                     🔄 Atualizar Lista
                 </button>
                 <div id="refresh-description" class="sr-only">
                     Clique para recarregar a lista de notas do servidor
                 </div>
-            </div>
 
             <!-- Seção de Cadernos/Categorias -->
             <section class="category-section" aria-labelledby="category-title">
@@ -126,7 +132,8 @@
                 >
                     <!-- Conteúdo carregado dinamicamente via JavaScript -->
                     <div class="loading" role="status" aria-label="Carregando notas">
-                        <p>🔄 Carregando notas...</p>
+                        <div class="loading-spinner"></div>
+                        <p>Carregando notas...</p>
                     </div>
                 </div>
                 
@@ -134,6 +141,8 @@
                     Lista de notas HTML da categoria selecionada
                 </div>
             </section>
+        </section>
+    </div>
         </main>
     </div>
 
