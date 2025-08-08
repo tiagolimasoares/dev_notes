@@ -1,10 +1,10 @@
-# 📝 Portal de Notas HTML
+# 📝 Notes HTML
 
-Sistema estático para hospedagem de notas HTML pessoais no GitHub Pages.
+Biblioteca pessoal de arquivos HTML com organização automática e categorização inteligente.
 
 ## 🎯 Objetivo
 
-Este projeto foi desenvolvido para hospedar suas páginas HTML pessoais de forma simples e automática no GitHub Pages. Qualquer arquivo HTML que você criar fica automaticamente disponível online com uma interface elegante para navegação.
+Sua biblioteca pessoal inteligente para armazenar e organizar arquivos HTML. O sistema detecta automaticamente as categorias dos seus arquivos e os organiza em cadernos profissionais, oferecendo acesso rápido e elegante a toda sua coleção.
 
 ## 🚀 Como Usar
 

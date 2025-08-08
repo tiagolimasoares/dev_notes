@@ -2,8 +2,8 @@
 # Garante que todos os arquivos HTML sejam servidos corretamente
 
 # Configurações básicas
-title: "Portal de Notas HTML"
-description: "Sistema de notas pessoais - Acesso rápido aos seus arquivos HTML"
+title: "Notes HTML"
+description: "Biblioteca pessoal de arquivos HTML com organização automática"
 url: ""
 baseurl: ""
 
