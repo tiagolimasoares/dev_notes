@@ -474,8 +474,19 @@ class NotesPortal {
             };
         });
         
-        // Ordena por data de modificação (mais recente primeiro)
-        this.files.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+        // Ordena por numeração crescente (ordem lógica dos arquivos)
+        this.files.sort((a, b) => {
+            const numA = this.extractFileNumber(a.name);
+            const numB = this.extractFileNumber(b.name);
+            
+            // Primeiro critério: ordem numérica
+            if (numA !== numB) {
+                return numA - numB;
+            }
+            
+            // Segundo critério: ordem alfabética
+            return a.name.localeCompare(b.name);
+        });
         
         console.log(`✅ [LOCAL] Carregados ${this.files.length} arquivos da pasta notes`);
         
@@ -587,8 +598,19 @@ class NotesPortal {
             };
         });
         
-        // Ordena por data (mais recente primeiro)
-        this.files.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+        // Ordena por numeração crescente (ordem lógica dos arquivos)
+        this.files.sort((a, b) => {
+            const numA = this.extractFileNumber(a.name);
+            const numB = this.extractFileNumber(b.name);
+            
+            // Primeiro critério: ordem numérica
+            if (numA !== numB) {
+                return numA - numB;
+            }
+            
+            // Segundo critério: ordem alfabética
+            return a.name.localeCompare(b.name);
+        });
         
         console.log(`🎉 [DEBUG] Sistema de emergência ativado: ${this.files.length} arquivos carregados`);
     }
@@ -610,18 +632,54 @@ class NotesPortal {
             const category = this.detectFileCategory(file.name);
             this.categories[category].files.push({
                 ...file,
-                category: category
+                category: category,
+                numericOrder: this.extractFileNumber(file.name) // Adiciona ordem numérica
             });
+        });
+        
+        // Ordena arquivos dentro de cada categoria por numeração crescente
+        Object.keys(this.categories).forEach(categoryKey => {
+            this.categories[categoryKey].files.sort((a, b) => {
+                // Primeiro critério: ordem numérica
+                const numA = a.numericOrder;
+                const numB = b.numericOrder;
+                
+                if (numA !== numB) {
+                    return numA - numB;
+                }
+                
+                // Segundo critério: ordem alfabética (fallback)
+                return a.name.localeCompare(b.name);
+            });
+        });
+        
+        // Ordena também a lista principal
+        this.files.sort((a, b) => {
+            const categoryA = this.detectFileCategory(a.name);
+            const categoryB = this.detectFileCategory(b.name);
+            
+            // Se mesma categoria, ordena por número
+            if (categoryA === categoryB) {
+                const numA = this.extractFileNumber(a.name);
+                const numB = this.extractFileNumber(b.name);
+                
+                if (numA !== numB) {
+                    return numA - numB;
+                }
+            }
+            
+            // Diferentes categorias, ordena por nome da categoria
+            return categoryA.localeCompare(categoryB);
         });
         
         // Log das categorias organizadas
         Object.entries(this.categories).forEach(([key, category]) => {
             if (category.files.length > 0) {
-                console.log(`📚 [CADERNO] ${category.name}: ${category.files.length} arquivos`);
+                console.log(`📚 [CADERNO] ${category.name}: ${category.files.length} arquivos (ordem crescente)`);
             }
         });
         
-        console.log('✅ [CATEGORIZE] Arquivos organizados em cadernos profissionais');
+        console.log('✅ [CATEGORIZE] Arquivos organizados em cadernos com ordem numérica');
     }
 
     /**
@@ -649,6 +707,62 @@ class NotesPortal {
         
         // Se não encontrou nenhuma categoria específica, vai para GERAL
         return 'GERAL';
+    }
+
+    /**
+     * Extrai a numeração de um arquivo para ordenação crescente
+     * Suporta diversos padrões de numeração nos nomes dos arquivos
+     * 
+     * @param {string} fileName Nome do arquivo
+     * @returns {number} Número extraído ou valor alto para arquivos sem numeração
+     */
+    extractFileNumber(fileName) {
+        // Remove extensão para análise
+        const baseName = fileName.replace(/\.html?$/i, '');
+        
+        // Padrões de numeração mais comuns (em ordem de prioridade)
+        const patterns = [
+            // Padrão principal: 2025_MM_DD_SIGLA_NNN
+            /_([A-Z]+)_(\d{3,4})/i,
+            
+            // Padrão com hífen: SIGLA-NNN
+            /([A-Z]+)-(\d{3,4})/i,
+            
+            // Padrão com espaço: SIGLA NNN
+            /([A-Z]+)\s+(\d{3,4})/i,
+            
+            // Padrão no final: ...NNN
+            /(\d{3,4})(?:\s|[-_]|$)/,
+            
+            // Padrão simples: qualquer sequência de 3+ dígitos
+            /(\d{3,})/
+        ];
+        
+        for (const pattern of patterns) {
+            const match = baseName.match(pattern);
+            if (match) {
+                // Se o padrão captura categoria e número
+                if (match.length >= 3) {
+                    const number = parseInt(match[2], 10);
+                    return number;
+                }
+                // Se captura apenas o número
+                else if (match.length >= 2) {
+                    const number = parseInt(match[1], 10);
+                    return number;
+                }
+            }
+        }
+        
+        // Se não encontrou numeração, tenta extrair qualquer número no nome
+        const anyNumber = baseName.match(/(\d+)/);
+        if (anyNumber) {
+            const number = parseInt(anyNumber[1], 10);
+            return number;
+        }
+        
+        // Se não encontrou nenhum número, retorna valor alto para ficar no final
+        return 9999;
     }
 
     /**
