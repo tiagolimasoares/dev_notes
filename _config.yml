@@ -1,0 +1,37 @@
+# Configuração do Jekyll para GitHub Pages
+# Garante que todos os arquivos HTML sejam servidos corretamente
+
+# Configurações básicas
+title: "Portal de Notas HTML"
+description: "Sistema de notas pessoais - Acesso rápido aos seus arquivos HTML"
+url: ""
+baseurl: ""
+
+# Plugins necessários
+plugins:
+  - jekyll-relative-links
+
+# Configurações de arquivos
+include:
+  - notes/
+  - assets/
+  - "*.html"
+
+# Arquivos a serem excluídos
+exclude:
+  - README.md
+  - .gitignore
+  - .github/
+
+# Configurações de processamento
+markdown: kramdown
+highlighter: rouge
+
+# Configurações de links relativos
+relative_links:
+  enabled: true
+  collections: false
+
+# Configurações de build
+safe: true
+incremental: false

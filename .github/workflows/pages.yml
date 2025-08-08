@@ -1,0 +1,49 @@
+# Configuração do GitHub Actions para GitHub Pages
+# Automatiza o deploy dos arquivos HTML estáticos
+
+name: Deploy Static HTML to GitHub Pages
+
+# Executa quando há push na branch main ou manualmente
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+# Configurações de permissão para GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Permite apenas um deploy simultâneo
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Job de build e deploy
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout do código
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      # Configuração do GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      # Upload dos arquivos
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+          
+      # Deploy para GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

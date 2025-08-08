@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Meta Tags Essenciais -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal de Notas HTML - Sistema para hospedagem e gerenciamento de notas HTML pessoais">
+    <meta name="keywords" content="notas, HTML, portal, GitHub Pages, documentação">
+    <meta name="author" content="Portal de Notas HTML">
+    
+    <!-- SEO e Social Media -->
+    <meta property="og:title" content="Portal de Notas HTML">
+    <meta property="og:description" content="Sistema de notas pessoais - Acesso rápido aos seus arquivos HTML">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Portal de Notas HTML">
+    <meta name="twitter:description" content="Sistema de notas pessoais - Acesso rápido aos seus arquivos HTML">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+    
+    <!-- Título da Página -->
+    <title>Portal de Notas HTML</title>
+    
+    <!-- Stylesheet Principal -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Preload de recursos críticos -->
+    <link rel="preload" href="assets/js/main.js" as="script">
+    
+    <!-- DNS Prefetch para APIs externas -->
+    <link rel="dns-prefetch" href="//api.github.com">
+    
+    <!-- Theme Color para mobile -->
+    <meta name="theme-color" content="#3498db">
+    
+    <!-- PWA Manifest (futuro) -->
+    <!-- <link rel="manifest" href="manifest.json"> -->
+</head>
+<body>
+    <!-- Skip Navigation para Acessibilidade -->
+    <a href="#main-content" class="skip-link">Pular para conteúdo principal</a>
+    
+    <!-- Container Principal -->
+    <div class="container">
+        <!-- Cabeçalho Principal -->
+        <header role="banner">
+            <h1 class="header-title">Portal de Notas HTML</h1>
+            <p class="header-subtitle">Sistema de Notas Pessoais - Acesso Rápido aos Seus Arquivos HTML</p>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main id="main-content" class="main-content" role="main">
+            <!-- Seção de Estatísticas -->
+            <section class="stats-section" aria-labelledby="stats-title">
+                <h2 id="stats-title" class="sr-only">Estatísticas do Portal</h2>
+                
+                <div class="stat-card" role="status" aria-live="polite">
+                    <span class="stat-number" id="total-files" aria-label="Total de notas">0</span>
+                    <span class="stat-label">Total de Notas</span>
+                </div>
+                
+                <div class="stat-card" role="status" aria-live="polite">
+                    <span class="stat-number" id="last-updated" aria-label="Última atualização">--</span>
+                    <span class="stat-label">Última Atualização</span>
+                </div>
+            </section>
+
+            <!-- Seção de Busca -->
+            <section class="search-section" aria-labelledby="search-title">
+                <h2 id="search-title" class="sr-only">Buscar Notas</h2>
+                <label for="search-input" class="sr-only">Campo de busca</label>
+                <input 
+                    type="search" 
+                    id="search-input" 
+                    class="search-input" 
+                    placeholder="🔍 Buscar notas por nome ou conteúdo..."
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-describedby="search-description"
+                >
+                <div id="search-description" class="sr-only">
+                    Digite para filtrar as notas em tempo real
+                </div>
+            </section>
+
+            <!-- Botão de Atualização -->
+            <div class="refresh-section">
+                <button 
+                    id="refresh-btn" 
+                    class="refresh-button"
+                    type="button"
+                    aria-describedby="refresh-description"
+                >
+                    🔄 Atualizar Lista
+                </button>
+                <div id="refresh-description" class="sr-only">
+                    Clique para recarregar a lista de notas do servidor
+                </div>
+            </div>
+
+            <!-- Seção de Arquivos -->
+            <section class="files-section" aria-labelledby="files-title">
+                <h2 id="files-title" class="section-title">📝 Notas Disponíveis</h2>
+                
+                <!-- Container dinâmico para lista de arquivos -->
+                <div 
+                    id="files-container" 
+                    role="region" 
+                    aria-live="polite" 
+                    aria-busy="false"
+                    aria-describedby="files-description"
+                >
+                    <!-- Conteúdo carregado dinamicamente via JavaScript -->
+                    <div class="loading" role="status" aria-label="Carregando notas">
+                        <p>🔄 Carregando notas...</p>
+                    </div>
+                </div>
+                
+                <div id="files-description" class="sr-only">
+                    Lista de notas HTML disponíveis no sistema
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Script Principal (carregado no final para melhor performance) -->
+    <script src="assets/js/main.js"></script>
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Portal de Notas HTML",
+        "description": "Sistema de notas pessoais - Acesso rápido aos seus arquivos HTML",
+        "url": "",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Any",
+        "permissions": "browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+
+    <!-- Analytics (opcional - comentado por enquanto) -->
+    <!--
+    <script>
+        // Google Analytics ou outra ferramenta de analytics
+        // window.dataLayer = window.dataLayer || [];
+        // function gtag(){dataLayer.push(arguments);}
+        // gtag('js', new Date());
+        // gtag('config', 'GA_TRACKING_ID');
+    </script>
+    -->
+</body>
+</html>

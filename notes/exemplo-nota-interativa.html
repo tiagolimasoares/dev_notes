@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo de Nota Interativa</title>
+    <style>
+        /**
+         * Estilos CSS integrados para notas HTML
+         * Design focado em legibilidade e funcionalidade
+         */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 2.5rem;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-basic {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 5px solid #3498db;
+        }
+
+        .section-highlight {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 5px solid #ff9800;
+        }
+
+        .section-important {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-left: 5px solid #ffc107;
+        }
+
+        .section-code {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            border-left: 5px solid #9c27b0;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-content {
+            font-size: 1rem;
+            text-align: justify;
+            line-height: 1.8;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-header {
+            background: #34495e;
+            color: #ecf0f1;
+            padding: 0.5rem 1rem;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: -1.5rem -1.5rem 1rem -1.5rem;
+        }
+
+        .interactive-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .interactive-item {
+            background: white;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .interactive-item:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .interactive-item.completed {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox.checked {
+            background: #3498db;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .navigation {
+            padding: 1.5rem;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible-content.active {
+            max-height: 1000px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <header class="header">
+            <h1>📝 Exemplo de Nota Interativa</h1>
+            <p>Modelo para criação de notas HTML dinâmicas e funcionais</p>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="content">
+            
+            <!-- Seção Básica -->
+            <section class="section section-basic">
+                <h2 class="section-title">📋 Seção de Informações Básicas</h2>
+                <div class="section-content">
+                    <p>Esta é uma seção padrão para informações gerais. Você pode usar este tipo de seção para conteúdo introdutório, definições, ou qualquer texto informativo básico.</p>
+                    <p>O design é limpo e focado na legibilidade, permitindo fácil digestão do conteúdo.</p>
+                </div>
+            </section>
+
+            <!-- Seção de Destaque -->
+            <section class="section section-highlight">
+                <h2 class="section-title">⭐ Seção de Destaque</h2>
+                <div class="section-content">
+                    <p><strong>Pontos importantes:</strong> Use esta seção para destacar informações cruciais que não devem passar despercebidas.</p>
+                    <ul>
+                        <li>Item destacado 1</li>
+                        <li>Item destacado 2</li>
+                        <li>Item destacado 3</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Lista Interativa -->
+            <section class="section section-important">
+                <h2 class="section-title">✅ Lista de Tarefas Interativa</h2>
+                <div class="section-content">
+                    <p>Clique nos itens abaixo para marcá-los como concluídos:</p>
+                    <ul class="interactive-list">
+                        <li class="interactive-item" data-task="1">
+                            <div class="checkbox"></div>
+                            <span>Primeira tarefa importante</span>
+                        </li>
+                        <li class="interactive-item" data-task="2">
+                            <div class="checkbox"></div>
+                            <span>Segunda tarefa a ser completada</span>
+                        </li>
+                        <li class="interactive-item" data-task="3">
+                            <div class="checkbox"></div>
+                            <span>Terceira tarefa da lista</span>
+                        </li>
+                        <li class="interactive-item" data-task="4">
+                            <div class="checkbox"></div>
+                            <span>Tarefa final do conjunto</span>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Seção de Código -->
+            <section class="section section-code">
+                <h2 class="section-title">💻 Exemplo de Código</h2>
+                <div class="section-content">
+                    <p>Para trechos de código ou comandos importantes:</p>
+                    <div class="code-block">
+                        <div class="code-header">JavaScript Example</div>
+                        <pre>
+// Exemplo de função JavaScript
+function exemploFuncao() {
+    const dados = {
+        nome: 'Exemplo',
+        tipo: 'Nota Interativa',
+        funcional: true
+    };
+    
+    console.log('Dados:', dados);
+    return dados;
+}
+
+// Uso da função
+const resultado = exemploFuncao();
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção Colapsível -->
+            <section class="section section-basic">
+                <h2 class="section-title collapsible">🔽 Seção Colapsível (Clique para expandir)</h2>
+                <div class="collapsible-content">
+                    <div class="section-content">
+                        <p>Este conteúdo estava oculto e pode ser mostrado/escondido clicando no título.</p>
+                        <p>Útil para organizar grandes quantidades de informação sem poluir a interface inicial.</p>
+                        <p>Você pode adicionar qualquer tipo de conteúdo aqui: texto, listas, códigos, etc.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estatísticas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number" id="total-tasks">4</span>
+                    <span class="stat-label">Total de Tarefas</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="completed-tasks">0</span>
+                    <span class="stat-label">Concluídas</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="progress">0%</span>
+                    <span class="stat-label">Progresso</span>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn" id="toggle-all">🔄 Alternar Todas as Tarefas</button>
+                <button class="btn btn-secondary" id="reset-tasks">🔄 Resetar Lista</button>
+            </div>
+        </main>
+
+        <!-- Navegação -->
+        <nav class="navigation">
+            <a href="../index.html" class="btn">🏠 Voltar ao Portal</a>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir Nota</button>
+        </nav>
+    </div>
+
+    <script>
+        /**
+         * Sistema Interativo de Notas HTML
+         * Implementa funcionalidades dinâmicas para notas interativas
+         * 
+         * Funcionalidades:
+         * - Sistema de tarefas com checkbox
+         * - Seções colapsíveis
+         * - Estatísticas em tempo real
+         * - Persistência de dados no localStorage
+         * - Interface responsiva e moderna
+         */
+
+        class InteractiveNote {
+            constructor() {
+                this.tasks = new Map();
+                this.storageKey = 'interactive-note-data';
+                this.init();
+            }
+
+            /**
+             * Inicializa o sistema de notas
+             */
+            init() {
+                this.loadData();
+                this.setupEventListeners();
+                this.updateStats();
+            }
+
+            /**
+             * Configura os listeners de eventos
+             */
+            setupEventListeners() {
+                // Event listeners para tarefas
+                document.querySelectorAll('.interactive-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.toggleTask(item);
+                    });
+                });
+
+                // Event listeners para seções colapsíveis
+                document.querySelectorAll('.collapsible').forEach(collapsible => {
+                    collapsible.addEventListener('click', () => {
+                        this.toggleCollapsible(collapsible);
+                    });
+                });
+
+                // Event listeners para botões
+                document.getElementById('toggle-all').addEventListener('click', () => {
+                    this.toggleAllTasks();
+                });
+
+                document.getElementById('reset-tasks').addEventListener('click', () => {
+                    this.resetAllTasks();
+                });
+            }
+
+            /**
+             * Alterna o estado de uma tarefa
+             */
+            toggleTask(taskElement) {
+                const taskId = taskElement.dataset.task;
+                const checkbox = taskElement.querySelector('.checkbox');
+                const isCompleted = taskElement.classList.contains('completed');
+
+                if (isCompleted) {
+                    // Marcar como não concluída
+                    taskElement.classList.remove('completed');
+                    checkbox.classList.remove('checked');
+                    this.tasks.set(taskId, false);
+                } else {
+                    // Marcar como concluída
+                    taskElement.classList.add('completed');
+                    checkbox.classList.add('checked');
+                    this.tasks.set(taskId, true);
+                }
+
+                this.updateStats();
+                this.saveData();
+            }
+
+            /**
+             * Alterna visibilidade de seções colapsíveis
+             */
+            toggleCollapsible(collapsibleElement) {
+                const content = collapsibleElement.nextElementSibling;
+                const isActive = content.classList.contains('active');
+
+                if (isActive) {
+                    content.classList.remove('active');
+                    collapsibleElement.textContent = collapsibleElement.textContent.replace('🔼', '🔽');
+                } else {
+                    content.classList.add('active');
+                    collapsibleElement.textContent = collapsibleElement.textContent.replace('🔽', '🔼');
+                }
+            }
+
+            /**
+             * Alterna o estado de todas as tarefas
+             */
+            toggleAllTasks() {
+                const allCompleted = Array.from(this.tasks.values()).every(status => status);
+                
+                document.querySelectorAll('.interactive-item').forEach(item => {
+                    const taskId = item.dataset.task;
+                    const checkbox = item.querySelector('.checkbox');
+
+                    if (allCompleted) {
+                        // Se todas estão completas, marcar todas como incompletas
+                        item.classList.remove('completed');
+                        checkbox.classList.remove('checked');
+                        this.tasks.set(taskId, false);
+                    } else {
+                        // Se nem todas estão completas, marcar todas como completas
+                        item.classList.add('completed');
+                        checkbox.classList.add('checked');
+                        this.tasks.set(taskId, true);
+                    }
+                });
+
+                this.updateStats();
+                this.saveData();
+            }
+
+            /**
+             * Reseta todas as tarefas
+             */
+            resetAllTasks() {
+                document.querySelectorAll('.interactive-item').forEach(item => {
+                    const taskId = item.dataset.task;
+                    const checkbox = item.querySelector('.checkbox');
+
+                    item.classList.remove('completed');
+                    checkbox.classList.remove('checked');
+                    this.tasks.set(taskId, false);
+                });
+
+                this.updateStats();
+                this.saveData();
+            }
+
+            /**
+             * Atualiza as estatísticas
+             */
+            updateStats() {
+                const totalTasks = this.tasks.size;
+                const completedTasks = Array.from(this.tasks.values()).filter(status => status).length;
+                const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+                document.getElementById('total-tasks').textContent = totalTasks;
+                document.getElementById('completed-tasks').textContent = completedTasks;
+                document.getElementById('progress').textContent = progress + '%';
+            }
+
+            /**
+             * Salva dados no localStorage
+             */
+            saveData() {
+                const data = {
+                    tasks: Object.fromEntries(this.tasks),
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem(this.storageKey, JSON.stringify(data));
+            }
+
+            /**
+             * Carrega dados do localStorage
+             */
+            loadData() {
+                try {
+                    const stored = localStorage.getItem(this.storageKey);
+                    if (stored) {
+                        const data = JSON.parse(stored);
+                        this.tasks = new Map(Object.entries(data.tasks));
+                        
+                        // Aplicar estados salvos
+                        this.tasks.forEach((completed, taskId) => {
+                            const taskElement = document.querySelector(`[data-task="${taskId}"]`);
+                            if (taskElement) {
+                                const checkbox = taskElement.querySelector('.checkbox');
+                                if (completed) {
+                                    taskElement.classList.add('completed');
+                                    checkbox.classList.add('checked');
+                                }
+                            }
+                        });
+                    } else {
+                        // Inicializar com tarefas padrão
+                        document.querySelectorAll('.interactive-item').forEach(item => {
+                            this.tasks.set(item.dataset.task, false);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    // Inicializar com tarefas padrão em caso de erro
+                    document.querySelectorAll('.interactive-item').forEach(item => {
+                        this.tasks.set(item.dataset.task, false);
+                    });
+                }
+            }
+
+            /**
+             * Retorna estatísticas completas
+             */
+            getStats() {
+                return {
+                    total: this.tasks.size,
+                    completed: Array.from(this.tasks.values()).filter(status => status).length,
+                    tasks: Object.fromEntries(this.tasks)
+                };
+            }
+        }
+
+        // Inicializa o sistema quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            window.interactiveNote = new InteractiveNote();
+        });
+
+        // Adiciona funcionalidade de atalhos de teclado
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+A para alternar todas as tarefas
+            if (e.key.toLowerCase() === 'a' && e.ctrlKey) {
+                e.preventDefault();
+                document.getElementById('toggle-all').click();
+            }
+            
+            // Ctrl+R para resetar (sobrescreve o padrão do navegador)
+            if (e.key.toLowerCase() === 'r' && e.ctrlKey) {
+                e.preventDefault();
+                document.getElementById('reset-tasks').click();
+            }
+            
+            // Tecla 'Home' para voltar ao topo
+            if (e.key === 'Home') {
+                window.scrollTo(0, 0);
+            }
+        });
+
+        // Salva dados antes de sair da página
+        window.addEventListener('beforeunload', () => {
+            if (window.interactiveNote) {
+                window.interactiveNote.saveData();
+            }
+        });
+    </script>
+</body>
+</html>
