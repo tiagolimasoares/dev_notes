@@ -394,6 +394,11 @@ class NotesPortal {
         // Lista de arquivos HTML conhecidos que devem estar na pasta notes
         // Esta lista será atualizada automaticamente quando novos arquivos forem detectados
         const knownFiles = [
+
+            //#novos uploads de Raciocinio logico
+            '2025_08_08_RLM_001 - Estruturas logicas .html',
+            '2025_08_08_RLM_002 - Estruturas logicas verdade mentira.html',
+            //=================================================================
             '2025_06_25_DC_001 - Introducao a teoria geral dos direitos fundamentais fixacao.html',
             '2025_06_25_DC_002 - Caracteristicas dos direitos fundamentais fixacao.html',
             '2025_06_25_DC_003 - Classificacao dos direitos fundamentais fixacao.html',
@@ -439,7 +444,7 @@ class NotesPortal {
             '2025_07_18_DP_007 - Resultado.html',
             '2025_07_18_DP_008 - Nexo causal parte I.html',
             '2025_07_18_DP_009 - Nexo causal parte II Concausas.html',
-            'exemplo-nota-interativa.html'
+            
         ];
         
         // Converte a lista de arquivos para o formato esperado
@@ -463,7 +468,12 @@ class NotesPortal {
                 lastModified = new Date('2025-07-16');
             } else if (fileName.includes('2025_07_18')) {
                 lastModified = new Date('2025-07-18');
+
+//com os demais arquivos basta seguir o mesmo padrão, adicionando novos else if conforme necessário
+            } else if (fileName.includes('2025_08_08')) {
+                lastModified = new Date('2025-08-08');
             }
+// todo esse trecho de codigo fechado por este comentario acima            
             
             return {
                 name: fileName,
