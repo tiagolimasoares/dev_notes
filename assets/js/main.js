@@ -36,9 +36,69 @@ class NotesPortal {
      */
     constructor() {
         this.files = [];
+        this.categorizedFiles = {};
+        this.activeCategory = 'todos'; // Categoria ativa atual
         this.currentRepo = this.extractRepoInfo();
         this.cacheDuration = 5 * 60 * 1000; // 5 minutos
         this.lastUpdate = null;
+        
+        // Configuração dos cadernos/categorias
+        this.categories = {
+            'DC': {
+                name: 'Direito Constitucional',
+                icon: '⚖️',
+                color: '#3498db',
+                files: []
+            },
+            'DA': {
+                name: 'Direito Administrativo', 
+                icon: '🏛️',
+                color: '#9b59b6',
+                files: []
+            },
+            'RLM': {
+                name: 'Raciocínio Lógico',
+                icon: '🧠',
+                color: '#e74c3c',
+                files: []
+            },
+            'PT': {
+                name: 'Língua Portuguesa',
+                icon: '📚',
+                color: '#27ae60',
+                files: []
+            },
+            'MT': {
+                name: 'Matemática',
+                icon: '🔢',
+                color: '#f39c12',
+                files: []
+            },
+            'DPP': {
+                name: 'Processo Penal',
+                icon: '⚔️',
+                color: '#e67e22',
+                files: []
+            },
+            'DP': {
+                name: 'Direito Penal',
+                icon: '🛡️',
+                color: '#c0392b',
+                files: []
+            },
+            'INF': {
+                name: 'Informática',
+                icon: '💻',
+                color: '#2c3e50',
+                files: []
+            },
+            'GERAL': {
+                name: 'Geral',
+                icon: '📋',
+                color: '#95a5a6',
+                files: []
+            }
+        };
         
         // Elementos DOM cache
         this.elements = {
@@ -46,7 +106,9 @@ class NotesPortal {
             searchInput: null,
             refreshBtn: null,
             totalFiles: null,
-            lastUpdated: null
+            lastUpdated: null,
+            categoryTabs: null,
+            categoryStats: null
         };
         
         this.init();
@@ -293,10 +355,12 @@ class NotesPortal {
             }
             
             this.lastUpdate = Date.now();
+            this.categorizeFiles();
+            this.renderCategoryTabs();
             this.renderFiles();
             this.updateStats();
             
-            console.log(`📁 Carregados ${this.files.length} arquivos`);
+            console.log(`📁 Carregados ${this.files.length} arquivos organizados em cadernos`);
             
         } catch (error) {
             console.error('❌ Erro ao carregar arquivos:', error);
@@ -530,6 +594,155 @@ class NotesPortal {
     }
 
     /**
+     * Categoriza arquivos automaticamente baseado nas siglas
+     * Implementa sistema de cadernos profissionais por matéria
+     */
+    categorizeFiles() {
+        console.log('📂 [CATEGORIZE] Organizando arquivos em cadernos...');
+        
+        // Limpa categorias anteriores
+        Object.keys(this.categories).forEach(key => {
+            this.categories[key].files = [];
+        });
+        
+        // Categoriza cada arquivo baseado na sigla
+        this.files.forEach(file => {
+            const category = this.detectFileCategory(file.name);
+            this.categories[category].files.push({
+                ...file,
+                category: category
+            });
+        });
+        
+        // Log das categorias organizadas
+        Object.entries(this.categories).forEach(([key, category]) => {
+            if (category.files.length > 0) {
+                console.log(`📚 [CADERNO] ${category.name}: ${category.files.length} arquivos`);
+            }
+        });
+        
+        console.log('✅ [CATEGORIZE] Arquivos organizados em cadernos profissionais');
+    }
+
+    /**
+     * Detecta a categoria de um arquivo baseado no nome
+     * Prioridade: DPP > DP (para evitar conflito entre Processo Penal e Direito Penal)
+     * 
+     * @param {string} fileName Nome do arquivo
+     * @returns {string} Chave da categoria
+     */
+    detectFileCategory(fileName) {
+        const upperFileName = fileName.toUpperCase();
+        
+        // Ordem de verificação importante: DPP antes de DP
+        const categoryPriority = ['DPP', 'DC', 'DA', 'RLM', 'PT', 'MT', 'DP', 'INF'];
+        
+        for (const categoryKey of categoryPriority) {
+            if (upperFileName.includes(`_${categoryKey}_`) || 
+                upperFileName.includes(`-${categoryKey}-`) ||
+                upperFileName.includes(` ${categoryKey} `) ||
+                upperFileName.startsWith(`${categoryKey}_`) ||
+                upperFileName.startsWith(`${categoryKey}-`)) {
+                return categoryKey;
+            }
+        }
+        
+        // Se não encontrou nenhuma categoria específica, vai para GERAL
+        return 'GERAL';
+    }
+
+    /**
+     * Renderiza as abas de categorias (cadernos)
+     * Cria interface profissional com contadores e cores
+     */
+    renderCategoryTabs() {
+        console.log('🎨 [UI] Renderizando abas de cadernos...');
+        
+        const categoryTabsContainer = document.querySelector('.category-tabs');
+        if (!categoryTabsContainer) {
+            console.warn('⚠️ Container de abas não encontrado');
+            return;
+        }
+        
+        // Aba "Todos" sempre primeiro
+        let tabsHTML = `
+            <button class="category-tab ${this.activeCategory === 'todos' ? 'active' : ''}" 
+                    data-category="todos" 
+                    onclick="window.notesPortal.switchCategory('todos')">
+                <span class="tab-icon">📋</span>
+                <span class="tab-name">Todos</span>
+                <span class="tab-count">${this.files.length}</span>
+            </button>
+        `;
+        
+        // Abas das categorias com arquivos
+        Object.entries(this.categories)
+            .filter(([key, category]) => category.files.length > 0)
+            .sort(([,a], [,b]) => b.files.length - a.files.length) // Ordena por quantidade
+            .forEach(([key, category]) => {
+                const isActive = this.activeCategory === key;
+                tabsHTML += `
+                    <button class="category-tab ${isActive ? 'active' : ''}" 
+                            data-category="${key}" 
+                            style="--category-color: ${category.color}"
+                            onclick="window.notesPortal.switchCategory('${key}')">
+                        <span class="tab-icon">${category.icon}</span>
+                        <span class="tab-name">${category.name}</span>
+                        <span class="tab-count">${category.files.length}</span>
+                    </button>
+                `;
+            });
+        
+        categoryTabsContainer.innerHTML = tabsHTML;
+        console.log('✅ [UI] Abas de cadernos renderizadas');
+    }
+
+    /**
+     * Troca a categoria ativa e atualiza a visualização
+     * 
+     * @param {string} categoryKey Chave da categoria
+     */
+    switchCategory(categoryKey) {
+        console.log(`🔄 [SWITCH] Mudando para caderno: ${categoryKey}`);
+        
+        this.activeCategory = categoryKey;
+        
+        // Atualiza abas visuais
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        const activeTab = document.querySelector(`[data-category="${categoryKey}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+        }
+        
+        // Atualiza visualização dos arquivos
+        this.renderFiles();
+        this.updateStats();
+        
+        // Limpa busca se estiver ativa
+        if (this.elements.searchInput) {
+            this.elements.searchInput.value = '';
+        }
+        
+        console.log(`✅ [SWITCH] Caderno ${categoryKey} ativado`);
+    }
+
+    /**
+     * Retorna os arquivos da categoria ativa
+     * 
+     * @returns {Array} Lista de arquivos filtrados por categoria
+     */
+    getActiveFiles() {
+        if (this.activeCategory === 'todos') {
+            return this.files;
+        }
+        
+        return this.categories[this.activeCategory]?.files || [];
+    }
+
+    /**
      * Descobre novos arquivos dinamicamente testando padrões comuns
      * Atualiza a lista automaticamente quando encontra novos arquivos
      */
@@ -657,17 +870,20 @@ class NotesPortal {
 
     /**
      * Renderiza a lista de arquivos no DOM
-     * Aplica animações e estados visuais
+     * Aplica filtros de categoria e animações
      */
     renderFiles() {
         if (!this.elements.filesContainer) return;
 
-        if (this.files.length === 0) {
+        // Pega arquivos da categoria ativa
+        const activeFiles = this.getActiveFiles();
+        
+        if (activeFiles.length === 0) {
             this.renderEmptyState();
             return;
         }
 
-        const filesGrid = this.files
+        const filesGrid = activeFiles
             .map(file => this.createFileCard(file))
             .join('');
             
@@ -678,17 +894,30 @@ class NotesPortal {
         
         // Salva dados no cache local
         this.setCachedData(this.files);
+        
+        console.log(`🎨 [RENDER] Exibidos ${activeFiles.length} arquivos da categoria: ${this.activeCategory}`);
     }
 
     /**
-     * Renderiza estado vazio quando não há arquivos
+     * Renderiza estado vazio quando não há arquivos na categoria
      */
     renderEmptyState() {
+        const categoryName = this.activeCategory === 'todos' 
+            ? 'total' 
+            : this.categories[this.activeCategory]?.name || 'categoria';
+            
+        const categoryIcon = this.activeCategory === 'todos' 
+            ? '📝' 
+            : this.categories[this.activeCategory]?.icon || '📋';
+            
         this.elements.filesContainer.innerHTML = `
             <div class="empty-state fade-in">
-                <div class="empty-state-icon">📝</div>
-                <h3>Nenhuma nota encontrada</h3>
-                <p>Adicione arquivos HTML na pasta <code>notes/</code> para começar.</p>
+                <div class="empty-state-icon">${categoryIcon}</div>
+                <h3>Nenhuma nota encontrada em ${categoryName}</h3>
+                ${this.activeCategory === 'todos' 
+                    ? '<p>Adicione arquivos HTML na pasta <code>notes/</code> para começar.</p>' 
+                    : `<p>Não há arquivos com a sigla <strong>${this.activeCategory}</strong> ainda.</p>`
+                }
                 <p>Os arquivos aparecerão automaticamente após o próximo push.</p>
             </div>
         `;
@@ -772,8 +1001,8 @@ class NotesPortal {
     }
 
     /**
-     * Filtra arquivos baseado no termo de busca
-     * Implementa busca fuzzy para melhor UX
+     * Filtra arquivos baseado no termo de busca dentro da categoria ativa
+     * Implementa busca fuzzy inteligente por categoria
      * 
      * @param {string} searchTerm Termo de busca
      */
@@ -782,11 +1011,17 @@ class NotesPortal {
         const term = searchTerm.toLowerCase().trim();
 
         if (!term) {
-            // Se não há termo, mostra todos
+            // Se não há termo, mostra todos da categoria ativa
             cards.forEach(card => {
                 card.style.display = 'block';
                 card.classList.remove('hidden');
             });
+            
+            // Remove feedback de busca anterior
+            const existingFeedback = document.querySelector('.search-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
             return;
         }
 
@@ -809,12 +1044,12 @@ class NotesPortal {
             }
         });
 
-        // Feedback visual para resultados da busca
+        // Feedback visual para resultados da busca com contexto de categoria
         this.showSearchFeedback(term, visibleCount);
     }
 
     /**
-     * Mostra feedback da busca
+     * Mostra feedback da busca com contexto de categoria
      * 
      * @param {string} term Termo buscado
      * @param {number} count Quantidade de resultados
@@ -826,11 +1061,16 @@ class NotesPortal {
             existingFeedback.remove();
         }
 
+        const categoryName = this.activeCategory === 'todos' 
+            ? 'todas as categorias' 
+            : this.categories[this.activeCategory]?.name || 'categoria atual';
+
         // Cria novo feedback
         const feedback = document.createElement('div');
         feedback.className = 'search-feedback';
         feedback.innerHTML = `
-            <p>🔍 Busca por "<strong>${term}</strong>": ${count} resultado(s) encontrado(s)</p>
+            <p>🔍 Busca por "<strong>${term}</strong>" em <em>${categoryName}</em>: 
+               <strong>${count}</strong> resultado(s) encontrado(s)</p>
         `;
         
         // Insere feedback
@@ -841,15 +1081,23 @@ class NotesPortal {
     }
 
     /**
-     * Atualiza as estatísticas de desempenho
+     * Atualiza as estatísticas considerando categoria ativa
      */
     updateStats() {
+        const activeFiles = this.getActiveFiles();
+        
         if (this.elements.totalFiles) {
-            this.elements.totalFiles.textContent = this.files.length;
+            this.elements.totalFiles.textContent = activeFiles.length;
         }
         
         if (this.elements.lastUpdated) {
             this.elements.lastUpdated.textContent = new Date().toLocaleTimeString('pt-BR');
+        }
+        
+        // Atualiza contador na aba ativa
+        const activeTab = document.querySelector('.category-tab.active .tab-count');
+        if (activeTab) {
+            activeTab.textContent = activeFiles.length;
         }
     }
 
