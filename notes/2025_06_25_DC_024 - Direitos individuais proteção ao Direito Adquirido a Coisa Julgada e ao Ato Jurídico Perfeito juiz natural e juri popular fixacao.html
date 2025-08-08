@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 23: Segurança Jurídica e Garantias Judiciais</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 23: Segurança Jurídica e Garantias Judiciais</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Segurança Jurídica e Garantias Judiciais</h1>
+                <p>Teste seus conhecimentos com base na Aula 23. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Um servidor público que se aposentou sob as regras de uma lei antiga, e que já recebe seus proventos, tem seu benefício protegido contra uma nova lei que altere as regras de aposentadoria para o futuro. Essa proteção se dá em virtude do(a):",
+                options: [
+                    "Ato jurídico perfeito",
+                    "Coisa julgada",
+                    "Direito adquirido",
+                    "Princípio do juiz natural",
+                    "Soberania dos veredictos"
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Proteção contra a Lei do Futuro:</strong> Perfeito! Você identificou corretamente o instituto que protege situações já consolidadas. O <strong>Direito Adquirido</strong> é aquele que já se incorporou ao patrimônio jurídico da pessoa, pois ela já cumpriu todos os requisitos exigidos pela lei vigente na época.</p>
+                        <p>Vamos diferenciar os três pilares da segurança jurídica (Art. 5º, XXXVI):</p>
+                        <ul>
+                            <li><strong>✅ Direito Adquirido:</strong> O direito já é seu, você já cumpriu as regras do jogo. Uma nova lei não pode tirá-lo de você. (É o caso da questão).</li>
+                            <li><strong>📄 Ato Jurídico Perfeito:</strong> Um ato (ex: um contrato assinado) que já se consumou, já se tornou completo e válido sob a lei da época. Uma lei nova não pode invalidá-lo.</li>
+                            <li><strong>⚖️ Coisa Julgada:</strong> Uma decisão judicial da qual não cabe mais recurso. Ela se torna imutável e indiscutível.</li>
+                        </ul>
+                        <p class="example"><strong>Exemplo Prático:</strong> O servidor do exemplo já tinha a idade e o tempo de contribuição exigidos pela lei antiga. Ele preencheu todos os requisitos. Portanto, ele <strong>adquiriu o direito</strong> de se aposentar com aquelas regras. Uma nova lei, mais rígida, que passe a valer hoje, não pode afetar a aposentadoria dele. No entanto, um servidor que ainda não preencheu os requisitos não tem direito adquirido e será regido pela nova lei quando for se aposentar.</p>
+                        <p><strong>(Fonte: Aula23, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O princípio do Juiz Natural, previsto no Art. 5º, XXXVII e LIII, da CF, garante ao cidadão o direito de ser processado e julgado por uma autoridade competente, previamente estabelecida em lei. Qual das seguintes situações viola diretamente esse princípio?",
+                options: [
+                    "A criação de Varas especializadas em crimes de lavagem de dinheiro.",
+                    "A designação de um juiz substituto para atuar em uma comarca durante as férias do titular.",
+                    "A criação de um 'tribunal de exceção', nomeado especificamente para julgar um caso de grande repercussão que já ocorreu.",
+                    "A transferência de um processo para outra comarca por razões de segurança.",
+                    "A atuação do Tribunal do Júri para julgar crimes dolosos contra a vida."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Tribunal 'Post Factum':</strong> Exato! A essência do princípio do Juiz Natural é a <strong>previsibilidade</strong> e a <strong>imparcialidade</strong>. Você deve saber, antes mesmo de qualquer fato ocorrer, qual juiz ou tribunal será o responsável por julgar determinados casos. Isso impede a manipulação e a criação de juízos de 'encomenda'.</p>
+                        <p>A maior violação a esse princípio é a criação de um <strong>Tribunal de Exceção</strong>, que é um tribunal criado <i>a posteriori</i>, ou seja, <strong>depois</strong> que o fato aconteceu, com a finalidade específica de julgar aquele caso ou aquela pessoa. Isso é expressamente proibido pela Constituição.</p>
+                        <div class="visual-aid">🧑‍⚖️ Juiz já existe ANTES do crime = ✅ Juiz Natural<br>🧑‍⚖️ Juiz é criado DEPOIS do crime para julgar = ❌ Tribunal de Exceção</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Imagine que ocorre um crime de grande repercussão nacional. Se o governo, pressionado pela opinião pública, criasse por lei uma 'Comissão Especial de Julgamento' composta por juristas notáveis apenas para julgar aquele crime específico, essa comissão seria um Tribunal de Exceção inconstitucional. O correto é que o caso seja julgado pela Vara Criminal da comarca onde o crime ocorreu, que já existia e tinha sua competência definida em lei antes do fato.</p>
+                        <p><strong>(Fonte: Aula23, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O crime de latrocínio (roubo seguido de morte) é julgado por qual órgão do Poder Judiciário?",
+                options: [
+                    "Pelo Tribunal do Júri, pois há uma morte dolosa.",
+                    "Pelo Superior Tribunal de Justiça (STJ), em razão da gravidade do crime.",
+                    "Pelo Juiz singular (Vara Criminal comum), pois se trata de um crime contra o patrimônio.",
+                    "Pelo Tribunal de Justiça do Estado, em competência originária.",
+                    "Pelo Supremo Tribunal Federal (STF), por ser crime hediondo."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Competência pelo Bem Jurídico Tutelado:</strong> Perfeito! Esta é uma 'pegadinha' clássica de prova. O candidato desatento vê a palavra 'morte' e associa imediatamente ao Tribunal do Júri. No entanto, a competência do Júri é específica para <strong>crimes dolosos contra a VIDA</strong> (homicídio, infanticídio, aborto, instigação ao suicídio).</p>
+                        <p>O latrocínio, embora resulte em morte, é classificado no Código Penal como um <strong>crime contra o PATRIMÔNIO</strong> (Art. 157, § 3º, II). O objetivo principal do agente é o roubo; a morte é um resultado que qualifica o crime, tornando-o mais grave. Por não ser um crime contra a vida, ele não é de competência do Júri.</p>
+                        <div class="visual-aid">⚖️ Súmula 603 do STF: "A competência para o processo e julgamento de latrocínio é do Juiz singular e não do Tribunal do Júri."</div>
+                        <p class="example"><strong>Na Prática:</strong> Se uma pessoa mata outra para roubar sua carteira, ela será processada e julgada por um juiz de uma Vara Criminal comum. Se ela mata outra por vingança, sem levar nenhum bem, ela será processada e julgada pelo Tribunal do Júri, pois o crime foi um homicídio (crime contra a vida).</p>
+                        <p><strong>(Fonte: Aula23, p. 5)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Um Prefeito comete um crime de homicídio doloso. A Constituição do seu Estado prevê que Prefeitos têm foro por prerrogativa de função no Tribunal de Justiça para todos os crimes. Nesse caso, quem julgará o Prefeito?",
+                options: [
+                    "O Tribunal de Justiça, pois o foro por prerrogativa de função sempre prevalece.",
+                    "O Superior Tribunal de Justiça (STJ), pois é a instância superior.",
+                    "O Tribunal do Júri, pois sua competência, prevista na Constituição Federal, prevalece sobre o foro estabelecido apenas na Constituição Estadual.",
+                    "O Juiz de primeira instância, pois a prerrogativa de função não se aplica a crimes dolosos contra a vida.",
+                    "O Supremo Tribunal Federal (STF), por se tratar de um agente político."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Conflito de Competências e a Hierarquia das Normas:</strong> Exato! Esta questão testa o seu conhecimento sobre a hierarquia entre as normas constitucionais e o entendimento sumulado do STF.</p>
+                        <p>Temos um conflito entre duas regras:</p>
+                        <ul>
+                            <li><strong>Regra da Constituição FEDERAL (Art. 5º, XXXVIII):</strong> A competência para julgar crimes dolosos contra a vida é do Tribunal do Júri.</li>
+                            <li><strong>Regra da Constituição ESTADUAL:</strong> O foro para julgar Prefeitos é o Tribunal de Justiça.</li>
+                        </ul>
+                        <p>Nesse conflito, a norma da Constituição Federal, por ser hierarquicamente superior, prevalece. O STF pacificou esse entendimento na <strong>Súmula Vinculante nº 45</strong>: 'A competência constitucional do Tribunal do Júri prevalece sobre o foro por prerrogativa de função estabelecido exclusivamente pela constituição estadual.'</p>
+                        <div class="visual-aid">🏛️ CF/88 (Júri) vs. 📜 CE (Foro de Prefeito) ➡️ Vitória da CF/88!</div>
+                        <p class="example"><strong>Importante:</strong> A situação seria diferente se o foro por prerrogativa de função estivesse previsto na própria <strong>Constituição Federal</strong>. Por exemplo, se um Deputado Federal (com foro no STF) cometesse um homicídio, ele seria julgado pelo STF, pois aí o conflito seria entre duas normas da mesma hierarquia (ambas na CF), e a regra específica do foro prevaleceria.</p>
+                        <p><strong>(Fonte: Aula23, p. 5 e 6)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual dos princípios abaixo, assegurados ao Tribunal do Júri, significa que os jurados não precisam fundamentar suas decisões e que a votação ocorre em uma sala secreta?",
+                options: [
+                    "A plenitude de defesa",
+                    "A soberania dos veredictos",
+                    "A competência para os crimes dolosos contra a vida",
+                    "O sigilo das votações",
+                    "O princípio do contraditório"
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Proteção da Convicção Íntima do Jurado:</strong> Perfeito! O <strong>sigilo das votações</strong> é uma garantia fundamental para assegurar que os jurados (cidadãos comuns) possam decidir de acordo com sua livre consciência, sem sofrer pressões externas ou temer retaliações.</p>
+                        <p>Esse princípio se manifesta de duas formas:</p>
+                        <ul>
+                            <li><strong>Sala Secreta:</strong> A votação dos quesitos (perguntas sobre o crime e a autoria) ocorre em um local reservado, apenas com a presença do juiz, do promotor, do advogado de defesa e dos oficiais de justiça.</li>
+                            <li><strong>Ausência de Fundamentação:</strong> Diferente de um juiz togado, o jurado decide por <strong>íntima convicção</strong>. Ele vota 'sim' ou 'não' para as perguntas, sem precisar escrever o porquê de sua decisão. Isso protege sua identidade e o mérito de seu voto.</li>
+                        </ul>
+                        <p class="example"><strong>Na Prática do Júri:</strong> Após os debates, o juiz leva os sete jurados para a 'sala secreta'. Lá, ele lê cada pergunta (ex: 'O réu efetuou os disparos?'). Cada jurado recebe duas cédulas, uma com 'sim' e outra com 'não', e deposita a que representa seu voto em uma urna, descartando a outra. A decisão é formada pela contagem dos votos, e ninguém sabe individualmente como cada jurado votou.</p>
+                        <p><strong>(Fonte: Aula23, p. 4)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de elite!</strong> Você demonstrou total domínio sobre as garantias da segurança jurídica e do processo penal. Este é um conhecimento fundamental que o coloca em grande vantagem. Avante!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

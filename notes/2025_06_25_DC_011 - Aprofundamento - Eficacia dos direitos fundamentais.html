@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Eficácia dos Direitos Fundamentais</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Eficácia dos Direitos Fundamentais</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 4</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Eficácia dos Direitos Fundamentais</h1>
+                <p>Teste seus conhecimentos com base no material fornecido. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "A aplicação tradicional dos direitos fundamentais, que ocorre na relação entre o Estado e o indivíduo, onde o Estado deve respeitar e garantir os direitos, é chamada de:",
+                options: [
+                    "Eficácia horizontal",
+                    "Eficácia diagonal",
+                    "Eficácia particular",
+                    "Eficácia vertical",
+                    "Eficácia direta"
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Relação Clássica 'de Cima para Baixo':</strong> Perfeito! A eficácia vertical é o ponto de partida de toda a teoria dos direitos fundamentais. Ela foi concebida para proteger o indivíduo, que é a parte mais fraca, contra os possíveis abusos do Estado, que detém o poder.</p>
+                        <p>Pense em uma relação hierárquica, como uma pirâmide. O Estado está no topo, e o cidadão está na base. A eficácia é 'vertical' porque as normas de direitos fundamentais 'descem' do topo para proteger quem está na base.</p>
+                        <div class="visual-aid">🔼 ESTADO<br>⬇️<br>👤 INDIVÍDUO</div>
+                        <p class="example"><strong>Exemplo do Material:</strong> O material cita que 'O Estado não pode censurar a liberdade de expressão'. Isso é um exemplo clássico. O Estado (ente superior) é proibido por uma norma de direito fundamental de violar a liberdade de um indivíduo (ente inferior na relação de poder). Outro exemplo: o Estado não pode prender alguém sem um processo legal justo.</p>
+                    </div>
+                `
+            },
+            {
+                question: "Quando os direitos fundamentais são aplicados em relações entre particulares que se encontram em uma situação teórica de igualdade, como a de um condomínio que não pode proibir um morador de professar sua religião, estamos diante da:",
+                options: [
+                    "Eficácia vertical",
+                    "Eficácia diagonal",
+                    "Eficácia horizontal",
+                    "Inaplicabilidade dos direitos",
+                    "Eficácia estatal"
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Relação 'Lado a Lado':</strong> Exato! A eficácia horizontal representa a evolução da teoria, reconhecendo que as violações a direitos fundamentais não partem apenas do Estado, mas também de outros particulares.</p>
+                        <p>Nesse caso, a aplicação dos direitos ocorre entre sujeitos que, em tese, estão no mesmo nível hierárquico. A ideia é impedir que o poder social ou econômico de um particular se sobreponha aos direitos fundamentais de outro.</p>
+                        <div class="visual-aid">👤 PARTICULAR ↔️ 👤 PARTICULAR</div>
+                        <p class="example"><strong>Exemplo do Material:</strong> O caso do condomínio é perfeito. O condomínio e o condômino são ambos particulares. A regra do condomínio não pode violar a liberdade religiosa do morador. Outro exemplo: uma escola particular não pode proibir a matrícula de um aluno com base em sua raça, pois estaria violando o direito à igualdade, mesmo sendo uma relação entre particulares.</p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual tipo de eficácia se aplica especificamente às relações entre particulares marcadas por uma 'desigualdade estrutural', como nas relações de trabalho e de consumo?",
+                options: [
+                    "Eficácia vertical",
+                    "Eficácia diagonal",
+                    "Eficácia horizontal",
+                    "Eficácia hierárquica",
+                    "Eficácia absoluta"
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Relação 'Inclinada':</strong> Resposta precisa! A eficácia diagonal é uma subespécie ou um refinamento da eficácia horizontal. Ela reconhece que, embora a relação seja entre dois particulares, eles não estão em pé de igualdade na prática.</p>
+                        <p>Existe uma desigualdade de poder 'estrutural', ou seja, que faz parte da própria natureza daquela relação. O empregador tem mais poder que o empregado; o fornecedor tem mais poder que o consumidor. Os direitos fundamentais entram em cena para 'inclinar a balança' e reequilibrar essa relação.</p>
+                        <div class="visual-aid">🏢 EMPREGADOR (mais poder)<br> slanted-arrow ↘<br>🧑‍🔧 EMPREGADO (menos poder)</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Uma grande empresa de telefonia (fornecedor) inclui uma cláusula abusiva no contrato de adesão de um cliente (consumidor). Embora seja um contrato entre particulares, a eficácia diagonal dos direitos fundamentais (como a proteção ao consumidor) permite anular essa cláusula, pois reconhece o desequilíbrio de poder entre as partes.</p>
+                    </div>
+                `
+            },
+            {
+                question: "Um hospital privado recusa atendimento de emergência a um paciente por ele pertencer a um determinado grupo étnico. A aplicação do direito à vida e à igualdade nesta situação, que envolve uma relação de consumo de serviço de saúde, é um exemplo de:",
+                options: [
+                    "Eficácia vertical, pois saúde é dever do Estado.",
+                    "Eficácia horizontal, pois hospital e paciente são particulares em igualdade.",
+                    "Eficácia diagonal, pois há uma relação desigual de consumo (fornecedor de serviço vs. consumidor vulnerável).",
+                    "Ato de autonomia privada do hospital, não sujeito aos direitos fundamentais.",
+                    "Eficácia estatal, pois apenas um hospital público estaria sujeito a essa regra."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Analisando o Cenário Concreto:</strong> Perfeito! Você aplicou a teoria corretamente. Vamos dissecar o caso:</p>
+                        <ol>
+                            <li><strong>É uma relação entre particulares?</strong> Sim. Hospital privado e paciente. Isso descarta a eficácia vertical.</li>
+                            <li><strong>Esses particulares estão em pé de igualdade?</strong> Definitivamente não. O paciente em uma emergência está em situação de extrema vulnerabilidade, e o hospital detém o conhecimento técnico e a estrutura. Além disso, é uma relação de consumo.</li>
+                            <li><strong>Conclusão:</strong> Como a relação é entre particulares (característica da eficácia horizontal) mas com uma clara desigualdade estrutural (característica da eficácia diagonal), a resposta mais precisa e técnica é <strong>eficácia diagonal</strong>. Os direitos fundamentais à vida e à igualdade são aplicados para proteger a parte mais fraca (o paciente) contra a discriminação praticada pela parte mais forte (o hospital).</li>
+                        </ul>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho perfeito!</strong> Você dominou completamente as formas de eficácia dos direitos fundamentais. Este é um conhecimento fundamental e você demonstrou total aptidão. Continue assim!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

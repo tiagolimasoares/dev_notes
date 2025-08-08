@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 34: Ação Popular</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 34: Ação Popular</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 4</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Remédios Constitucionais: Ação Popular</h1>
+                <p>Teste seus conhecimentos com base na Aula 34. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "De acordo com o Art. 5º, LXXIII, da CF, quem tem legitimidade ativa para propor Ação Popular?",
+                options: [
+                    "Qualquer pessoa, física ou jurídica.",
+                    "Apenas o Ministério Público.",
+                    "Qualquer cidadão, ou seja, o nacional no pleno gozo de seus direitos políticos.",
+                    "Apenas partidos políticos com representação no Congresso Nacional.",
+                    "Qualquer brasileiro, nato ou naturalizado, independentemente da situação de seus direitos políticos."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Guardião da Coisa Pública:</strong> Perfeito! A Constituição é taxativa ao conferir a legitimidade da Ação Popular ao <strong>cidadão</strong>. Este é um conceito técnico que as bancas adoram explorar.</p>
+                        <p>Ser cidadão não é o mesmo que ser apenas um nacional. O conceito de cidadania está ligado ao exercício dos direitos políticos.</p>
+                        <ul>
+                            <li><strong>Nacional:</strong> É o vínculo jurídico com o Estado (brasileiro nato ou naturalizado).</li>
+                            <li><strong>Cidadão:</strong> É o nacional que está com seus direitos políticos ativos, ou seja, que pode votar e ser votado. A prova dessa condição é, em regra, o <strong>título de eleitor</strong> regular.</li>
+                        </ul>
+                        <div class="visual-aid">👤 Nacional + 🗳️ Direitos Políticos Ativos = ✅ Cidadão (Pode propor Ação Popular)</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um adolescente de 17 anos, que já tirou seu título de eleitor e vota (voto facultativo), é considerado cidadão e pode propor uma Ação Popular. Por outro lado, um brasileiro que teve seus direitos políticos suspensos por uma condenação criminal transitada em julgado, não pode, durante o período da suspensão, ajuizar essa ação.</p>
+                        <p><strong>(Fonte: Aula34, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A Ação Popular visa anular atos lesivos a determinados bens jurídicos. Qual das alternativas abaixo NÃO corresponde a um desses bens protegidos pela Ação Popular?",
+                options: [
+                    "O patrimônio público.",
+                    "A moralidade administrativa.",
+                    "O meio ambiente.",
+                    "A honra de um servidor público específico.",
+                    "O patrimônio histórico e cultural."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Defesa de Interesses Coletivos:</strong> Exato! A Ação Popular é um instrumento para a defesa de interesses da <strong>coletividade</strong>, não para a proteção de direitos puramente individuais.</p>
+                        <p>O Art. 5º, LXXIII, da CF, lista os bens jurídicos que podem ser protegidos por esta ação:</p>
+                        <ul>
+                            <li><strong>💰 Patrimônio Público:</strong> Desvio de dinheiro, contratos superfaturados, etc.</li>
+                            <li><strong>😇 Moralidade Administrativa:</strong> Atos de nepotismo, improbidade, etc.</li>
+                            <li><strong>🌳 Meio Ambiente:</strong> Desmatamento ilegal, poluição de rios por uma obra pública, etc.</li>
+                            <li><strong>🏛️ Patrimônio Histórico e Cultural:</strong> Demolição de um prédio histórico, danos a um sítio arqueológico, etc.</li>
+                        </ul>
+                        <p>A <strong>honra</strong> de um servidor, por outro lado, é um direito <strong>individual e personalíssimo</strong>. Se um servidor se sentir ofendido, ele deve buscar a reparação por meio de ações próprias (queixa-crime por calúnia/difamação, ação de indenização por danos morais), mas não pela Ação Popular.</p>
+                        <p class="example"><strong>Na Prática:</strong> Se um prefeito desvia dinheiro da merenda escolar, um cidadão pode entrar com Ação Popular para anular o ato lesivo ao <strong>patrimônio público</strong>. Se, em um discurso, o mesmo prefeito ofende a honra de um vereador, o vereador deve processá-lo individualmente, pois a lesão foi a um direito pessoal seu.</p>
+                        <p><strong>(Fonte: Aula34, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Em relação às custas judiciais e ao ônus da sucumbência na Ação Popular, qual é a regra estabelecida pela Constituição?",
+                options: [
+                    "O autor popular sempre deve pagar as custas e os honorários se perder a ação.",
+                    "O autor é isento de custas e sucumbência, mesmo que tenha agido com má-fé.",
+                    "O autor é isento de custas e sucumbência, salvo se for comprovada a sua má-fé.",
+                    "A isenção só se aplica se o autor for beneficiário da justiça gratuita.",
+                    "O Estado sempre arca com todos os custos do processo."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Incentivo à Cidadania Fiscalizadora:</strong> Perfeito! Para incentivar o cidadão a exercer esse importante papel de fiscal, a Constituição estabeleceu a <strong>gratuidade</strong> como regra geral. O objetivo é que o medo de arcar com os custos do processo não impeça o cidadão de defender o patrimônio público.</p>
+                        <p>No entanto, essa gratuidade não é um 'cheque em branco' para aventuras judiciais irresponsáveis. A própria Constituição cria uma exceção para coibir o abuso do direito:</p>
+                        <ul>
+                            <li><strong>Regra Geral:</strong> Autor popular é <strong>isento</strong> de custas judiciais e do ônus da sucumbência (pagar os honorários do advogado da parte vencedora).</li>
+                            <li><strong>Exceção:</strong> Se ficar <strong>comprovado</strong> que o autor agiu com <strong>MÁ-FÉ</strong> (ou seja, entrou com a ação sabendo que não tinha fundamento, apenas para prejudicar, para fins eleitoreiros, etc.), ele perde a isenção e será condenado a pagar os custos.</li>
+                        </ul>
+                        <div class="visual-aid">😇 Boa-fé = ✅ Gratuito<br>😈 Má-fé = ❌ Paga a conta</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Um cidadão, com base em reportagens e documentos, ajuíza uma Ação Popular contra uma licitação que parece fraudulenta. Ao final, o juiz entende que não houve fraude. O cidadão não pagará nada, pois agiu de boa-fé. Agora, se ficar provado que o mesmo cidadão forjou os documentos apenas para prejudicar a empresa vencedora, que é de um rival político, ele será condenado por litigância de má-fé e arcará com todos os custos.</p>
+                        <p><strong>(Fonte: Aula34, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Um cidadão ajuíza uma Ação Popular contra um Ministro de Estado, questionando um ato administrativo praticado por ele. Em regra, qual é o órgão competente para julgar essa ação?",
+                options: [
+                    "O Supremo Tribunal Federal (STF), pois o réu é Ministro de Estado.",
+                    "O Superior Tribunal de Justiça (STJ), pela mesma razão.",
+                    "O Tribunal Regional Federal (TRF).",
+                    "O Juízo de 1º grau (Justiça Federal ou Estadual, a depender da natureza do ato).",
+                    "O Tribunal de Contas da União (TCU)."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Ausência do Foro por Prerrogativa de Função:</strong> Exato! Esta é uma informação crucial e contraintuitiva para muitos. A Lei da Ação Popular (Lei nº 4.717/65) <strong>não estabelece foro por prerrogativa de função</strong>.</p>
+                        <p>Isso significa que, não importa quão alta seja a autoridade que praticou o ato (Presidente da República, Ministro, Governador, etc.), a Ação Popular contra ela será, em regra, julgada na <strong>primeira instância</strong> da Justiça. A competência será da Justiça Federal se a União ou uma de suas entidades estiver no polo passivo, ou da Justiça Estadual nos demais casos.</p>
+                        <div class="visual-aid">👑 Autoridade com Foro (em Ação Penal) vs. ⚖️ Ação Popular ➡️ Julgamento em 1º Grau</div>
+                        <p><strong>Atenção à Exceção da Exceção:</strong> A aula menciona que, excepcionalmente, o STF pode ser competente, mas em situações muito específicas previstas na Constituição (Art. 102, I, 'f' e 'n'), como em causas entre um Estado e a União, ou quando todos os membros da magistratura são interessados, o que é raríssimo de ocorrer em uma Ação Popular.</p>
+                        <p class="example"><strong>Na Prática:</strong> Se um Ministro de Estado comete um crime comum, ele é julgado pelo STF (foro por prerrogativa de função). No entanto, se o mesmo Ministro assina um contrato administrativo lesivo ao patrimônio público, a Ação Popular para anular esse contrato será ajuizada perante um Juiz Federal de 1º Grau em Brasília.</p>
+                        <p><strong>(Fonte: Aula34, p. 3)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre a Ação Popular. Este é um conhecimento fundamental que o coloca em grande vantagem. Mantenha o foco e a disciplina!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

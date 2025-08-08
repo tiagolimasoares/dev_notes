@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 16: Direito à Privacidade</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 16: Direito à Privacidade</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Fundamentais: Direito à Privacidade</h1>
+                <p>Teste seus conhecimentos com base na Aula 16. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "O Art. 5º, X, da Constituição Federal, estabelece a inviolabilidade de quatro bens jurídicos que compõem o direito à privacidade. Quais são eles?",
+                options: [
+                    "Intimidade, vida privada, sigilo de dados e imagem.",
+                    "Honra, imagem, liberdade e propriedade.",
+                    "Intimidade, vida privada, honra e imagem.",
+                    "Vida privada, honra, sigilo bancário e fiscal.",
+                    "Intimidade, honra, imagem e liberdade de expressão."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Quarteto da Privacidade:</strong> Perfeito! É fundamental memorizar os quatro pilares do direito à privacidade conforme o texto expresso da Constituição. São eles:</p>
+                        <ul>
+                            <li><strong>🔒 Intimidade:</strong> O núcleo mais secreto da vida de uma pessoa. Seus pensamentos, segredos, sua vida sexual. É a esfera onde o indivíduo tem o direito de estar só.</li>
+                            <li><strong>🏡 Vida Privada:</strong> Um círculo um pouco mais externo. Envolve as relações sociais do indivíduo que não são de interesse público, como suas relações familiares, de amizade e seus hábitos domésticos.</li>
+                            <li><strong>🎖️ Honra:</strong> A reputação da pessoa. Divide-se em <strong>honra objetiva</strong> (o que os outros pensam de você) e <strong>honra subjetiva</strong> (o que você pensa de si mesmo, sua autoestima).</li>
+                            <li><strong>👤 Imagem:</strong> A representação física da pessoa, seja por foto, vídeo ou caricatura.</li>
+                        </ul>
+                        <p class="example"><strong>Analogia da Casa:</strong> A <strong>intimidade</strong> é o seu quarto trancado. A <strong>vida privada</strong> é a sua sala de estar, onde você recebe amigos. A <strong>honra</strong> é sua reputação na vizinhança. A <strong>imagem</strong> é a sua foto no porta-retrato da sala.</p>
+                        <p><strong>(Fonte: Aula16, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Conforme a doutrina apresentada na Aula 16, qual é a distinção correta entre 'intimidade' e 'vida privada'?",
+                options: [
+                    "Não há diferença, os termos são perfeitamente sinônimos.",
+                    "Intimidade se refere aos segredos e informações confidenciais, enquanto a vida privada abrange as relações sociais sem interesse público.",
+                    "Intimidade é a proteção da imagem, e vida privada é a proteção da honra.",
+                    "Intimidade se aplica apenas a pessoas públicas, e vida privada a pessoas comuns.",
+                    "Intimidade é um conceito jurídico, e vida privada é um conceito sociológico."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Os Círculos Concêntricos da Privacidade:</strong> Exato! A doutrina utiliza a imagem de círculos concêntricos para explicar essa diferença sutil, mas importante.</p>
+                        <p>Imagine dois círculos, um dentro do outro:</p>
+                        <ul>
+                            <li><strong>Círculo Interno (Núcleo):</strong> É a <strong>INTIMIDADE</strong>. Aqui estão os segredos mais profundos, as informações confidenciais, as opções sexuais, os diários pessoais. É a esfera do 'eu comigo mesmo'.</li>
+                            <li><strong>Círculo Externo:</strong> É a <strong>VIDA PRIVADA</strong>. Abrange as relações que, embora não sejam secretas, não são de interesse público. Inclui as relações familiares, de amizade, os locais que a pessoa frequenta, seus hábitos. É a esfera do 'eu com os meus'.</li>
+                        </ul>
+                        <p class="example"><strong>Exemplo Prático:</strong> O conteúdo de uma conversa sua com seu psicólogo faz parte da sua <strong>intimidade</strong>. O fato de você ter ido a um jantar na casa de um amigo no sábado à noite faz parte da sua <strong>vida privada</strong>. Ambos são protegidos, mas a intimidade representa um grau ainda mais restrito de acesso.</p>
+                        <p><strong>(Fonte: Aula16, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O 'Direito ao Esquecimento', conforme conceituado na Aula 16, é o direito de uma pessoa de:",
+                options: [
+                    "Apagar qualquer menção ao seu nome na internet.",
+                    "Impedir que um fato, ainda que verídico, seja massivamente relembrado e exposto ao público tempos depois de ocorrido, causando dor e dificultando a ressocialização.",
+                    "Processar criminalmente qualquer pessoa que relembre um erro que cometeu no passado.",
+                    "Obter uma nova identidade civil para recomeçar a vida do zero.",
+                    "Exigir que biografias não autorizadas sejam retiradas de circulação."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Direito de 'Virar a Página':</strong> Perfeito! O conceito de 'Direito ao Esquecimento' (ou 'direito de ser deixado em paz') está ligado à passagem do tempo e à dignidade da pessoa humana.</p>
+                        <p>A ideia central é que ninguém pode ser eternamente estigmatizado por um fato de seu passado, especialmente se já cumpriu sua pena ou se o fato não tem mais relevância pública. A constante rememoração de um evento trágico ou de um crime pode causar sofrimento contínuo e impedir que a pessoa se reintegre plenamente à sociedade.</p>
+                        <div class="visual-aid">🗓️ Passado vs. 🕊️ Presente/Futuro</div>
+                        <p class="example"><strong>Exemplo Clássico (Caso Aída Curi):</strong> Uma mulher foi brutalmente assassinada décadas atrás. Anos depois, um programa de TV decide reconstituir o crime em detalhes, com atores, causando imensa dor e sofrimento aos seus familiares ainda vivos. A família invocou o 'direito ao esquecimento' para argumentar que, embora o fato fosse verídico, sua rememoração daquela forma espetaculosa e sem relevância jornalística atual violava sua paz e sua dignidade.</p>
+                        <p><strong>(Fonte: Aula16, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual foi a tese firmada pelo STF no julgamento do RE 1010606 (Tema 786) sobre o 'Direito ao Esquecimento'?",
+                options: [
+                    "O direito ao esquecimento é um direito fundamental absoluto.",
+                    "O direito ao esquecimento só se aplica a pessoas que não são públicas.",
+                    "É incompatível com a Constituição a ideia de um direito ao esquecimento que impeça, em razão da passagem do tempo, a divulgação de fatos verídicos e licitamente obtidos.",
+                    "O direito ao esquecimento é constitucional e prevalece sempre sobre a liberdade de imprensa.",
+                    "O direito ao esquecimento foi considerado constitucional, mas sua aplicação depende de lei federal."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Posição do Guardião da Constituição:</strong> Exato! Esta é a decisão mais importante sobre o tema e de cobrança certa em provas. O STF, ao analisar o caso, fez uma ponderação entre o direito à privacidade/honra e o direito à informação/liberdade de expressão.</p>
+                        <p>A Corte decidiu que <strong>não se pode criar um 'direito de apagar a história'</strong>. A liberdade de expressão e o direito da sociedade à memória histórica prevalecem. Portanto, o 'direito ao esquecimento' <strong>não pode ser usado como uma ferramenta de censura</strong> para proibir a divulgação de fatos verídicos.</p>
+                        <p><strong>Mas atenção:</strong> Isso não significa que a vítima de um abuso ficou desprotegida! O STF ressaltou que eventuais excessos e abusos (como uma reportagem sensacionalista e descontextualizada) devem ser analisados <strong>caso a caso</strong>, e a vítima pode buscar reparação com base nos direitos à honra, imagem e privacidade, mas não pode invocar um 'direito genérico ao esquecimento' para proibir a matéria.</p>
+                        <div class="visual-aid">🚫 Direito de Apagar a História? NÃO!<br>⚖️ Direito de Reparar Abusos? SIM!</div>
+                        <p><strong>(Fonte: Aula16, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A violação dos direitos à intimidade, vida privada, honra e imagem, conforme o Art. 5º, X, da CF, assegura à vítima o direito a qual tipo de reparação?",
+                options: [
+                    "Apenas a uma retratação pública.",
+                    "Apenas a uma indenização por dano moral.",
+                    "A uma indenização por dano material ou moral.",
+                    "Apenas a uma indenização por dano material.",
+                    "A prisão do ofensor em todos os casos."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Reparação Completa do Dano:</strong> Perfeito. A Constituição é clara ao prever uma reparação ampla, que abrange as duas principais formas de dano que podem decorrer de uma ofensa.</p>
+                        <p>A reparação pode ser:</p>
+                        <ul>
+                            <li><strong>💸 Dano Material:</strong> Refere-se a prejuízos financeiros concretos, perdas que podem ser calculadas em dinheiro. É o que a pessoa efetivamente perdeu ou deixou de ganhar.</li>
+                            <li><strong>💔 Dano Moral:</strong> Refere-se à dor, ao sofrimento, à angústia, ao abalo psicológico e à ofensa à dignidade. Não tem um valor econômico direto, mas é compensado financeiramente para tentar mitigar o sofrimento da vítima e punir o ofensor.</li>
+                        </ul>
+                        <p>O texto usa a conjunção 'ou', mas a jurisprudência entende que os danos podem ser <strong>cumulados</strong> se ambos ocorrerem.</p>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um fotógrafo tira e vende, sem autorização, uma foto de uma modelo para uma campanha publicitária de um produto duvidoso. A modelo sofre: <strong>1) Dano Material:</strong> ela deixou de ganhar o cachê que cobraria pela foto. <strong>2) Dano à Imagem/Moral:</strong> sua imagem foi associada a um produto ruim, causando-lhe constrangimento e prejudicando sua reputação. Ela pode processar o fotógrafo e a empresa pedindo uma indenização que cubra ambos os danos.</p>
+                        <p><strong>(Fonte: Aula16, p. 2)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre os conceitos introdutórios do Direito à Privacidade e a importante jurisprudência do STF sobre o Direito ao Esquecimento. Mantenha o foco, você está no caminho certo!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

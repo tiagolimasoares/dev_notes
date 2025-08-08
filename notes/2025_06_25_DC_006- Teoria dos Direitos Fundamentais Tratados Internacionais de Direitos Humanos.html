@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 06: Tratados Internacionais</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas agora suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin-top: 10px;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 06: Tratados Internacionais</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 4</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Teoria dos Direitos Fundamentais: Tratados Internacionais de Direitos Humanos</h1>
+                <p>Teste seus conhecimentos com base no material da Aula 06. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        Toda a lógica da aplicação está contida nesta tag <script>.
+        A grande melhoria está na propriedade `explanation` de cada questão, que agora contém
+        HTML formatado para criar uma "mini-aula" completa, conforme solicitado.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Um Tratado Internacional sobre Direitos Humanos, para ser equivalente a uma Emenda Constitucional, precisa ser aprovado com um quórum específico. Qual é esse quórum?",
+                options: [
+                    "Em cada Casa do Congresso Nacional, em turno único, por maioria absoluta dos votos.",
+                    "Na Câmara dos Deputados, em dois turnos, por três quintos dos votos, e no Senado, em turno único, por maioria simples.",
+                    "Em cada Casa do Congresso Nacional, em dois turnos, por três quintos dos votos dos respectivos membros.",
+                    "No Congresso Nacional (sessão conjunta), em dois turnos, por dois terços dos votos.",
+                    "Em cada Casa do Congresso Nacional, em turno único, por três quintos dos votos."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Regra de Ouro (Art. 5º, § 3º, da CF/88):</strong> A sua resposta está perfeita! A Constituição Federal estabelece um rito especial e mais rígido para que um tratado de direitos humanos receba o status máximo em nosso ordenamento jurídico. Ele precisa ser aprovado de forma idêntica a uma Proposta de Emenda à Constituição (PEC).</p>
+                        <p>Isso significa que a aprovação deve ocorrer <strong>separadamente na Câmara dos Deputados e no Senado Federal</strong>. Em cada uma dessas 'casas', o tratado precisa ser votado e aprovado <strong>duas vezes (dois turnos)</strong>, e em ambas as votações, deve alcançar no mínimo <strong>três quintos dos votos</strong> do total de membros de cada casa.</p>
+                        <div class="visual-aid">🏛️➡️ Votação 1 (3/5) ➡️ Votação 2 (3/5) ➡️ ✅</div>
+                        <p class="example"><strong>Exemplo Real:</strong> Pense nisso como conseguir um "selo de qualidade constitucional". A <strong>Convenção Internacional sobre os Direitos das Pessoas com Deficiência</strong> e seu Protocolo Facultativo foram os primeiros a receber esse 'selo' no Brasil (Decreto nº 6.949/2009). Eles passaram por todo esse processo rigoroso e, hoje, têm a mesma força de uma Emenda Constitucional, não podendo ser alterados por uma lei comum.</p>
+                        <p><strong>(Fonte: Aula06, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Se um Tratado Internacional sobre Direitos Humanos for aprovado pelo Congresso Nacional, mas sem seguir o rito de Emenda Constitucional (art. 5º, § 3º), qual será o seu status hierárquico no ordenamento jurídico brasileiro?",
+                options: [
+                    "Status de Lei Ordinária, podendo ser revogado por qualquer lei posterior.",
+                    "Status Supralegal, ou seja, abaixo da Constituição, mas acima das leis comuns.",
+                    "Não terá validade jurídica no Brasil, precisando ser votado novamente.",
+                    "Status de Lei Complementar, acima das leis ordinárias, mas abaixo das emendas.",
+                    "Status Constitucional, pois o que importa é o tema 'direitos humanos'."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Criação do 'Andar do Meio' pelo STF:</strong> Excelente! Você compreendeu uma das construções jurisprudenciais mais importantes do Direito Constitucional moderno. Quando um tratado de direitos humanos é aprovado, mas sem o quórum qualificado, ele não é rebaixado a uma simples lei, nem é elevado à Constituição.</p>
+                        <p>O Supremo Tribunal Federal (STF) decidiu que esses tratados possuem um status especial: <strong>supralegal</strong>. </p>
+                        <div class="visual-aid">
+                            🥇 <strong>1º Lugar:</strong> Constituição + Tratados com Quórum de EC<br>
+                            🥈 <strong>2º Lugar:</strong> Tratados de DH com Status SUPRALEGAL<br>
+                            🥉 <strong>3º Lugar:</strong> Leis (Ordinárias, Complementares, etc.)
+                        </div>
+                        <p><strong>Analogia do Prédio Jurídico:</strong> Imagine a pirâmide de normas como um prédio. A <strong>Constituição</strong> é a cobertura de luxo, o topo. As <strong>leis comuns</strong> são os apartamentos dos andares de baixo. O tratado supralegal é um <strong>apartamento no mezanino</strong>: ele está claramente acima dos apartamentos comuns, mas ainda está abaixo da cobertura. Portanto, uma lei comum não pode 'despejar' o morador do mezanino.</p>
+                        <p class="example"><strong>Exemplo Real:</strong> O <strong>Pacto de San José da Costa Rica</strong> é o maior exemplo. Ele veda a prisão civil por dívida, com exceção do devedor de pensão alimentícia. O Código Civil antigo permitia a prisão do depositário infiel. O STF, com base no status supralegal do Pacto, declarou que a lei brasileira que previa essa prisão não era mais válida (não foi 'recepcionada'). A norma supralegal paralisou a eficácia da lei inferior.</p>
+                        <p><strong>(Fonte: Aula06, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Considerando a hierarquia das normas, se uma lei ordinária federal, criada em 2024, contrariar uma disposição do Pacto de San José da Costa Rica (que tem status supralegal), o que acontece?",
+                options: [
+                    "A lei prevalece, pois é mais recente (critério cronológico).",
+                    "O Pacto de San José prevalece, e a lei ordinária é considerada inválida ou tem sua eficácia paralisada.",
+                    "Ambos são aplicáveis, e o juiz decide qual usar no caso concreto.",
+                    "A lei é válida, mas o Pacto de San José deve ser alterado pelo Congresso.",
+                    "A lei precisa ser declarada inconstitucional pelo STF em uma ADI."
+                ],
+                answer: 1,
+                 explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Poder da Norma Superior:</strong> Perfeito! A hierarquia das normas não é apenas teórica, ela tem efeitos práticos diretos. Como vimos na questão anterior, o tratado de direitos humanos com status supralegal está em um patamar <strong>superior</strong> ao das leis ordinárias.</p>
+                        <p>Dessa forma, a lei ordinária não tem força para contrariar o tratado. Qualquer juiz ou tribunal, ao se deparar com esse conflito, deve deixar de aplicar a lei e fazer prevalecer a norma do tratado. Isso é chamado de <strong>controle de convencionalidade</strong> das leis.</p>
+                        <div class="visual-aid">📜 Lei Comum vs. 🛡️ Tratado Supralegal ➡️ Vitória do Tratado 🛡️</div>
+                        <p class="example"><strong>Exemplo do Dia a Dia:</strong> Imagine que o condomínio onde você mora (representando as leis do Brasil) cria uma nova regra proibindo animais de estimação. No entanto, o regulamento do bairro (representando o tratado supralegal), que é superior, permite expressamente um animal por apartamento. A regra do condomínio, por ser inferior, não terá validade e não poderá ser aplicada contra você e seu pet, pois a norma superior do bairro prevalece.</p>
+                        <p><strong>(Fonte: Aula06, p. 2 e 3, raciocínio combinado)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Com base na representação gráfica (pirâmide) da Aula 06, onde se localizam os tratados e convenções internacionais que versam sobre direitos humanos, mas que foram aprovados com o quórum de uma lei ordinária?",
+                options: [
+                    "No topo da pirâmide, junto com a Constituição Federal.",
+                    "Na base da pirâmide, junto com os decretos e portarias.",
+                    "Em um nível intermediário, acima das leis e abaixo da Constituição.",
+                    "Fora da pirâmide, pois não integram o ordenamento jurídico.",
+                    "No mesmo nível das leis, podendo ser revogados por elas."
+                ],
+                answer: 2,
+                 explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Visualizando a Hierarquia:</strong> Exato! A pirâmide normativa é a melhor ferramenta visual para entender essa estrutura. A sua resposta corresponde perfeitamente à decisão do STF e ao esquema apresentado.</p>
+                        <p>Vamos revisar os 'andares' da nossa pirâmide jurídica:</p>
+                        <ul>
+                            <li><strong>Topo (Bloco de Constitucionalidade):</strong> Constituição Federal e os Tratados de Direitos Humanos aprovados com o quórum do art. 5º, § 3º.</li>
+                            <li><strong>Mezanino (Status Supralegal):</strong> Tratados de Direitos Humanos aprovados SEM o quórum do art. 5º, § 3º.</li>
+                            <li><strong>Base (Legalidade):</strong> Leis Complementares, Leis Ordinárias, Medidas Provisórias, etc.</li>
+                        </ul>
+                        <div class="visual-aid">🔼 Constituição<br>🔼 Tratados de DH (Supralegais)<br>🔼 Leis Comuns</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Se o Congresso aprova hoje um novo tratado sobre proteção de dados que não seja de direitos humanos, ele entrará no nível da base (Leis). Se aprova um sobre direitos humanos pelo rito comum, ele vai para o mezanino (Supralegal). Se aprova um sobre direitos humanos pelo rito de emenda, ele sobe para o topo (Constitucional). O 'elevador' que leva para o topo é o quórum qualificado.</p>
+                        <p><strong>(Fonte: Aula06, p. 2 e 3)</strong></p>
+                    </div>
+                `
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                // Altera o título para "Incorreto" na explicação gerada
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Gabarito! Performance de elite.</strong> Você demonstrou total domínio sobre a hierarquia dos tratados internacionais. Este é um diferencial competitivo decisivo. Avante!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

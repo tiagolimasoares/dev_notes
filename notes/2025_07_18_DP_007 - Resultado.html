@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Fato Típico: Resultado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilos Globais e Paleta de Cores */
+        :root {
+            --primary-blue: #0A3D62;
+            --secondary-blue: #1E639B;
+            --light-gray: #F0F2F5;
+            --medium-gray: #D1D5DB;
+            --dark-gray: #4B5563;
+            --text-color: #1F2937;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            display: flex;
+        }
+
+        /* Estilo da Sidebar */
+        #sidebar {
+            width: 250px;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 2rem 1rem;
+            transition: width 0.3s;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        #sidebar h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--secondary-blue);
+            padding-bottom: 1rem;
+        }
+
+        #sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #sidebar ul li a {
+            display: block;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--white);
+            transition: background-color 0.3s, color 0.3s;
+            font-weight: 500;
+        }
+
+        #sidebar ul li a:hover, #sidebar ul li a.active {
+            background-color: var(--white);
+            color: var(--primary-blue);
+        }
+
+        /* Conteúdo Principal */
+        #main-content {
+            margin-left: 250px;
+            padding: 2rem 3rem;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s, width 0.3s;
+        }
+
+        /* Estilo dos Cards de Questão */
+        .question-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary-blue);
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilo das Alternativas */
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .option:hover {
+            background-color: #EBF5FF;
+            border-color: var(--secondary-blue);
+        }
+        
+        .option.correct {
+            background-color: var(--success-green);
+            color: var(--white);
+            border-color: #059669;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-red);
+            color: var(--white);
+            border-color: #DC2626;
+        }
+        
+        .option.eliminated {
+            text-decoration: line-through;
+            background-color: var(--medium-gray);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 1rem;
+            min-width: 20px;
+        }
+        
+        .scissor-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: color 0.2s;
+        }
+        
+        .scissor-icon:hover {
+            color: var(--error-red);
+        }
+        .option.eliminated .scissor-icon, .option.correct .scissor-icon, .option.incorrect .scissor-icon {
+            display: none;
+        }
+
+        /* Estilo do Feedback */
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #D1FAE5;
+            border-left: 5px solid var(--success-green);
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #FEE2E2;
+            border-left: 5px solid var(--error-red);
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feedback-explanation {
+            line-height: 1.6;
+        }
+        
+        .feedback-example {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            border-left: 3px solid var(--secondary-blue);
+        }
+
+        /* Seção de Relatório */
+        #report-section {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #review-section {
+            margin-top: 2rem;
+        }
+
+        .review-card {
+            background-color: #FFFBEB;
+            border: 1px solid #FBBF24;
+            border-left: 5px solid #F59E0B;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Direito Penal</h2>
+        <ul>
+            <li><a href="#quiz-section" onclick="scrollToSection('quiz-section')" class="active">Questões</a></li>
+            <li><a href="#report-section" onclick="scrollToSection('report-section')">Relatório</a></li>
+        </ul>
+    </div>
+
+    <div id="main-content">
+        <h1 class="text-3xl font-bold mb-2 text-[var(--primary-blue)]">Questões de Fixação: Fato Típico - Resultado</h1>
+        <p class="mb-8 text-[var(--dark-gray)]">Aula 21 - Analise cada questão e selecione a alternativa correta. Use o ícone de tesoura <i class="fas fa-cut"></i> para eliminar as alternativas que julgar incorretas.</p>
+
+        <div id="quiz-section">
+            <!-- As questões serão inseridas aqui via JavaScript -->
+        </div>
+
+        <div id="report-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-6 text-[var(--primary-blue)]">Relatório de Desempenho</h2>
+            <div class="w-full md:w-1/2 mx-auto mb-8">
+                <canvas id="performance-chart"></canvas>
+            </div>
+            <div id="review-section">
+                <!-- A revisão dos erros será inserida aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // DOCUMENTAÇÃO GERAL DO SCRIPT (JavaScript)
+    // Módulo da Aula 21: Resultado.
+    // O script foi populado com questões sobre os conceitos de resultado naturalístico e jurídico,
+    // e a classificação dos crimes em material, formal e de mera conduta, mantendo o padrão de "mini-aulas".
+
+    const questions = [
+        {
+            question: "A doutrina penal distingue o resultado em duas espécies: naturalístico e jurídico. Com base nessa distinção, é correto afirmar que:",
+            options: [
+                "Todo crime possui resultado naturalístico, mas nem todo crime possui resultado jurídico.",
+                "O resultado naturalístico é a lesão ao bem jurídico, enquanto o resultado jurídico é a alteração no mundo exterior.",
+                "Os crimes de mera conduta não possuem resultado naturalístico nem jurídico, sendo exceções à teoria do crime.",
+                "Todo crime, sem exceção, possui um resultado jurídico (lesão ou perigo de lesão a um bem tutelado), mas nem todo crime possui um resultado naturalístico (modificação do mundo exterior).",
+                "Resultado jurídico e resultado naturalístico são termos sinônimos para a consumação do crime."
+            ],
+            answer: 3,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (D):</strong></p>' +
+                    '<p>Esta é a premissa fundamental do tema. Vamos diferenciar os conceitos:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Resultado Naturalístico:</strong> É a modificação <strong>física, material, palpável</strong> no mundo exterior causada pela conduta. Ex: o corpo sem vida no homicídio; o objeto subtraído no furto.</li>' +
+                        '<li class="mt-1"><strong>- Resultado Jurídico (ou Normativo):</strong> É a <strong>lesão ou o perigo concreto de lesão</strong> ao bem jurídico protegido pela norma penal. Ex: a violação ao bem jurídico "vida" no homicídio; a violação ao bem jurídico "patrimônio" no furto.</li>' +
+                    '</ul>' +
+                    '<p>A conclusão lógica é que <strong>NÃO EXISTE CRIME SEM RESULTADO JURÍDICO</strong>. Se uma conduta não lesa nem expõe a perigo nenhum bem jurídico, ela é um indiferente penal. No entanto, existem crimes que não produzem uma alteração material no mundo, ou seja, <strong>não possuem resultado naturalístico</strong>, como veremos na classificação a seguir.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> No crime de ameaça (art. 147), quando "A" diz a "B" que vai matá-lo, não há uma modificação física no mundo (resultado naturalístico). Contudo, há uma lesão ao bem jurídico "liberdade psíquica" de "B", que se sente intimidado. Portanto, há resultado jurídico, e o crime existe.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 21, p. 2</em></p>',
+            topic: "Resultado Naturalístico vs. Resultado Jurídico"
+        },
+        {
+            question: "O crime de homicídio (art. 121 do CP) exige, para sua consumação, a morte da vítima. O crime de extorsão mediante sequestro (art. 159 do CP), por sua vez, se consuma com o simples ato de sequestrar a pessoa com o fim de obter vantagem, ainda que esta não seja paga. Respectivamente, como são classificados esses crimes quanto ao resultado?",
+            options: [
+                "Material e de Mera Conduta.",
+                "Formal e Material.",
+                "Material e Formal.",
+                "Ambos são materiais.",
+                "Ambos são formais."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>A classificação dos crimes quanto ao resultado é crucial para determinar o momento da consumação e a admissibilidade da tentativa. A chave é perguntar: "O tipo penal <strong>exige</strong> a ocorrência do resultado naturalístico para a consumação?"</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Crime Material:</strong> A lei descreve uma conduta e um resultado, e <strong>EXIGE</strong> a ocorrência desse resultado para a consumação. O homicídio é o exemplo perfeito: o crime só se consuma com a morte (resultado naturalístico).</li>' +
+                        '<li class="mt-1"><strong>- Crime Formal (ou de consumação antecipada):</strong> A lei descreve uma conduta e um resultado, mas <strong>NÃO EXIGE</strong> a ocorrência do resultado para a consumação. O crime se consuma com a simples prática da conduta. Na extorsão mediante sequestro, o crime está consumado no momento do sequestro; o recebimento da vantagem é mero exaurimento do crime.</li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong><br><strong>Homicídio (Material):</strong> Se "A" atira em "B" e "B" sobrevive, o crime não se consumou. Temos uma tentativa de homicídio.<br><strong>Corrupção Passiva (Formal):</strong> Se um funcionário público solicita propina (art. 317), o crime já está consumado. Se ele efetivamente recebe o dinheiro, isso é apenas o exaurimento, que pode influenciar na pena, mas o crime já estava perfeito com a mera solicitação.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 21, p. 3</em></p>',
+            topic: "Classificação: Crime Material vs. Crime Formal"
+        },
+        {
+            question: "O crime de porte ilegal de arma de fogo de uso permitido (art. 14 da Lei 10.826/03) se consuma com o simples ato de portar a arma sem autorização, não sendo necessário que o agente dispare ou ameace alguém. Como se classifica esse tipo de crime?",
+            options: [
+                "Crime material, pois o resultado é o perigo concreto para a sociedade.",
+                "Crime formal, pois o resultado (disparo) é previsto, mas não exigido.",
+                "Crime de mera conduta, pois o tipo penal descreve apenas um comportamento, sem prever um resultado naturalístico.",
+                "Crime de perigo individual.",
+                "Crime vago."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>Chegamos à terceira categoria da classificação:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Crime de Mera Conduta (ou de simples atividade):</strong> É o crime em que o tipo penal se limita a descrever uma ação ou omissão, <strong>sem sequer prever um resultado naturalístico</strong>. A lei pune o simples comportamento por si só. Não há um "depois" materialmente relevante previsto na norma.</li>' +
+                    '</ul>' +
+                    '<p>No porte de arma, o legislador pune a simples conduta de "portar", pois entende que esse comportamento, por si só, já gera um perigo abstrato para a incolumidade pública. Não há um resultado naturalístico (como um disparo ou uma morte) descrito no tipo penal. A conduta se esgota em si mesma.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> Outro exemplo clássico é a violação de domicílio (art. 150 do CP). O crime se consuma no momento em que o agente "entra ou permanece" na casa alheia sem permissão. A lei não descreve nenhum resultado posterior. A simples conduta de invadir já é o crime consumado.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 21, p. 3</em></p>',
+            topic: "Classificação: Crime de Mera Conduta"
+        },
+        {
+            question: "Considerando a classificação dos crimes quanto ao resultado (material, formal e de mera conduta), qual é a principal consequência prática dessa distinção?",
+            options: [
+                "A definição da competência para julgamento (Justiça Federal ou Estadual).",
+                "A possibilidade de aplicação de pena de multa.",
+                "A determinação do momento consumativo do crime e, consequentemente, a admissibilidade ou não da tentativa.",
+                "A necessidade de dolo ou culpa para a configuração do crime.",
+                "A classificação do crime como hediondo ou não."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>Saber classificar um crime como material, formal ou de mera conduta não é um mero exercício acadêmico. Tem uma implicação prática fundamental:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Momento Consumativo:</strong> Saber quando o crime "está completo" é essencial. Nos crimes <strong>materiais</strong>, a consumação ocorre com a produção do resultado (a morte, no homicídio). Nos crimes <strong>formais</strong> e de <strong>mera conduta</strong>, a consumação ocorre com a simples prática da conduta (a solicitação da propina, o ato de portar a arma).</li>' +
+                        '<li class="mt-1"><strong>- Admissibilidade da Tentativa:</strong> A tentativa (art. 14, II) exige que o crime não se consume por circunstâncias alheias à vontade do agente. Para isso, é preciso que o caminho do crime (<i>iter criminis</i>) possa ser fracionado. Em regra, os crimes <strong>materiais</strong> e <strong>formais</strong> admitem tentativa, pois é possível imaginar a conduta sendo iniciada e o resultado (no caso do material) ou a conclusão da conduta (no caso do formal) não ocorrendo. Já os crimes de <strong>mera conduta</strong>, por se consumarem no exato instante da ação, em geral, não admitem o fracionamento, tornando a tentativa mais difícil de ser configurada (embora não impossível em alguns casos).</li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> "A" envia uma carta a um funcionário público oferecendo propina (crime formal de corrupção ativa). Se a carta é interceptada antes de chegar ao destinatário, temos uma tentativa, pois a conduta de "oferecer" não se completou. Isso mostra como a classificação impacta diretamente na análise do caso concreto.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 21, p. 3</em></p>',
+            topic: "Consequências Práticas da Classificação dos Crimes"
+        }
+    ];
+
+    const userAnswers = new Array(questions.length).fill(null);
+    const quizContainer = document.getElementById('quiz-section');
+    const reportSection = document.getElementById('report-section');
+    let performanceChart = null;
+
+    function renderQuestions() {
+        let quizHTML = '';
+        questions.forEach((q, index) => {
+            quizHTML +=
+                '<div class="question-card" id="question-' + index + '">' +
+                    '<p class="question-title">' + (index + 1) + '. ' + q.question + '</p>' +
+                    '<div class="options-container">';
+            q.options.forEach((option, optionIndex) => {
+                quizHTML +=
+                    '<div class="option" data-question="' + index + '" data-option="' + optionIndex + '">' +
+                        '<span class="option-letter">' + String.fromCharCode(65 + optionIndex) + '</span>' +
+                        '<span class="option-text">' + option + '</span>' +
+                        '<i class="fas fa-cut scissor-icon" title="Eliminar alternativa"></i>' +
+                    '</div>';
+            });
+            quizHTML +=
+                    '</div>' +
+                    '<div class="feedback" id="feedback-' + index + '"></div>' +
+                '</div>';
+        });
+        quizContainer.innerHTML = quizHTML;
+        addEventListeners();
+    }
+
+    function addEventListeners() {
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', handleOptionSelect);
+        });
+        document.querySelectorAll('.scissor-icon').forEach(icon => {
+            icon.addEventListener('click', handleEliminateOption);
+        });
+    }
+
+    function handleEliminateOption(e) {
+        e.stopPropagation();
+        const optionDiv = e.target.parentElement;
+        if (!optionDiv.classList.contains('eliminated') && userAnswers[optionDiv.dataset.question] === null) {
+            optionDiv.classList.add('eliminated');
+        }
+    }
+
+    function handleOptionSelect(e) {
+        const selectedOption = e.currentTarget;
+        const questionIndex = parseInt(selectedOption.dataset.question);
+        const optionIndex = parseInt(selectedOption.dataset.option);
+
+        if (userAnswers[questionIndex] !== null || selectedOption.classList.contains('eliminated')) {
+            return;
+        }
+
+        const isCorrect = optionIndex === questions[questionIndex].answer;
+        userAnswers[questionIndex] = { answered: optionIndex, correct: isCorrect };
+
+        const optionsContainer = selectedOption.parentElement;
+        optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+        selectedOption.classList.add(isCorrect ? 'correct' : 'incorrect');
+        
+        optionsContainer.querySelectorAll('.scissor-icon').forEach(icon => icon.style.display = 'none');
+
+        showFeedback(questionIndex, isCorrect);
+        
+        if (userAnswers.every(answer => answer !== null)) {
+            reportSection.classList.remove('hidden');
+            generateReport();
+            scrollToSection('report-section');
+        }
+    }
+
+    function showFeedback(questionIndex, isCorrect) {
+        const feedbackDiv = document.getElementById('feedback-' + questionIndex);
+        const questionData = questions[questionIndex];
+        
+        let feedbackHTML = 
+            '<p class="feedback-title">' + (isCorrect ? 'Resposta Correta! Análise do Professor:' : 'Resposta Incorreta. Análise do Professor:') + '</p>' +
+            '<div>' + questionData.explanation + '</div>';
+        
+        feedbackDiv.innerHTML = feedbackHTML;
+        feedbackDiv.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    }
+    
+    function generateReport() {
+        const correctAnswers = userAnswers.filter(a => a.correct).length;
+        const incorrectAnswers = questions.length - correctAnswers;
+
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        if (performanceChart) {
+            performanceChart.destroy();
+        }
+        performanceChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Acertos', 'Erros'],
+                datasets: [{
+                    data: [correctAnswers, incorrectAnswers],
+                    backgroundColor: ['var(--success-green)', 'var(--error-red)'],
+                    borderColor: ['var(--white)'],
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 14 }, padding: 20 } },
+                    title: { display: true, text: 'Seu Desempenho Geral', font: { size: 18, weight: 'bold' }, padding: { bottom: 20 } }
+                }
+            }
+        });
+
+        const reviewSection = document.getElementById('review-section');
+        let reviewHTML = '<h3 class="text-xl font-bold mb-4 text-[var(--primary-blue)]">Pontos para Revisão</h3>';
+        const incorrectQuestions = userAnswers
+            .map((answer, index) => ({...answer, index}))
+            .filter(answer => !answer.correct);
+
+        if (incorrectQuestions.length === 0) {
+            reviewHTML += '<p class="text-lg text-[var(--success-green)] font-semibold">Perfeito! Você dominou a classificação dos crimes quanto ao resultado. Continue com essa precisão.</p>';
+        } else {
+            reviewHTML += '<p class="mb-4 text-[var(--dark-gray)]">Você errou ' + incorrectQuestions.length + ' questão(ões). A maestria é forjada na correção. Revise os seguintes pontos:</p>';
+            incorrectQuestions.forEach(q => {
+                const originalQuestion = questions[q.index];
+                reviewHTML +=
+                    '<div class="review-card">' +
+                        '<h4 class="font-bold text-lg mb-2 text-[#D97706]">' + originalQuestion.topic + '</h4>' +
+                        '<p class="mb-3"><strong>Na questão:</strong> "' + originalQuestion.question + '"</p>' +
+                        '<p class="font-semibold">Relembre o ponto-chave:</p>' +
+                        originalQuestion.explanation +
+                    '</div>';
+            });
+        }
+        reviewSection.innerHTML = reviewHTML;
+    }
+
+    function scrollToSection(sectionId) {
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+        const sections = ['quiz-section', 'report-section'];
+        let currentSection = '';
+
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 150 && rect.bottom >= 150) {
+                    currentSection = sectionId;
+                }
+            }
+        });
+        
+        const sidebarLinks = document.querySelectorAll('#sidebar ul li a');
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if(link.getAttribute('href') === '#' + currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', renderQuestions);
+    </script>
+
+</body>
+</html>

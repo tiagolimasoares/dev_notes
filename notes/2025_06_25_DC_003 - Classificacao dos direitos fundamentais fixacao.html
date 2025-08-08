@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 03: Classificação</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        Todo o estilo da página está contido dentro desta tag <style>.
+        Isso simplifica a distribuição, pois não é necessário um arquivo .css separado.
+        A paleta de cores e a estrutura seguem os princípios de um design clean e profissional.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback da Resposta --- */
+        .feedback {
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.95em;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left: 4px solid #2ecc71;
+            color: #27ae60;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left: 4px solid #e74c3c;
+            color: #c0392b;
+            display: block;
+        }
+        
+        .feedback p { margin: 0; }
+        .feedback strong { font-weight: 700; }
+        .feedback .explanation {
+            margin-top: 10px;
+            color: #2c3e50;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 03: Classificação</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 7</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Teoria dos Direitos Fundamentais: Classificação</h1>
+                <p>Teste seus conhecimentos com base no material da Aula 03. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise os comentários para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        Toda a lógica da aplicação está contida nesta tag <script>.
+        Isso inclui:
+        - O array de questões (`questions`) com as alternativas e explicações.
+        - Funções para renderizar o quiz, processar respostas, gerar o gráfico e a aula de reforço.
+        - Event Listeners que "ouvem" os cliques do usuário e disparam as ações corretas.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- 1. DADOS DAS QUESTÕES (Baseado no PDF da Aula 03) ---
+        const questions = [
+            {
+                question: "De acordo com a Teoria dos Status de Georg Jellinek, a exigência de prestações positivas do Estado, como saúde e educação, corresponde ao:",
+                options: [
+                    "Status passivo",
+                    "Status negativo",
+                    "Status ativo",
+                    "Status positivo",
+                    "Status de defesa"
+                ],
+                answer: 3,
+                explanation: "Correto. O 'status positivo' é exatamente o direito do indivíduo de demandar uma atuação do Estado, ou seja, exigir o cumprimento de obrigações e prestações positivas em seu favor, como nos direitos sociais. (Fonte: Aula03, p. 2)"
+            },
+            {
+                question: "O lema da Revolução Francesa 'Liberdade, Igualdade e Fraternidade' é usado como parâmetro para a teoria das gerações dos direitos. Os direitos de primeira geração estão associados a qual desses ideais?",
+                options: [
+                    "Igualdade",
+                    "Fraternidade",
+                    "Liberdade",
+                    "Solidariedade",
+                    "Justiça"
+                ],
+                answer: 2,
+                explanation: "Correto. Os direitos de primeira geração (ou dimensão) estão intimamente ligados ao ideal de 'Liberdade'. Eles buscam proteger as liberdades individuais contra a intervenção do Estado e correspondem aos direitos civis e políticos. (Fonte: Aula03, p. 2 e 3)"
+            },
+            {
+                question: "O direito a um meio ambiente ecologicamente equilibrado e o direito do consumidor são exemplos de direitos de qual geração (ou dimensão)?",
+                options: [
+                    "Primeira geração",
+                    "Segunda geração",
+                    "Terceira geração",
+                    "Quarta geração",
+                    "Quinta geração"
+                ],
+                answer: 2,
+                explanation: "Correto. Esses são exemplos clássicos de direitos de terceira geração, que consagram os princípios da solidariedade e da fraternidade. São direitos transindividuais, ou seja, pertencem a toda a coletividade e não a um indivíduo isoladamente. (Fonte: Aula03, p. 3)"
+            },
+            {
+                question: "Na Teoria dos Status, a posição do indivíduo que se relaciona com seus deveres e obrigações perante o Estado, como o dever de prestar serviço militar, é classificada como:",
+                options: [
+                    "Status ativo",
+                    "Status negativo",
+                    "Status positivo",
+                    "Status de submissão",
+                    "Status passivo"
+                ],
+                answer: 4,
+                explanation: "Correto. O 'status passivo' representa a submissão do indivíduo a certas obrigações impostas pelo Estado. Não se trata de um direito, mas de um dever fundamental. (Fonte: Aula03, p. 2)"
+            },
+            {
+                question: "Os direitos de segunda geração, marcados pela busca da igualdade material, impõem ao Estado um dever de:",
+                options: [
+                    "Não interferência (abstenção), para proteger as liberdades.",
+                    "Atuação positiva (prestação), para garantir condições de vida digna.",
+                    "Proteger a coletividade contra ameaças globais.",
+                    "Garantir a participação política dos cidadãos.",
+                    "Manter-se neutro em todas as relações sociais."
+                ],
+                answer: 1,
+                explanation: "Correto. Diferentemente da primeira geração, que exigia uma abstenção estatal, os direitos de segunda geração (sociais, econômicos e culturais) demandam uma 'atuação positiva'. O Estado deve agir para prover bens e serviços que busquem reduzir as desigualdades e garantir a igualdade material. (Fonte: Aula03, p. 3)"
+            },
+             {
+                question: "O direito à liberdade de expressão e de associação, que representa uma esfera onde o Estado não deve intervir, enquadra-se em qual status da teoria de Jellinek?",
+                options: [
+                    "Status ativo",
+                    "Status negativo",
+                    "Status positivo",
+                    "Status de cidadania",
+                    "Status passivo"
+                ],
+                answer: 1,
+                explanation: "Correto. O 'status negativo' ou 'status de liberdade' corresponde ao dever de não intervenção do Estado na esfera de liberdade dos indivíduos, protegendo-os de interferências arbitrárias. (Fonte: Aula03, p. 2)"
+            },
+            {
+                question: "Segundo a doutrina mencionada na aula, os direitos de quarta geração, conforme a visão de Paulo Bonavides, estão relacionados a quê?",
+                options: [
+                    "Direito à paz mundial.",
+                    "Direito ao meio ambiente.",
+                    "Democracia, pluralismo jurídico e informação.",
+                    "Direitos sociais e econômicos.",
+                    "Direitos civis e políticos."
+                ],
+                answer: 2,
+                explanation: "Correto. A Aula 03 menciona que, para além das três gerações clássicas, há doutrinadores que apontam novas gerações. Paulo Bonavides associa a quarta geração a temas como a democracia (em seu sentido mais amplo), o pluralismo jurídico e o direito à informação. (Fonte: Aula03, p. 3)"
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = `<strong>Correto!</strong><div class="explanation">${questions[questionIndex].explanation}</div>`;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                feedbackEl.innerHTML = `<strong>Incorreto.</strong><div class="explanation">${questions[questionIndex].explanation}</div>`;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; // Resetando o conteúdo
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    const correctAnswerText = question.options[question.answer];
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <p><strong>Resposta correta:</strong> <span class="correct-answer">${String.fromCharCode(65 + question.answer)}) ${correctAnswerText}</span></p>
+                            <div class="explanation">
+                                <strong>Justificativa:</strong> ${question.explanation}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Excelente! Você gabaritou o simulado.</strong> Demonstrou total domínio sobre a classificação dos Direitos Fundamentais. Mantenha o foco!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise os comentários para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

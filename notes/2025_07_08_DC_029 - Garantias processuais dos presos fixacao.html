@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 28: Garantias Processuais</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 28: Garantias Processuais</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 4</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Garantias Processuais</h1>
+                <p>Teste seus conhecimentos com base na Aula 28. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "O princípio da presunção de inocência (Art. 5º, LVII) estabelece que 'ninguém será considerado culpado até o trânsito em julgado de sentença penal condenatória'. Qual é a principal consequência prática desse princípio em relação à execução da pena?",
+                options: [
+                    "Impede a decretação de qualquer tipo de prisão antes do final do processo.",
+                    "Inviabiliza a execução provisória da pena após condenação em segunda instância.",
+                    "Permite que o réu recorra em liberdade em todos os casos, sem exceção.",
+                    "Anula o processo se a mídia considerar o réu culpado antecipadamente.",
+                    "Exige que a pena seja cumprida em regime aberto até o trânsito em julgado."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Barreira contra a Punição Antecipada:</strong> Perfeito! Você compreendeu a consequência mais importante e debatida da presunção de inocência. Se uma pessoa só é considerada culpada após o trânsito em julgado (quando não cabem mais recursos), ela não pode começar a cumprir a pena definitiva antes disso.</p>
+                        <p>O STF, nas ADCs 43, 44 e 54, firmou o entendimento de que a execução da pena só pode começar após o esgotamento de todos os recursos. Isso está em linha com o Art. 283 do Código de Processo Penal.</p>
+                        <p><strong>Atenção à pegadinha:</strong> Isso <strong>NÃO</strong> impede a decretação de <strong>prisões cautelares</strong> (preventiva, temporária). A prisão cautelar não é pena, mas sim uma medida necessária para garantir a ordem pública, a instrução do processo ou a aplicação da lei penal.</p>
+                        <div class="visual-aid">👨‍⚖️ Condenação sem Trânsito em Julgado ➡️ ❌ Não cumpre pena definitiva.<br>🚨 Risco à Ordem Pública/Processo ➡️ ✅ Pode ter prisão cautelar.</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> João é condenado por roubo em 1ª e 2ª instância. Ele ainda pode recorrer ao STJ e ao STF. Enquanto seus recursos estiverem pendentes, ele não iniciará o cumprimento da pena de 8 anos a que foi condenado. No entanto, se durante o processo ele ameaçar testemunhas, o juiz pode decretar sua prisão <strong>preventiva</strong> para garantir a ordem do processo, e essa prisão é perfeitamente constitucional.</p>
+                        <p><strong>(Fonte: Aula28, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A regra geral do Art. 5º, LVIII, é que 'o civilmente identificado não será submetido a identificação criminal'. Qual das alternativas abaixo apresenta uma exceção a essa regra, prevista na Lei nº 12.037/09?",
+                options: [
+                    "Quando o indiciado se recusa a fornecer o nome dos pais.",
+                    "Quando o indiciado não possui diploma de curso superior.",
+                    "Quando o documento de identidade apresentado tiver indício de falsificação ou rasura.",
+                    "Quando o crime investigado for hediondo.",
+                    "Quando o indiciado já tiver sido preso anteriormente."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Garantia da Identidade Fidedigna:</strong> Exato! A regra é proteger o cidadão que já tem uma identificação civil válida (como RG ou CNH) de passar pelo constrangimento da identificação criminal (impressões digitais, fotografia). No entanto, essa proteção não é absoluta.</p>
+                        <p>A Lei nº 12.037/09 prevê situações em que, mesmo que a pessoa apresente um documento, a identificação criminal pode ser feita para garantir que não há dúvidas sobre quem ela realmente é. A suspeita de <strong>falsificação ou rasura</strong> é uma dessas hipóteses, pois coloca em xeque a própria validade da identificação civil apresentada.</p>
+                        <p><strong>Outras exceções importantes da lei:</strong></p>
+                        <ul>
+                            <li>Documento insuficiente para identificar cabalmente.</li>
+                            <li>Portar documentos distintos com informações conflitantes.</li>
+                            <li>Constatação de uso de outros nomes em registros policiais.</li>
+                        </ul>
+                        <p class="example"><strong>Na Prática Policial:</strong> Durante uma abordagem, uma pessoa apresenta uma CNH que parece ter a foto adulterada ou a data de validade claramente raspada. Diante dessa fundada suspeita, o delegado pode determinar que seja feita a identificação criminal (coleta de digitais e foto) para confirmar a identidade da pessoa, mesmo que ela insista que o documento é válido.</p>
+                        <p><strong>(Fonte: Aula28, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A Ação Penal Privada Subsidiária da Pública (Art. 5º, LIX) é um instrumento que pode ser utilizado pela vítima de um crime quando ocorre qual situação?",
+                options: [
+                    "Quando o Ministério Público pede a absolvição do réu.",
+                    "Quando a vítima não concorda com a pena aplicada na sentença.",
+                    "Quando o Ministério Público permanece inerte e não oferece a denúncia no prazo legal.",
+                    "Quando o inquérito policial não consegue descobrir a autoria do crime.",
+                    "Quando o crime é de menor potencial ofensivo."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O 'Plano B' contra a Inércia do MP:</strong> Perfeito! A titularidade da ação penal pública é, em regra, do Ministério Público. É ele quem deve denunciar os criminosos à Justiça. No entanto, o que acontece se o MP, que tem o dever de agir, 'dormir no ponto' e não fizer nada?</p>
+                        <p>A Constituição, para evitar que a inércia do Estado prejudique a vítima, cria essa garantia. Se o promotor, tendo os elementos para denunciar, não o faz no prazo que a lei estabelece, a vítima (ou seu representante legal) ganha o direito de 'substituir' o MP e ela mesma propor a ação penal contra o autor do crime. É uma forma de provocar a jurisdição que estava paralisada.</p>
+                        <div class="visual-aid">⏰ Prazo do MP Esgotado ➡️  inert MP Inerte ➡️ 🙋 Vítima Pode Agir!</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> A polícia conclui um inquérito de lesão corporal grave e o remete ao Ministério Público. O promotor tem um prazo legal para analisar o inquérito e oferecer a denúncia. Se ele, sem justificativa, deixa o inquérito 'na gaveta' e o prazo se esgota, a vítima pode contratar um advogado e protocolar uma queixa-crime (que é o nome da peça inicial da ação penal privada) subsidiária da pública, dando início ao processo penal.</p>
+                        <p><strong>(Fonte: Aula28, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A regra da publicidade dos atos processuais (Art. 5º, LX) pode ser restringida em quais hipóteses?",
+                options: [
+                    "Quando o réu for uma autoridade pública.",
+                    "Quando o processo envolver grande quantia em dinheiro.",
+                    "Apenas em processos criminais.",
+                    "Quando a defesa da intimidade ou o interesse social o exigirem.",
+                    "A publicidade é absoluta e não admite restrições."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Transparência e suas Exceções:</strong> Exato! A publicidade é um pilar da República. Ela permite que a sociedade fiscalize os atos do Poder Judiciário, garantindo a transparência e a imparcialidade. A regra é que qualquer cidadão pode ter acesso aos autos de um processo e assistir a uma audiência.</p>
+                        <p>No entanto, esse direito não é absoluto. A própria Constituição prevê duas grandes exceções, nas quais o processo pode correr em <strong>segredo de justiça</strong> para proteger outros valores também importantes:</p>
+                        <ul>
+                            <li><strong>🤫 Defesa da Intimidade:</strong> Para proteger a privacidade e a honra das partes envolvidas. É o caso típico de processos de família (divórcio, guarda de filhos) ou que envolvam crimes sexuais, onde a exposição dos detalhes causaria um constrangimento enorme e desnecessário.</li>
+                            <li><strong>🛡️ Interesse Social:</strong> Quando a publicidade do ato pode colocar em risco a segurança da sociedade ou do Estado. Por exemplo, em investigações que envolvem a segurança nacional ou operações policiais sigilosas em andamento.</li>
+                        </ul>
+                        <p class="example"><strong>Cenário Prático:</strong> Um processo que discute a guarda de uma criança, com alegações sensíveis sobre a conduta dos pais, tramitará em segredo de justiça para proteger a <strong>intimidade</strong> da família e, principalmente, da criança. Já uma investigação sobre um plano terrorista tramitará em segredo para proteger o <strong>interesse social</strong>, evitando que os investigados descubram as estratégias da polícia e fujam.</p>
+                        <p><strong>(Fonte: Aula28, p. 3)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre as garantias processuais. Este é um conhecimento fundamental para uma atuação policial legalista e eficiente. Mantenha o foco!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

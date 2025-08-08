@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Fato Típico: Culpa (Parte I)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilos Globais e Paleta de Cores */
+        :root {
+            --primary-blue: #0A3D62;
+            --secondary-blue: #1E639B;
+            --light-gray: #F0F2F5;
+            --medium-gray: #D1D5DB;
+            --dark-gray: #4B5563;
+            --text-color: #1F2937;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            display: flex;
+        }
+
+        /* Estilo da Sidebar */
+        #sidebar {
+            width: 250px;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 2rem 1rem;
+            transition: width 0.3s;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        #sidebar h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--secondary-blue);
+            padding-bottom: 1rem;
+        }
+
+        #sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #sidebar ul li a {
+            display: block;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--white);
+            transition: background-color 0.3s, color 0.3s;
+            font-weight: 500;
+        }
+
+        #sidebar ul li a:hover, #sidebar ul li a.active {
+            background-color: var(--white);
+            color: var(--primary-blue);
+        }
+
+        /* Conteúdo Principal */
+        #main-content {
+            margin-left: 250px;
+            padding: 2rem 3rem;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s, width 0.3s;
+        }
+
+        /* Estilo dos Cards de Questão */
+        .question-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary-blue);
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilo das Alternativas */
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .option:hover {
+            background-color: #EBF5FF;
+            border-color: var(--secondary-blue);
+        }
+        
+        .option.correct {
+            background-color: var(--success-green);
+            color: var(--white);
+            border-color: #059669;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-red);
+            color: var(--white);
+            border-color: #DC2626;
+        }
+        
+        .option.eliminated {
+            text-decoration: line-through;
+            background-color: var(--medium-gray);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 1rem;
+            min-width: 20px;
+        }
+        
+        .scissor-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: color 0.2s;
+        }
+        
+        .scissor-icon:hover {
+            color: var(--error-red);
+        }
+        .option.eliminated .scissor-icon, .option.correct .scissor-icon, .option.incorrect .scissor-icon {
+            display: none;
+        }
+
+        /* Estilo do Feedback */
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #D1FAE5;
+            border-left: 5px solid var(--success-green);
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #FEE2E2;
+            border-left: 5px solid var(--error-red);
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feedback-explanation {
+            line-height: 1.6;
+        }
+        
+        .feedback-example {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            border-left: 3px solid var(--secondary-blue);
+        }
+
+        /* Seção de Relatório */
+        #report-section {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #review-section {
+            margin-top: 2rem;
+        }
+
+        .review-card {
+            background-color: #FFFBEB;
+            border: 1px solid #FBBF24;
+            border-left: 5px solid #F59E0B;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Direito Penal</h2>
+        <ul>
+            <li><a href="#quiz-section" onclick="scrollToSection('quiz-section')" class="active">Questões</a></li>
+            <li><a href="#report-section" onclick="scrollToSection('report-section')">Relatório</a></li>
+        </ul>
+    </div>
+
+    <div id="main-content">
+        <h1 class="text-3xl font-bold mb-2 text-[var(--primary-blue)]">Questões de Fixação: Fato Típico - Culpa (Parte I)</h1>
+        <p class="mb-8 text-[var(--dark-gray)]">Aula 19 - Analise cada questão e selecione a alternativa correta. Use o ícone de tesoura <i class="fas fa-cut"></i> para eliminar as alternativas que julgar incorretas.</p>
+
+        <div id="quiz-section">
+            <!-- As questões serão inseridas aqui via JavaScript -->
+        </div>
+
+        <div id="report-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-6 text-[var(--primary-blue)]">Relatório de Desempenho</h2>
+            <div class="w-full md:w-1/2 mx-auto mb-8">
+                <canvas id="performance-chart"></canvas>
+            </div>
+            <div id="review-section">
+                <!-- A revisão dos erros será inserida aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // DOCUMENTAÇÃO GERAL DO SCRIPT (JavaScript)
+    // Módulo da Aula 19: Culpa (Parte I).
+    // O script foi populado com questões sobre os elementos estruturais do crime culposo,
+    // mantendo o formato de "mini-aulas" com exemplos práticos para cada explicação.
+
+    const questions = [
+        {
+            question: "O crime culposo possui uma estrutura de elementos bem definida. Qual dos elementos abaixo NÃO é considerado um componente do crime culposo?",
+            options: [
+                "Conduta voluntária.",
+                "Resultado naturalístico voluntário.",
+                "Violação do dever objetivo de cuidado.",
+                "Previsibilidade objetiva do resultado.",
+                "Tipicidade."
+            ],
+            answer: 1,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (B):</strong></p>' +
+                    '<p>A essência do crime culposo reside na divergência entre a vontade do agente e o resultado ocorrido. A estrutura é a seguinte:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>1. Conduta Voluntária:</strong> O agente QUER praticar a conduta inicial (ex: dirigir em alta velocidade, limpar uma arma). A conduta em si é voluntária.</li>' +
+                        '<li class="mt-1"><strong>2. Violação do Dever de Cuidado:</strong> Essa conduta voluntária é praticada de forma imprudente, negligente ou imperita.</li>' +
+                        '<li class="mt-1"><strong>3. Resultado Naturalístico INVOLUNTÁRIO:</strong> O resultado lesivo (morte, lesão) NÃO era querido nem aceito pelo agente. Se fosse voluntário, o crime seria doloso. Esta é a principal característica.</li>' +
+                        '<li class="mt-1"><strong>4. Previsibilidade Objetiva:</strong> O resultado, embora não previsto pelo agente, era previsível para uma pessoa de diligência mediana (o "homem médio").</li>' +
+                        '<li class="mt-1"><strong>5. Tipicidade:</strong> A modalidade culposa deve estar expressamente prevista em lei.</li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> Um caçador limpa sua espingarda (conduta voluntária) na varanda, sem verificar se estava descarregada (violação do dever de cuidado). A arma dispara e atinge um vizinho (resultado involuntário). A morte era previsível (previsibilidade objetiva) e há previsão legal para o homicídio culposo (tipicidade). O erro da alternativa B é afirmar que o resultado é voluntário, o que configuraria dolo.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 19, p. 2-3</em></p>',
+            topic: "Elementos do Crime Culposo"
+        },
+        {
+            question: "O parágrafo único do art. 18 do Código Penal estabelece que, 'salvo os casos expressos em lei, ninguém pode ser punido por fato previsto como crime, senão quando o pratica dolosamente'. Este dispositivo consagra um princípio fundamental para a punição a título de culpa. Qual princípio é esse?",
+            options: [
+                "Princípio da legalidade.",
+                "Princípio da ofensividade.",
+                "Princípio da excepcionalidade do crime culposo.",
+                "Princípio da insignificância.",
+                "Princípio da responsabilidade penal objetiva."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>Este artigo é de extrema importância. Ele estabelece que, no Direito Penal brasileiro, <strong>a regra é a punição por dolo</strong>. A punição por culpa é a <strong>exceção</strong>. Isso é o que chamamos de <strong>Princípio da Excepcionalidade do Crime Culposo</strong>.</p>' +
+                    '<p>Na prática, isso significa que um tipo penal só admitirá a modalidade culposa se houver uma previsão legal explícita. Se a lei descreve um crime (ex: "subtrair coisa alheia móvel" - furto) e não diz nada sobre a forma culposa, entende-se que ele só pode ser punido se praticado com dolo.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> O crime de dano (art. 163 do CP) consiste em "destruir, inutilizar ou deteriorar coisa alheia". A lei não prevê a modalidade culposa. Portanto, se alguém, por descuido (culpa), tropeça e quebra um vaso valioso de uma loja, não comete o crime de dano. A conduta é atípica penalmente, podendo gerar apenas responsabilidade civil (dever de indenizar). Só haveria crime se a pessoa quebrasse o vaso de propósito (dolo).</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 19, p. 4</em></p>',
+            topic: "Princípio da Excepcionalidade (Tipicidade no Crime Culposo)"
+        },
+        {
+            question: "Sobre a tentativa nos crimes culposos, qual é a regra geral adotada pela doutrina e pela jurisprudência?",
+            options: [
+                "A tentativa é sempre admitida, desde que o resultado não ocorra por circunstâncias alheias à vontade do agente.",
+                "A tentativa só é admitida nos casos de culpa consciente.",
+                "A tentativa nunca é admitida, sem exceções, pois o resultado é involuntário.",
+                "A tentativa não é admitida, como regra, pois o agente não quer o resultado, sendo impossível 'tentar' fazer algo que não se deseja.",
+                "A tentativa é admitida, mas a pena é reduzida pela metade."
+            ],
+            answer: 3,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (D):</strong></p>' +
+                    '<p>A lógica da tentativa (art. 14, II, do CP) pressupõe um agente que <strong>inicia a execução</strong> de um crime que ele <strong>deseja consumar</strong> (dolo), mas não consegue por circunstâncias externas. Ora, no crime culposo, o agente <strong>não deseja</strong> o resultado final. Pelo contrário, ele espera que não aconteça.</p>' +
+                    '<p>Sendo assim, é logicamente incompatível "tentar" produzir um resultado que não se quer. Por essa razão, a <strong>regra geral é a inadmissibilidade da tentativa nos crimes culposos</strong>. Se a conduta culposa não gera o resultado lesivo, o fato é penalmente atípico.</p>' +
+                    '<p>O material de apoio aponta, contudo, uma exceção a essa regra (a culpa imprópria), que será aprofundada posteriormente, mas a regra geral é o que a questão exige.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> Um motorista dirige de forma imprudente, em alta velocidade. Ele "costura" entre os carros, mas, por sorte, não bate em ninguém e chega ao seu destino. Ele praticou uma conduta perigosa, mas como não houve resultado lesivo (lesão ou morte), não há crime. Não se pode falar em "tentativa de lesão corporal culposa", pois ele não queria lesionar ninguém.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 19, p. 3</em></p>',
+            topic: "Tentativa no Crime Culposo"
+        },
+        {
+            question: "Um dos elementos centrais do crime culposo é a 'previsibilidade objetiva do resultado'. O que esse conceito significa?",
+            options: [
+                "Que o agente, pessoalmente, previu a ocorrência do resultado, mas acreditou que poderia evitá-lo.",
+                "Que o resultado era totalmente imprevisível, configurando caso fortuito.",
+                "Que o resultado, ainda que não tenha sido previsto pelo agente, era previsível para uma pessoa comum, de prudência e atenção medianas, nas mesmas circunstâncias.",
+                "Que o agente tinha o dever legal específico de prever aquele resultado, como no caso de um médico.",
+                "Que a previsibilidade é analisada apenas após a ocorrência do resultado, para justificar a punição."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>A previsibilidade é o que conecta a conduta descuidada ao resultado. Ela não é analisada sob a ótica pessoal do agente (previsibilidade subjetiva), mas sim sob um critério objetivo, o do <strong>homem médio</strong> (ou mulher média).</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Previsibilidade Objetiva:</strong> O juiz se pergunta: "Uma pessoa com prudência normal, na mesma situação do réu, teria condições de prever que aquela conduta poderia gerar o resultado?". Se a resposta for sim, o requisito está preenchido. Não importa se o agente, por ser desatento ou excessivamente otimista, não previu.</li>' +
+                        '<li class="mt-1"><strong>- Previsibilidade Subjetiva:</strong> A previsão efetiva pelo agente. Isso é relevante para diferenciar a culpa consciente (quando ele prevê) da inconsciente (quando não prevê), mas o elemento estrutural do tipo culposo é a objetiva.</li>' +
+                    '</ul>' +
+                    '<p>Se o resultado era absolutamente imprevisível para qualquer pessoa (ex: um raio atinge o carro), rompe-se o nexo da culpa, e o fato será atípico por ausência de previsibilidade (caso fortuito).</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> Deixar uma arma de fogo carregada sobre a mesa de centro da sala, com crianças em casa, é uma conduta que gera um resultado previsível para o homem médio. Mesmo que o pai diga "nunca imaginei que meu filho de 4 anos pegaria a arma", a previsibilidade objetiva está presente, e ele responderá se um acidente ocorrer.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 19, p. 4</em></p>',
+            topic: "Previsibilidade Objetiva na Culpa"
+        }
+    ];
+
+    const userAnswers = new Array(questions.length).fill(null);
+    const quizContainer = document.getElementById('quiz-section');
+    const reportSection = document.getElementById('report-section');
+    let performanceChart = null;
+
+    function renderQuestions() {
+        let quizHTML = '';
+        questions.forEach((q, index) => {
+            quizHTML +=
+                '<div class="question-card" id="question-' + index + '">' +
+                    '<p class="question-title">' + (index + 1) + '. ' + q.question + '</p>' +
+                    '<div class="options-container">';
+            q.options.forEach((option, optionIndex) => {
+                quizHTML +=
+                    '<div class="option" data-question="' + index + '" data-option="' + optionIndex + '">' +
+                        '<span class="option-letter">' + String.fromCharCode(65 + optionIndex) + '</span>' +
+                        '<span class="option-text">' + option + '</span>' +
+                        '<i class="fas fa-cut scissor-icon" title="Eliminar alternativa"></i>' +
+                    '</div>';
+            });
+            quizHTML +=
+                    '</div>' +
+                    '<div class="feedback" id="feedback-' + index + '"></div>' +
+                '</div>';
+        });
+        quizContainer.innerHTML = quizHTML;
+        addEventListeners();
+    }
+
+    function addEventListeners() {
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', handleOptionSelect);
+        });
+        document.querySelectorAll('.scissor-icon').forEach(icon => {
+            icon.addEventListener('click', handleEliminateOption);
+        });
+    }
+
+    function handleEliminateOption(e) {
+        e.stopPropagation();
+        const optionDiv = e.target.parentElement;
+        if (!optionDiv.classList.contains('eliminated') && userAnswers[optionDiv.dataset.question] === null) {
+            optionDiv.classList.add('eliminated');
+        }
+    }
+
+    function handleOptionSelect(e) {
+        const selectedOption = e.currentTarget;
+        const questionIndex = parseInt(selectedOption.dataset.question);
+        const optionIndex = parseInt(selectedOption.dataset.option);
+
+        if (userAnswers[questionIndex] !== null || selectedOption.classList.contains('eliminated')) {
+            return;
+        }
+
+        const isCorrect = optionIndex === questions[questionIndex].answer;
+        userAnswers[questionIndex] = { answered: optionIndex, correct: isCorrect };
+
+        const optionsContainer = selectedOption.parentElement;
+        optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+        selectedOption.classList.add(isCorrect ? 'correct' : 'incorrect');
+        
+        optionsContainer.querySelectorAll('.scissor-icon').forEach(icon => icon.style.display = 'none');
+
+        showFeedback(questionIndex, isCorrect);
+        
+        if (userAnswers.every(answer => answer !== null)) {
+            reportSection.classList.remove('hidden');
+            generateReport();
+            scrollToSection('report-section');
+        }
+    }
+
+    function showFeedback(questionIndex, isCorrect) {
+        const feedbackDiv = document.getElementById('feedback-' + questionIndex);
+        const questionData = questions[questionIndex];
+        
+        let feedbackHTML = 
+            '<p class="feedback-title">' + (isCorrect ? 'Resposta Correta! Análise do Professor:' : 'Resposta Incorreta. Análise do Professor:') + '</p>' +
+            '<div>' + questionData.explanation + '</div>';
+        
+        feedbackDiv.innerHTML = feedbackHTML;
+        feedbackDiv.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    }
+    
+    function generateReport() {
+        const correctAnswers = userAnswers.filter(a => a.correct).length;
+        const incorrectAnswers = questions.length - correctAnswers;
+
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        if (performanceChart) {
+            performanceChart.destroy();
+        }
+        performanceChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Acertos', 'Erros'],
+                datasets: [{
+                    data: [correctAnswers, incorrectAnswers],
+                    backgroundColor: ['var(--success-green)', 'var(--error-red)'],
+                    borderColor: ['var(--white)'],
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 14 }, padding: 20 } },
+                    title: { display: true, text: 'Seu Desempenho Geral', font: { size: 18, weight: 'bold' }, padding: { bottom: 20 } }
+                }
+            }
+        });
+
+        const reviewSection = document.getElementById('review-section');
+        let reviewHTML = '<h3 class="text-xl font-bold mb-4 text-[var(--primary-blue)]">Pontos para Revisão</h3>';
+        const incorrectQuestions = userAnswers
+            .map((answer, index) => ({...answer, index}))
+            .filter(answer => !answer.correct);
+
+        if (incorrectQuestions.length === 0) {
+            reviewHTML += '<p class="text-lg text-[var(--success-green)] font-semibold">Impecável! Você compreendeu a estrutura do crime culposo. Prossiga com essa excelência.</p>';
+        } else {
+            reviewHTML += '<p class="mb-4 text-[var(--dark-gray)]">Você errou ' + incorrectQuestions.length + ' questão(ões). A atenção aos detalhes é o caminho para a perfeição. Revise:</p>';
+            incorrectQuestions.forEach(q => {
+                const originalQuestion = questions[q.index];
+                reviewHTML +=
+                    '<div class="review-card">' +
+                        '<h4 class="font-bold text-lg mb-2 text-[#D97706]">' + originalQuestion.topic + '</h4>' +
+                        '<p class="mb-3"><strong>Na questão:</strong> "' + originalQuestion.question + '"</p>' +
+                        '<p class="font-semibold">Relembre o ponto-chave:</p>' +
+                        originalQuestion.explanation +
+                    '</div>';
+            });
+        }
+        reviewSection.innerHTML = reviewHTML;
+    }
+
+    function scrollToSection(sectionId) {
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+        const sections = ['quiz-section', 'report-section'];
+        let currentSection = '';
+
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 150 && rect.bottom >= 150) {
+                    currentSection = sectionId;
+                }
+            }
+        });
+        
+        const sidebarLinks = document.querySelectorAll('#sidebar ul li a');
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if(link.getAttribute('href') === '#' + currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', renderQuestions);
+    </script>
+
+</body>
+</html>

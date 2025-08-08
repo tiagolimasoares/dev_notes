@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 33: Mandado de Injunção</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 33: Mandado de Injunção</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 4</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Remédios Constitucionais: Mandado de Injunção</h1>
+                <p>Teste seus conhecimentos com base na Aula 33. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Qual é o pressuposto fundamental para o cabimento do Mandado de Injunção, conforme o Art. 5º, LXXI, da Constituição?",
+                options: [
+                    "A existência de um ato ilegal ou com abuso de poder por parte de uma autoridade.",
+                    "A necessidade de acessar ou retificar informações pessoais em bancos de dados públicos.",
+                    "A falta de norma regulamentadora que torne inviável o exercício de um direito constitucional.",
+                    "A ameaça ou violação à liberdade de locomoção.",
+                    "A lesão ao patrimônio público ou à moralidade administrativa."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Remédio contra a 'Gaveta Vazia' do Legislador:</strong> Perfeito! Você identificou a essência do Mandado de Injunção (MI). Ele não serve para atacar um ato, mas sim a <strong>falta de um ato</strong>. O MI é o instrumento que o cidadão tem para combater a <strong>omissão inconstitucional</strong>.</p>
+                        <p>A lógica é a seguinte: a Constituição cria um direito, mas diz que uma lei futura irá detalhar como exercê-lo. Se o Congresso Nacional (ou outro órgão competente) não cria essa lei, o direito fica 'no papel', sem poder ser exercido. O MI serve para que o Judiciário supra essa lacuna no caso concreto.</p>
+                        <div class="visual-aid">🚪 Direito na Constituição (Porta) + 🔑 Falta da Lei (Chave) = ⚖️ Mandado de Injunção (para abrir a porta)</div>
+                        <p class="example"><strong>Exemplo Clássico:</strong> A Constituição garante o direito de greve aos servidores públicos (Art. 37, VII), mas diz que ele será exercido 'nos termos e nos limites definidos em lei específica'. Por décadas, o Congresso não criou essa lei. Os servidores, então, impetraram Mandados de Injunção no STF, que, para suprir a omissão, determinou que se aplicasse, por analogia, a lei de greve da iniciativa privada até que a lei específica dos servidores seja criada.</p>
+                        <p><strong>(Fonte: Aula33, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a Lei nº 13.300/16, que disciplina o Mandado de Injunção, qual é o principal efeito de uma decisão que concede a injunção?",
+                options: [
+                    "A anulação imediata do ato da autoridade omissa.",
+                    "A criação da norma geral e abstrata pelo próprio Poder Judiciário.",
+                    "A condenação do legislador omisso ao pagamento de multa diária.",
+                    "O estabelecimento de um prazo razoável para que o órgão competente edite a norma regulamentadora.",
+                    "A prisão do chefe do poder omisso."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Teoria Concretista Intermediária:</strong> Exato! A Lei 13.300/16 positivou o entendimento que o STF já vinha adotando, conhecido como 'teoria concretista de perfil intermediário'.</p>
+                        <p>Isso significa que o Judiciário, ao reconhecer a omissão, adota uma postura de duas etapas:</p>
+                        <ol>
+                            <li><strong>1º: Notificar e Dar Prazo:</strong> Primeiramente, o Judiciário age com deferência ao princípio da separação dos poderes. Ele notifica o órgão legislador omisso (ex: Congresso Nacional) e estabelece um <strong>prazo razoável</strong> para que ele cumpra seu dever e edite a norma que falta.</li>
+                            <li><strong>2º: Resolver o Caso Concreto (se o prazo for descumprido):</strong> Se, mesmo após o prazo, a omissão persistir, o Judiciário pode então avançar e criar uma solução <strong>concreta</strong> para viabilizar o exercício do direito para aquele que impetrou o MI.</li>
+                        </ol>
+                        <div class="visual-aid">🧑‍⚖️ Juiz ➡️ 🏛️ Legislador: 'Você tem X dias para criar a lei!'</div>
+                        <p class="example"><strong>Na Prática:</strong> No caso do direito de greve dos servidores, o STF primeiro notificou o Congresso para que criasse a lei. Como o Congresso continuou inerte, o STF então decidiu que, enquanto a lei não for criada, os servidores podem exercer seu direito aplicando as regras da lei de greve do setor privado. A decisão primeiro dá uma chance ao legislador e depois resolve o problema de forma concreta.</p>
+                        <p><strong>(Fonte: Aula33, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O cabimento do Mandado de Injunção, conforme a Lei nº 13.300/16, abrange qual tipo de omissão?",
+                options: [
+                    "Apenas a falta total da norma regulamentadora.",
+                    "Apenas a falta parcial da norma regulamentadora.",
+                    "Tanto a falta total quanto a falta parcial da norma regulamentadora.",
+                    "Apenas a omissão de um decreto do Poder Executivo.",
+                    "Apenas a omissão de uma lei complementar."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Omissão Total ou Parcial:</strong> Perfeito! A Lei 13.300/16 foi expressa ao prever que o MI é cabível não apenas quando não existe nenhuma norma, mas também quando a norma que existe é insuficiente para garantir o pleno exercício do direito.</p>
+                        <ul>
+                            <li><strong>Omissão Total:</strong> É a ausência completa da lei. O direito está na Constituição, mas não há nenhuma regulamentação. É um 'vazio legislativo'.</li>
+                            <li><strong>Omissão Parcial:</strong> Existe uma lei, mas ela é falha, incompleta. Ela regulamenta uma parte do direito, mas deixa outras 'pontas soltas', de modo que, na prática, o exercício do direito ainda é inviável para certas situações ou pessoas.</li>
+                        </ul>
+                        <p class="example"><strong>Cenário Prático:</strong> Imagine que a Constituição garanta a todos os trabalhadores o direito a um adicional de periculosidade, a ser regulado por lei. Se o Congresso cria uma lei que define o adicional apenas para trabalhadores da indústria química, mas 'esquece' de regular para os da indústria de explosivos, um trabalhador dessa segunda área poderia impetrar um MI alegando uma <strong>omissão parcial</strong>, pois a lei existente não o contempla, tornando seu direito inviável.</p>
+                        <p><strong>(Fonte: Aula33, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual direito fundamental, quando inviabilizado por falta de norma regulamentadora, NÃO pode ser protegido por Mandado de Injunção?",
+                options: [
+                    "Direito de greve do servidor público.",
+                    "Direito à aposentadoria especial.",
+                    "Direito à liberdade de locomoção.",
+                    "Direitos inerentes à nacionalidade e à cidadania.",
+                    "Direitos e liberdades constitucionais em geral."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Exclusividade dos Remédios Constitucionais:</strong> Exato! Esta questão testa o seu conhecimento sobre o campo de atuação de cada remédio. O Mandado de Injunção, assim como o Mandado de Segurança, tem um caráter subsidiário em relação aos remédios mais específicos.</p>
+                        <p>A regra é clara:</p>
+                        <ul>
+                            <li>Se a omissão legislativa inviabiliza a <strong>liberdade de locomoção</strong>, o remédio adequado não é o MI, mas sim o <strong>Habeas Corpus</strong>, que é o guardião específico desse direito.</li>
+                        </ul>
+                        <p>O Mandado de Injunção serve para todos os outros direitos e liberdades constitucionais (e prerrogativas de nacionalidade, soberania e cidadania) que dependam de regulamentação e não sejam protegidos por HC ou HD.</p>
+                        <div class="visual-aid">🚶‍♂️ Falta de norma que afeta a locomoção? ➡️ Habeas Corpus<br>🛡️ Falta de norma que afeta outros direitos? ➡️ Mandado de Injunção</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Imagine que uma lei penal estabeleça que o réu tem direito a recorrer em liberdade, mas que um decreto definirá o procedimento. Se o decreto nunca é editado e, por causa disso, o juiz mantém o réu preso, essa omissão afeta diretamente a liberdade de locomoção. O remédio cabível seria o Habeas Corpus, e não o Mandado de Injunção.</p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre o Mandado de Injunção. Este é um conhecimento refinado que o coloca em grande vantagem. Mantenha o foco!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

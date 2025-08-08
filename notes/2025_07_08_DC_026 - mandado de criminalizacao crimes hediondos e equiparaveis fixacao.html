@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 25: Mandados de Criminalização</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 25: Mandados de Criminalização</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Mandados Constitucionais de Criminalização</h1>
+                <p>Teste seus conhecimentos com base na Aula 25. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "De acordo com a Constituição Federal, qual dos seguintes crimes é, ao mesmo tempo, inafiançável e imprescritível?",
+                options: [
+                    "Tortura",
+                    "Tráfico ilícito de entorpecentes",
+                    "Terrorismo",
+                    "Racismo",
+                    "Homicídio qualificado"
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Os Crimes que o Tempo Não Apaga:</strong> Perfeito! Você identificou corretamente o tratamento constitucional diferenciado. A Constituição criou dois 'grupos' de crimes com tratamento mais rigoroso. É fundamental não confundi-los.</p>
+                        <p><strong>Grupo 1: Inafiançáveis e IMPRESCRITÍVEIS</strong> (a punição pode ser buscada a qualquer tempo):</p>
+                        <ul>
+                            <li><strong>RA:</strong> <strong>RA</strong>cismo (Art. 5º, XLII)</li>
+                            <li><strong>ÇÃO:</strong> A<strong>ÇÃO</strong> de grupos armados, civis ou militares, contra a ordem constitucional e o Estado Democrático (Art. 5º, XLIV)</li>
+                        </ul>
+                        <p><strong>Grupo 2: Inafiançáveis e INSUSCETÍVEIS DE GRAÇA OU ANISTIA</strong> (não podem ser perdoados):</p>
+                        <ul>
+                            <li><strong>TTT + H:</strong> <strong>T</strong>ortura, <strong>T</strong>ráfico, <strong>T</strong>errorismo e os definidos como <strong>H</strong>ediondos (Art. 5º, XLIII).</li>
+                        </ul>
+                        <div class="visual-aid">RA + ÇÃO = 🕰️ Imprescritível<br>TTT + H =  pardoning_hand: Proibido Perdoar</div>
+                        <p class="example"><strong>Na Prática:</strong> Se uma pessoa cometeu um ato de racismo em 1990 e a prova só for descoberta hoje, ela ainda pode ser processada e condenada. Se ela cometeu um crime de tortura na mesma data, o crime já prescreveu (pois não é imprescritível), e ela não poderá mais ser punida.</p>
+                        <p><strong>(Fonte: Aula25, p. 2, 4 e 7)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Conforme o entendimento do STF e a legislação atual (Lei 14.532/23), a injúria racial é considerada:",
+                options: [
+                    "Um crime de menor potencial ofensivo, afiançável e prescritível.",
+                    "Um crime contra a honra, distinto do racismo e prescritível.",
+                    "Uma espécie do crime de racismo, sendo, portanto, inafiançável e imprescritível.",
+                    "Um crime afiançável, mas imprescritível.",
+                    "Um crime equiparado a hediondo."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Evolução da Proteção contra o Racismo:</strong> Exato! Este é um dos temas mais atuais e importantes. O STF, no julgamento do HC 154248, já havia decidido que a injúria racial, por ser uma manifestação do racismo, também deveria ser tratada como imprescritível.</p>
+                        <p>Posteriormente, a <strong>Lei nº 14.532/2023</strong> veio para <strong>positivar</strong> esse entendimento. Ela alterou a legislação para equiparar expressamente a injúria racial ao crime de racismo. Portanto, hoje, não há mais dúvida:</p>
+                        <ul>
+                            <li><strong>Injúria Racial = Racismo</strong></li>
+                            <li><strong>Consequências:</strong> Inafiançável e Imprescritível.</li>
+                        </ul>
+                        <p class="example"><strong>Diferença (que não existe mais para fins de prescrição):</strong> Antigamente, dizia-se que o <strong>racismo</strong> era ofender uma coletividade (ex: 'todos do povo X são inferiores'), enquanto a <strong>injúria racial</strong> era ofender um indivíduo usando elementos de raça/cor (ex: chamar uma pessoa específica de 'macaco'). Hoje, para fins de punibilidade e prescrição, ambas as condutas são tratadas com o mesmo rigor constitucional do racismo.</p>
+                        <p><strong>(Fonte: Aula25, p. 2 e 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O mnemônico 'TTTH' é utilizado para se referir aos crimes equiparados aos hediondos. Qual crime NÃO faz parte desse grupo?",
+                options: [
+                    "Tortura",
+                    "Terrorismo",
+                    "Tráfico ilícito de entorpecentes",
+                    "Homicídio qualificado",
+                    "Todos fazem parte do grupo."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Distinção entre Hediondos e Equiparados:</strong> Perfeito! Esta é uma 'pegadinha' clássica que testa a precisão do candidato. A Constituição e a lei fazem uma distinção técnica.</p>
+                        <p>O Art. 5º, XLIII, diz: 'a lei considerará crimes inafiançáveis e insuscetíveis de graça ou anistia a prática da <strong>tortura</strong>, o <strong>tráfico ilícito de entorpecentes e drogas afins</strong>, o <strong>terrorismo</strong> e os definidos como <strong>crimes hediondos</strong>...'.</p>
+                        <p>Isso significa que:</p>
+                        <ul>
+                            <li><strong>Crimes Equiparados a Hediondos (o 'TTT'):</strong> São a Tortura, o Tráfico e o Terrorismo. A própria Constituição já lhes dá esse tratamento rigoroso.</li>
+                            <li><strong>Crimes Hediondos (o 'H'):</strong> São aqueles listados na Lei nº 8.072/90. O <strong>homicídio qualificado</strong> é um exemplo de crime hediondo, mas ele está na lista da LEI, não diretamente na Constituição como os outros três.</li>
+                        </ul>
+                        <div class="visual-aid">TTT = Equiparados (Fonte: CF) <br> H = Hediondos (Fonte: Lei 8.072/90)</div>
+                        <p><strong>Importante:</strong> Embora a origem seja diferente, o <strong>tratamento penal e processual</strong> (inafiançabilidade, insuscetibilidade de graça/anistia/indulto, etc.) é o mesmo para todos eles.</p>
+                        <p><strong>(Fonte: Aula25, p. 5 e 6)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Além de inafiançáveis e insuscetíveis de graça ou anistia, os crimes hediondos e equiparados, por construção jurisprudencial do STF, também são insuscetíveis de:",
+                options: [
+                    "Prisão preventiva.",
+                    "Progressão de regime.",
+                    "Liberdade provisória.",
+                    "Indulto.",
+                    "Condenação."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Vedação ao 'Perdão Coletivo':</strong> Exato! O texto da Constituição (Art. 5º, XLIII) menciona apenas a vedação à <strong>graça</strong> e à <strong>anistia</strong>. No entanto, a Lei dos Crimes Hediondos (Lei 8.072/90) estendeu essa proibição ao <strong>indulto</strong>.</p>
+                        <p>Houve uma grande discussão se essa proibição legal seria constitucional. O STF decidiu que <strong>SIM</strong>. A Corte entendeu que:</p>
+                        <ul>
+                            <li><strong>Graça:</strong> É um benefício individual, um 'perdão' concedido pelo Presidente da República a uma pessoa específica.</li>
+                            <li><strong>Indulto:</strong> É um benefício coletivo, um 'perdão' concedido por decreto presidencial a um grupo de pessoas que se enquadram em certas condições (ex: o famoso 'indulto de Natal').</li>
+                        </ul>
+                        <p>O STF considerou que o indulto é uma 'graça coletiva' e que, se a Constituição proibiu o perdão individual (graça), seria ilógico permitir o perdão coletivo (indulto) para crimes de igual ou maior gravidade. Portanto, a vedação ao indulto na lei é uma interpretação válida e constitucional do mandado de criminalização.</p>
+                        <p><strong>(Fonte: Aula25, p. 5)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Conforme o STF, a prática de homofobia e transfobia deve ser enquadrada, até que o Congresso Nacional legisle sobre o tema, como qual tipo de crime?",
+                options: [
+                    "Lesão corporal.",
+                    "Crime contra a honra.",
+                    "Racismo (em sua dimensão social).",
+                    "Ato obsceno.",
+                    "Não é considerado crime, apenas ilícito civil."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Proteção contra a Discriminação por Orientação Sexual e Identidade de Gênero:</strong> Perfeito! Esta é outra decisão histórica do STF (ADO 26 e MI 4733). Diante da omissão do Congresso Nacional em criar uma lei para punir a homofobia e a transfobia, o STF agiu.</p>
+                        <p>A Corte entendeu que a discriminação baseada na orientação sexual ou na identidade de gênero é uma forma de <strong>racismo social</strong>. O racismo, em seu sentido amplo, não se limita à cor da pele, mas abrange qualquer forma de segregação e inferiorização de grupos vulneráveis.</p>
+                        <p>Portanto, o STF decidiu que, enquanto o Congresso não criar uma lei específica, as condutas homofóbicas e transfóbicas devem ser enquadradas nos tipos penais da <strong>Lei do Racismo (Lei nº 7.716/89)</strong>.</p>
+                        <div class="visual-aid">혐오 발언 🏳️‍🌈 = Racismo Social ⚖️</div>
+                        <p class="example"><strong>Na Prática:</strong> Se o dono de um restaurante se recusa a atender um casal de pessoas do mesmo sexo, ele pode ser processado com base no Art. 5º da Lei do Racismo, que pune quem recusa ou impede o acesso a estabelecimento comercial, negando-se a servir, atender ou receber cliente ou comprador. A motivação (homofobia) é enquadrada como racismo para fins de aplicação da lei.</p>
+                        <p><strong>(Fonte: Aula25, p. 4)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de elite!</strong> Você demonstrou total domínio sobre os mandados de criminalização e a jurisprudência correlata. Este é um conhecimento fundamental para as carreiras policiais. Continue neste ritmo!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

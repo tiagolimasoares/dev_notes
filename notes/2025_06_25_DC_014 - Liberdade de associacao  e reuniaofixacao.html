@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 13: Liberdade de Reunião e Associação</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 13: Liberdade de Reunião e Associação</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 6</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direito à Liberdade de Reunião e de Associação</h1>
+                <p>Teste seus conhecimentos com base na Aula 13. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Qual é a principal diferença entre a exigência constitucional para o exercício do direito de reunião e para a criação de uma associação?",
+                options: [
+                    "A reunião exige autorização judicial, enquanto a associação exige apenas registro em cartório.",
+                    "A reunião exige prévio aviso à autoridade competente, enquanto a criação de associações independe de autorização.",
+                    "Ambas exigem autorização da autoridade policial do local.",
+                    "A reunião pode ser armada, mas a associação não pode ter caráter paramilitar.",
+                    "A reunião é permitida apenas para fins políticos, e a associação para fins lícitos em geral."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Ponto-Chave da Distinção:</strong> Perfeito! Esta é a diferença mais cobrada em provas. As bancas adoram trocar os requisitos para confundir o candidato. Vamos solidificar:</p>
+                        <ul>
+                            <li><strong>📢 REUNIÃO (Art. 5º, XVI):</strong> É um evento <strong>temporário e transitório</strong>. Pense em uma manifestação, um protesto, uma passeata. Para isso, a Constituição <strong>NÃO EXIGE AUTORIZAÇÃO</strong>, mas sim um <strong>PRÉVIO AVISO</strong> à autoridade. O aviso serve para que o poder público possa organizar o trânsito, garantir a segurança e evitar conflitos.</li>
+                            <li><strong>👥 ASSOCIAÇÃO (Art. 5º, XVIII):</strong> É uma entidade <strong>permanente e estável</strong>. Pense em um clube, um sindicato, uma ONG. Para criar uma associação, a Constituição é ainda mais liberal: <strong>INDEPENDE DE AUTORIZAÇÃO</strong> e é vedada a interferência do Estado em seu funcionamento. Não precisa nem de aviso prévio.</li>
+                        </ul>
+                        <div class="visual-aid">Reunião = Avisar para organizar.<br>Associação = Criar livremente, sem pedir permissão.</div>
+                        <p class="example"><strong>Analogia Prática:</strong> Se você e seus amigos querem fazer um protesto na praça da cidade (reunião), vocês devem <strong>avisar</strong> a prefeitura e a polícia. Se vocês querem fundar o 'Clube dos Amigos do Bairro' (associação), vocês simplesmente se juntam, elaboram um estatuto e o registram, sem precisar pedir <strong>autorização</strong> a ninguém.</p>
+                        <p><strong>(Fonte: Aula13, p. 2 e 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a jurisprudência do STF (RE 806339), o requisito do 'prévio aviso' para o direito de reunião é satisfeito como?",
+                options: [
+                    "Apenas com o protocolo de um ofício na delegacia de polícia com 72 horas de antecedência.",
+                    "Com a simples veiculação de informação que permita ao poder público tomar conhecimento da reunião, como postagens em redes sociais.",
+                    "Apenas com a publicação em jornais de grande circulação.",
+                    "Com a autorização expressa do prefeito da cidade.",
+                    "O STF considerou o prévio aviso inconstitucional, não sendo mais exigido."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Interpretação Moderna do 'Aviso':</strong> Exato! O STF, atento à realidade digital, entendeu que o 'aviso prévio' não precisa ser um ato burocrático e formal. O objetivo do aviso é dar <strong>ciência</strong> ao poder público para que ele possa cumprir seu papel de garantir a ordem e a segurança.</p>
+                        <p>A Corte decidiu que, se a convocação para a manifestação foi amplamente divulgada (em redes sociais, grupos de WhatsApp, etc.), considera-se que o poder público já teve ciência. Ele não pode alegar que não foi 'formalmente' avisado para reprimir a reunião. A postura do Estado deve ser <strong>ativa</strong>, de buscar a informação, e não passiva, de esperar um ofício.</p>
+                        <div class="visual-aid">📢 Divulgação Ampla = ✅ Aviso Cumprido</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um movimento estudantil cria um evento no Facebook convocando uma passeata para a semana seguinte. O evento viraliza e tem milhares de confirmações. A polícia não pode, no dia do ato, dissolver a manifestação alegando que não recebeu um documento protocolado na delegacia. A ampla divulgação já serviu como aviso, e a obrigação da polícia é garantir a segurança do evento.</p>
+                        <p><strong>(Fonte: Aula13, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Para que as atividades de uma associação sejam compulsoriamente suspensas e para que ela seja compulsoriamente dissolvida, a Constituição exige, respectivamente:",
+                options: [
+                    "Decisão administrativa e decisão judicial.",
+                    "Decisão judicial e decisão judicial com trânsito em julgado.",
+                    "Decisão judicial com trânsito em julgado e decisão do Ministério Público.",
+                    "Ambas exigem apenas uma decisão judicial de primeira instância.",
+                    "Ambas exigem uma lei específica aprovada pelo Congresso Nacional."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Escala de Gravidade da Sanção:</strong> Perfeito! Este é outro ponto clássico de prova. A Constituição protege fortemente a liberdade de associação e estabelece uma 'escala' de requisitos para as interferências mais graves em seu funcionamento, sempre exigindo a intervenção do Poder Judiciário.</p>
+                        <p>A diferença está no grau de definitividade da medida:</p>
+                        <ul>
+                            <li><strong>⏸️ SUSPENSÃO (Medida Temporária):</strong> É como um 'cartão amarelo'. A associação para de funcionar por um tempo, mas ainda existe. Para isso, basta uma <strong>decisão judicial</strong> (que pode ser uma liminar, por exemplo).</li>
+                            <li><strong>❌ DISSOLUÇÃO (Medida Definitiva):</strong> É o 'cartão vermelho'. A associação é extinta, deixa de existir. Por ser a medida mais drástica, a Constituição exige mais: uma <strong>decisão judicial com trânsito em julgado</strong>, ou seja, uma decisão da qual não caiba mais nenhum recurso.</li>
+                        </ul>
+                        <p class="example"><strong>Analogia do Futebol:</strong> Imagine que um time (associação) está envolvido em brigas constantes. O juiz do campeonato (Poder Judiciário) pode dar uma liminar e <strong>suspender</strong> o time dos próximos jogos. Para <strong>expulsar (dissolver)</strong> o time do campeonato para sempre, a decisão precisa ser final e definitiva, após todos os recursos possíveis no tribunal desportivo (trânsito em julgado).</p>
+                        <p><strong>(Fonte: Aula13, p. 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Uma associação de moradores deseja entrar com uma ação judicial em nome de todos os seus membros para questionar a cobrança de IPTU no bairro. De acordo com o Art. 5º, XXI, da CF, o que é necessário para que a associação tenha legitimidade para fazer isso?",
+                options: [
+                    "Aprovação em assembleia por maioria simples.",
+                    "Autorização expressa dos filiados.",
+                    "Apenas a previsão no estatuto da associação.",
+                    "Autorização do Ministério Público.",
+                    "Não precisa de nada, a representação é automática."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Necessidade da Autorização Expressa:</strong> Resposta precisa. Este inciso trata da <strong>representação processual</strong>. Diferente do mandado de segurança coletivo (que exige apenas previsão no estatuto), para atuar como representante em ações comuns, a associação precisa de uma <strong>autorização expressa</strong>.</p>
+                        <p>O STF já decidiu que essa autorização não precisa ser individual (uma procuração de cada membro), podendo ser concedida de forma coletiva, por meio de uma <strong>deliberação em assembleia</strong> da associação, desde que a convocação para a assembleia tenha sido específica para esse fim.</p>
+                        <div class="visual-aid">⚖️ Ação Judicial em nome dos membros ➡️ ✅ Autorização Expressa (Individual ou em Assembleia)</div>
+                        <p class="example"><strong>Cenário Prático:</strong> A associação de moradores do nosso exemplo não pode simplesmente protocolar a ação. Ela precisa primeiro convocar uma assembleia geral com a pauta: 'Deliberar sobre a autorização para a associação ingressar com ação judicial para discutir o IPTU'. Se a maioria dos presentes na assembleia aprovar, a associação terá a 'autorização expressa' necessária para representar todos os seus filiados naquela ação específica.</p>
+                        <p><strong>(Fonte: Aula13, p. 5)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual tipo de associação é expressamente VEDADO pela Constituição Federal no Art. 5º, XVII?",
+                options: [
+                    "Associações com fins lucrativos.",
+                    "Associações de caráter político-partidário.",
+                    "Associações de caráter paramilitar.",
+                    "Associações que critiquem o governo.",
+                    "Associações formadas por estrangeiros."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Limite da Força:</strong> Exato! A Constituição garante a mais ampla liberdade de associação para <strong>fins lícitos</strong>, mas estabelece uma proibição clara e absoluta: a criação de associações de caráter paramilitar.</p>
+                        <p><strong>O que é 'paramilitar'?</strong> São grupos civis que se organizam e se estruturam de forma semelhante às forças militares (com hierarquia, uniformes, treinamento de táticas de combate, uso de armamento, etc.), mas que não fazem parte das Forças Armadas ou das forças de segurança pública oficiais. A existência desses grupos é uma ameaça direta ao <strong>monopólio do uso legítimo da força pelo Estado</strong>, um pilar de qualquer nação soberana.</p>
+                        <div class="visual-aid">👥 Associação Civil = OK! ✅<br>🎖️ Associação com Estrutura Militar = PROIBIDO! ❌</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um grupo de cidadãos que se organiza para limpar um parque no fim de semana é uma associação lícita. Um grupo que se organiza, compra armas, cria patentes, treina táticas de guerrilha urbana e começa a 'patrulhar' o bairro por conta própria é uma associação paramilitar, expressamente vedada pela Constituição e considerada criminosa (milícia privada).</p>
+                        <p><strong>(Fonte: Aula13, p. 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O direito de reunião, conforme o texto constitucional, deve ser exercido pacificamente e:",
+                options: [
+                    "Com o rosto coberto para proteger a identidade.",
+                    "Sem armas.",
+                    "Apenas durante o dia.",
+                    "Com a presença obrigatória da polícia.",
+                    "Com um número máximo de 1000 pessoas."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Requisitos Essenciais para a Reunião:</strong> Perfeito! A Constituição estabelece condições claras para que o direito de reunião seja exercido de forma legítima e não se transforme em uma ameaça à ordem pública.</p>
+                        <p>O Art. 5º, XVI, é taxativo ao exigir que a reunião seja:</p>
+                        <ul>
+                            <li><strong>🕊️ Pacífica:</strong> O objetivo deve ser a manifestação de ideias, e não a violência, o quebra-quebra ou a desordem.</li>
+                            <li><strong>🚫 Sem Armas:</strong> A presença de armas (de fogo ou brancas) é incompatível com o caráter pacífico da reunião e é expressamente proibida.</li>
+                        </ul>
+                        <p>Esses requisitos são a contrapartida para a ampla liberdade de se reunir. O direito existe para o debate e a manifestação, não para a intimidação ou o confronto armado.</p>
+                        <p class="example"><strong>Cenário Prático:</strong> Uma manifestação de agricultores com tratores e cartazes em frente ao Congresso é um exercício legítimo do direito de reunião. Se os mesmos agricultores estivessem portando facões e espingardas, a reunião se tornaria ilegal, e a polícia teria o dever de intervir para desarmá-los e garantir a segurança, podendo até mesmo dissolver o ato se a situação saísse de controle.</p>
+                        <p><strong>(Fonte: Aula13, p. 2)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre as liberdades de reunião e associação, diferenciando com precisão seus requisitos e limites. Este é um passo firme em direção à sua aprovação. Mantenha o ritmo!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

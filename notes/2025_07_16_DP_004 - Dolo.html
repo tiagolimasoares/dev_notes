@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Fato Típico: Dolo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilos Globais e Paleta de Cores */
+        :root {
+            --primary-blue: #0A3D62;
+            --secondary-blue: #1E639B;
+            --light-gray: #F0F2F5;
+            --medium-gray: #D1D5DB;
+            --dark-gray: #4B5563;
+            --text-color: #1F2937;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            display: flex;
+        }
+
+        /* Estilo da Sidebar */
+        #sidebar {
+            width: 250px;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 2rem 1rem;
+            transition: width 0.3s;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        #sidebar h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--secondary-blue);
+            padding-bottom: 1rem;
+        }
+
+        #sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #sidebar ul li a {
+            display: block;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--white);
+            transition: background-color 0.3s, color 0.3s;
+            font-weight: 500;
+        }
+
+        #sidebar ul li a:hover, #sidebar ul li a.active {
+            background-color: var(--white);
+            color: var(--primary-blue);
+        }
+
+        /* Conteúdo Principal */
+        #main-content {
+            margin-left: 250px;
+            padding: 2rem 3rem;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s, width 0.3s;
+        }
+
+        /* Estilo dos Cards de Questão */
+        .question-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary-blue);
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilo das Alternativas */
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .option:hover {
+            background-color: #EBF5FF;
+            border-color: var(--secondary-blue);
+        }
+        
+        .option.correct {
+            background-color: var(--success-green);
+            color: var(--white);
+            border-color: #059669;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-red);
+            color: var(--white);
+            border-color: #DC2626;
+        }
+        
+        .option.eliminated {
+            text-decoration: line-through;
+            background-color: var(--medium-gray);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 1rem;
+            min-width: 20px;
+        }
+        
+        .scissor-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: color 0.2s;
+        }
+        
+        .scissor-icon:hover {
+            color: var(--error-red);
+        }
+        .option.eliminated .scissor-icon, .option.correct .scissor-icon, .option.incorrect .scissor-icon {
+            display: none;
+        }
+
+        /* Estilo do Feedback */
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #D1FAE5;
+            border-left: 5px solid var(--success-green);
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #FEE2E2;
+            border-left: 5px solid var(--error-red);
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feedback-explanation {
+            line-height: 1.6;
+        }
+        
+        .feedback-example {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            border-left: 3px solid var(--secondary-blue);
+        }
+
+        /* Seção de Relatório */
+        #report-section {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #review-section {
+            margin-top: 2rem;
+        }
+
+        .review-card {
+            background-color: #FFFBEB;
+            border: 1px solid #FBBF24;
+            border-left: 5px solid #F59E0B;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Direito Penal</h2>
+        <ul>
+            <li><a href="#quiz-section" onclick="scrollToSection('quiz-section')" class="active">Questões</a></li>
+            <li><a href="#report-section" onclick="scrollToSection('report-section')">Relatório</a></li>
+        </ul>
+    </div>
+
+    <div id="main-content">
+        <h1 class="text-3xl font-bold mb-2 text-[var(--primary-blue)]">Questões de Fixação: Fato Típico - Dolo</h1>
+        <p class="mb-8 text-[var(--dark-gray)]">Aula 18 - Analise cada questão e selecione a alternativa correta. Use o ícone de tesoura <i class="fas fa-cut"></i> para eliminar as alternativas que julgar incorretas.</p>
+
+        <div id="quiz-section">
+            <!-- As questões serão inseridas aqui via JavaScript -->
+        </div>
+
+        <div id="report-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-6 text-[var(--primary-blue)]">Relatório de Desempenho</h2>
+            <div class="w-full md:w-1/2 mx-auto mb-8">
+                <canvas id="performance-chart"></canvas>
+            </div>
+            <div id="review-section">
+                <!-- A revisão dos erros será inserida aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // DOCUMENTAÇÃO GERAL DO SCRIPT (JavaScript)
+    // Módulo da Aula 18: Dolo.
+    // O script segue o padrão estabelecido, com questões e "mini-aulas" focadas nas teorias e espécies de dolo,
+    // cobrindo integralmente o conteúdo do PDF com exemplos práticos e didática aprofundada.
+
+    const questions = [
+        {
+            question: "O art. 18, I, do Código Penal define o crime doloso como aquele em que 'o agente quis o resultado ou assumiu o risco de produzi-lo'. Essa redação abarca duas teorias distintas para fundamentar o dolo. Quais são elas e a que tipo de dolo cada uma corresponde?",
+            options: [
+                "Teoria da Representação (dolo direto) e Teoria da Vontade (dolo eventual).",
+                "Teoria da Vontade (dolo direto) e Teoria do Assentimento (dolo eventual).",
+                "Teoria do Assentimento (dolo direto) e Teoria da Representação (dolo eventual).",
+                "Teoria da Vontade (dolo direto e eventual).",
+                "Teoria da Representação (dolo geral) e Teoria do Assentimento (dolo específico)."
+            ],
+            answer: 1,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (B):</strong></p>' +
+                    '<p>O legislador brasileiro foi técnico ao redigir o conceito de dolo, unindo duas teorias em uma só frase:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>"quis o resultado"</strong>: Adota a <strong>Teoria da Vontade</strong>. Para esta teoria, o dolo existe quando o agente tem a vontade livre e consciente de produzir o resultado. Corresponde ao <strong>dolo direto</strong>.</li>' +
+                        '<li class="mt-1"><strong>"assumiu o risco de produzi-lo"</strong>: Adota a <strong>Teoria do Assentimento (ou do consentimento)</strong>. Aqui, o agente prevê o resultado como possível, não o deseja diretamente, mas age com indiferença, aceitando-o caso venha a ocorrer. Corresponde ao <strong>dolo eventual</strong>.</li>' +
+                    '</ul>' +
+                    '<p>A Teoria da Representação (basta prever o resultado) não foi adotada, pois levaria à punição por dolo em casos de culpa consciente.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong><br><strong>Dolo Direto (Vontade):</strong> "A" aponta a arma para "B" e atira com o fim específico de matar. Ele <i>quis</i> o resultado.<br><strong>Dolo Eventual (Assentimento):</strong> "A" participa de um "racha" em via urbana movimentada. Ele não quer matar ninguém, seu objetivo é ganhar a corrida, mas ele prevê que um atropelamento fatal é possível e, mesmo assim, prossegue. Ele <i>assumiu o risco</i>.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 18, p. 2</em></p>',
+            topic: "Teorias do Dolo (Vontade e Assentimento)"
+        },
+        {
+            question: "No chamado dolo de 2º grau, ou dolo de consequências necessárias, como se caracteriza a intenção do agente em relação aos efeitos colaterais de sua conduta principal?",
+            options: [
+                "O agente não prevê os efeitos colaterais, que ocorrem de forma acidental, configurando crime culposo.",
+                "O agente prevê os efeitos colaterais como possíveis e assume o risco de produzi-los, tratando-se de dolo eventual.",
+                "O agente não deseja diretamente os efeitos colaterais, mas os aceita como consequência inevitável e necessária para atingir seu objetivo principal.",
+                "O agente deseja tanto o resultado principal quanto os efeitos colaterais com a mesma intensidade, configurando dolo direto de 1º grau para todos os resultados.",
+                "Configura-se o dolo de 2º grau apenas quando os efeitos colaterais são menos graves que o resultado principal."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>O dolo de 2º grau é uma forma de dolo direto, mas com uma particularidade. A vontade do agente está focada em um alvo (dolo de 1º grau), mas para atingi-lo, ele sabe que, <strong>necessariamente e com certeza</strong>, produzirá outros resultados (os efeitos colaterais).</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>Dolo de 1º Grau:</strong> É o resultado que o agente quer, o seu objetivo final.</li>' +
+                        '<li class="mt-1"><strong>Dolo de 2º Grau:</strong> São os resultados que ele não quer como fim, mas sabe que são um <strong>meio inevitável</strong> para alcançar o dolo de 1º grau. Ele não "assume o risco" (isso é dolo eventual), ele tem <strong>certeza</strong> da ocorrência.</li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> Um terrorista quer matar um político (dolo de 1º grau) e, para isso, coloca uma bomba no avião em que ele está. O terrorista não tem nada contra os outros 150 passageiros e a tripulação, mas sabe que, para matar o político, a morte deles é uma <strong>consequência necessária</strong>. Ele responderá por todos os homicídios com dolo direto (o do político em 1º grau e os demais em 2º grau).</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 18, p. 4</em></p>',
+            topic: "Dolo de 1º e 2º Grau"
+        },
+        {
+            question: "O dolo geral, também conhecido como erro sucessivo ou 'aberratio causae', é uma espécie de erro de tipo acidental. Qual situação descreve corretamente o dolo geral?",
+            options: [
+                "O agente quer atingir a pessoa 'A', mas por erro na execução, atinge 'B'.",
+                "O agente, com a intenção de praticar um crime menos grave, acaba produzindo um resultado mais grave por culpa.",
+                "O agente, supondo já ter consumado o crime, pratica uma segunda ação com outra finalidade, e esta segunda ação é que efetivamente causa o resultado pretendido inicialmente.",
+                "O agente tem a intenção de praticar um crime, mas desiste voluntariamente de prosseguir na execução.",
+                "O agente, desde o início, tem a intenção de praticar um crime mais grave, passando por um menos grave que é necessário para o seu fim."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>O <strong>dolo geral</strong> (ou <i>aberratio causae</i>) ocorre quando há um erro sobre o nexo de causalidade. O plano do agente se desenrola em dois atos, mas ele se engana sobre qual deles realmente produziu o resultado.</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>1º Ato:</strong> O agente pratica uma conduta para matar (ex: atira na vítima).</li>' +
+                        '<li class="mt-1"><strong>Erro:</strong> Ele acredita que a vítima já está morta.</li>' +
+                        '<li class="mt-1"><strong>2º Ato:</strong> Ele pratica uma nova conduta com outra finalidade (ex: ocultar o cadáver, jogando-o no rio).</li>' +
+                        '<li class="mt-1"><strong>Resultado Real:</strong> A perícia constata que a vítima morreu afogada (pelo 2º ato), e não pelo tiro (1º ato).</li>' +
+                    '</ul>' +
+                    '<p>Para o Direito Penal, o dolo inicial (de matar) é considerado um "dolo geral" que abrange todo o desenrolar dos fatos. O agente responde por homicídio doloso consumado, e não por tentativa de homicídio em concurso com homicídio culposo, pois o desdobramento causal estava dentro de sua linha de ação.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> É a situação clássica descrita no material: "A" dispara contra "B". Crendo que "B" morreu, joga o corpo ao mar para se livrar dele. "B", na verdade, estava apenas desmaiado e morre por afogamento. "A" responderá por homicídio doloso consumado.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 18, p. 6</em></p>',
+            topic: "Dolo Geral (Erro Sucessivo / Aberratio Causae)"
+        },
+        {
+            question: "A distinção entre crime progressivo e progressão criminosa é fundamental para a correta tipificação da conduta. Assinale a alternativa que melhor descreve a progressão criminosa.",
+            options: [
+                "O agente, desde o início, deseja o resultado mais grave e, para alcançá-lo, pratica um crime menos grave que funciona como etapa necessária.",
+                "O agente inicia a execução de um crime, mas desiste voluntariamente antes da consumação.",
+                "O agente pratica um crime e, após consumá-lo, sua vontade evolui e ele decide praticar um crime mais grave.",
+                "O agente pratica dois crimes idênticos em sequência, configurando crime continuado.",
+                "O agente comete um erro sobre o nexo causal, como no dolo geral."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>A chave para diferenciar os institutos é a <strong>vontade inicial</strong> do agente.</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Crime Progressivo (Alternativa A):</strong> A vontade inicial já é a do crime mais grave. O crime menos grave (crime-meio) é apenas uma passagem obrigatória e é absorvido pelo mais grave (crime-fim). O dolo é um só, desde o começo.</li>' +
+                        '<li class="mt-1"><strong>- Progressão Criminosa (Alternativa C):</strong> Aqui há uma <strong>mutação no dolo</strong> do agente. Ele inicialmente queria praticar um crime (ex: roubo). Após consumar este primeiro crime, sua intenção muda, e ele decide praticar um segundo crime mais grave (ex: estupro). Há dois desígnios autônomos e sucessivos. O agente responderá pelos dois crimes em concurso.</li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong><br><strong>Crime Progressivo:</strong> "A" quer matar "B" (dolo inicial). Para isso, ele desfere várias facadas (lesões corporais). O crime de lesão é absorvido pelo de homicídio. Ele responde só por homicídio.<br><strong>Progressão Criminosa:</strong> "A" quer apenas roubar "B" (dolo inicial). Após pegar o celular da vítima, ele decide estuprá-la (novo dolo). Ele responderá por roubo em concurso com estupro.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 18, p. 6-7</em></p>',
+            topic: "Progressão Criminosa vs. Crime Progressivo"
+        },
+        {
+            question: "Um tipo penal que descreve a conduta como 'Sequestrar pessoa com o fim de obter, para si ou para outrem, qualquer vantagem' (art. 159, CP) exige, para sua configuração, a presença de:",
+            options: [
+                "Dolo genérico, pois basta a vontade de sequestrar.",
+                "Dolo específico, pois além da vontade de sequestrar (dolo genérico), exige a finalidade especial de obter vantagem.",
+                "Dolo eventual, pois o agente assume o risco de obter a vantagem.",
+                "Dolo de 2º grau, pois a obtenção da vantagem é consequência necessária do sequestro.",
+                "Dolo geral, pois o resultado pode ocorrer de forma diversa da planejada."
+            ],
+            answer: 1,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (B):</strong></p>' +
+                    '<p>A classificação entre dolo genérico e específico ajuda a interpretar o tipo penal e a identificar todos os elementos subjetivos exigidos.</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Dolo Genérico:</strong> É a vontade de realizar a conduta descrita no verbo do tipo penal, sem nenhuma finalidade adicional. Ex: No crime de homicídio (art. 121), o dolo é a vontade de "matar alguém".</li>' +
+                        '<li class="mt-1"><strong>- Dolo Específico:</strong> O tipo penal exige algo a mais. Além da vontade de praticar a conduta-base (dolo genérico), o agente deve ter uma <strong>finalidade especial</strong>, um "especial fim de agir". No crime de extorsão mediante sequestro, não basta querer sequestrar; é preciso agir <strong>"com o fim de obter vantagem"</strong>. Essa finalidade é o dolo específico.</li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> Se "A" sequestra "B" apenas por vingança, para mantê-lo em cárcere privado, ele comete o crime do art. 148 (cárcere privado), que exige apenas o dolo genérico de privar a liberdade. Se ele sequestra "B" para pedir resgate à família, ele comete o crime do art. 159, pois agiu com o dolo específico de obter vantagem.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 18, p. 5</em></p>',
+            topic: "Dolo Genérico e Dolo Específico"
+        }
+    ];
+
+    const userAnswers = new Array(questions.length).fill(null);
+    const quizContainer = document.getElementById('quiz-section');
+    const reportSection = document.getElementById('report-section');
+    let performanceChart = null;
+
+    function renderQuestions() {
+        let quizHTML = '';
+        questions.forEach((q, index) => {
+            quizHTML +=
+                '<div class="question-card" id="question-' + index + '">' +
+                    '<p class="question-title">' + (index + 1) + '. ' + q.question + '</p>' +
+                    '<div class="options-container">';
+            q.options.forEach((option, optionIndex) => {
+                quizHTML +=
+                    '<div class="option" data-question="' + index + '" data-option="' + optionIndex + '">' +
+                        '<span class="option-letter">' + String.fromCharCode(65 + optionIndex) + '</span>' +
+                        '<span class="option-text">' + option + '</span>' +
+                        '<i class="fas fa-cut scissor-icon" title="Eliminar alternativa"></i>' +
+                    '</div>';
+            });
+            quizHTML +=
+                    '</div>' +
+                    '<div class="feedback" id="feedback-' + index + '"></div>' +
+                '</div>';
+        });
+        quizContainer.innerHTML = quizHTML;
+        addEventListeners();
+    }
+
+    function addEventListeners() {
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', handleOptionSelect);
+        });
+        document.querySelectorAll('.scissor-icon').forEach(icon => {
+            icon.addEventListener('click', handleEliminateOption);
+        });
+    }
+
+    function handleEliminateOption(e) {
+        e.stopPropagation();
+        const optionDiv = e.target.parentElement;
+        if (!optionDiv.classList.contains('eliminated') && userAnswers[optionDiv.dataset.question] === null) {
+            optionDiv.classList.add('eliminated');
+        }
+    }
+
+    function handleOptionSelect(e) {
+        const selectedOption = e.currentTarget;
+        const questionIndex = parseInt(selectedOption.dataset.question);
+        const optionIndex = parseInt(selectedOption.dataset.option);
+
+        if (userAnswers[questionIndex] !== null || selectedOption.classList.contains('eliminated')) {
+            return;
+        }
+
+        const isCorrect = optionIndex === questions[questionIndex].answer;
+        userAnswers[questionIndex] = { answered: optionIndex, correct: isCorrect };
+
+        const optionsContainer = selectedOption.parentElement;
+        optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+        selectedOption.classList.add(isCorrect ? 'correct' : 'incorrect');
+        
+        optionsContainer.querySelectorAll('.scissor-icon').forEach(icon => icon.style.display = 'none');
+
+        showFeedback(questionIndex, isCorrect);
+        
+        if (userAnswers.every(answer => answer !== null)) {
+            reportSection.classList.remove('hidden');
+            generateReport();
+            scrollToSection('report-section');
+        }
+    }
+
+    function showFeedback(questionIndex, isCorrect) {
+        const feedbackDiv = document.getElementById('feedback-' + questionIndex);
+        const questionData = questions[questionIndex];
+        
+        let feedbackHTML = 
+            '<p class="feedback-title">' + (isCorrect ? 'Resposta Correta! Análise do Professor:' : 'Resposta Incorreta. Análise do Professor:') + '</p>' +
+            '<div>' + questionData.explanation + '</div>';
+        
+        feedbackDiv.innerHTML = feedbackHTML;
+        feedbackDiv.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    }
+    
+    function generateReport() {
+        const correctAnswers = userAnswers.filter(a => a.correct).length;
+        const incorrectAnswers = questions.length - correctAnswers;
+
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        if (performanceChart) {
+            performanceChart.destroy();
+        }
+        performanceChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Acertos', 'Erros'],
+                datasets: [{
+                    data: [correctAnswers, incorrectAnswers],
+                    backgroundColor: ['var(--success-green)', 'var(--error-red)'],
+                    borderColor: ['var(--white)'],
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 14 }, padding: 20 } },
+                    title: { display: true, text: 'Seu Desempenho Geral', font: { size: 18, weight: 'bold' }, padding: { bottom: 20 } }
+                }
+            }
+        });
+
+        const reviewSection = document.getElementById('review-section');
+        let reviewHTML = '<h3 class="text-xl font-bold mb-4 text-[var(--primary-blue)]">Pontos para Revisão</h3>';
+        const incorrectQuestions = userAnswers
+            .map((answer, index) => ({...answer, index}))
+            .filter(answer => !answer.correct);
+
+        if (incorrectQuestions.length === 0) {
+            reviewHTML += '<p class="text-lg text-[var(--success-green)] font-semibold">Performance de elite! Você compreendeu as nuances do dolo. Continue neste ritmo.</p>';
+        } else {
+            reviewHTML += '<p class="mb-4 text-[var(--dark-gray)]">Você errou ' + incorrectQuestions.length + ' questão(ões). A maestria vem da repetição e correção. Revise estes tópicos:</p>';
+            incorrectQuestions.forEach(q => {
+                const originalQuestion = questions[q.index];
+                reviewHTML +=
+                    '<div class="review-card">' +
+                        '<h4 class="font-bold text-lg mb-2 text-[#D97706]">' + originalQuestion.topic + '</h4>' +
+                        '<p class="mb-3"><strong>Na questão:</strong> "' + originalQuestion.question + '"</p>' +
+                        '<p class="font-semibold">Relembre o ponto-chave:</p>' +
+                        originalQuestion.explanation +
+                    '</div>';
+            });
+        }
+        reviewSection.innerHTML = reviewHTML;
+    }
+
+    function scrollToSection(sectionId) {
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+        const sections = ['quiz-section', 'report-section'];
+        let currentSection = '';
+
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 150 && rect.bottom >= 150) {
+                    currentSection = sectionId;
+                }
+            }
+        });
+        
+        const sidebarLinks = document.querySelectorAll('#sidebar ul li a');
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if(link.getAttribute('href') === '#' + currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', renderQuestions);
+    </script>
+
+</body>
+</html>

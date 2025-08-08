@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 21: Direito de Propriedade</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 21: Direito de Propriedade</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Direito de Propriedade</h1>
+                <p>Teste seus conhecimentos com base na Aula 21. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Qual é a principal diferença entre a Desapropriação e a Requisição Administrativa quanto à natureza da intervenção e à indenização?",
+                options: [
+                    "A Desapropriação é sempre temporária e a Requisição é definitiva, com indenização prévia em ambos os casos.",
+                    "A Desapropriação transfere a propriedade de forma definitiva e a indenização é, em regra, prévia, justa e em dinheiro. A Requisição é o uso temporário e a indenização só ocorre se houver dano.",
+                    "Ambas são transferências definitivas, mas a indenização na Requisição é sempre em títulos da dívida pública.",
+                    "A Desapropriação só se aplica a imóveis rurais, e a Requisição a imóveis urbanos.",
+                    "A Desapropriação não exige indenização, enquanto a Requisição exige pagamento prévio e em dinheiro."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Distinção Fundamental:</strong> Perfeito! Você identificou os dois pontos centrais que diferenciam esses institutos e que são muito explorados em provas.</p>
+                        <p>Vamos esquematizar a diferença para nunca mais esquecer:</p>
+                        <ul>
+                            <li><strong>➡️ DESAPROPRIAÇÃO:</strong>
+                                <ul>
+                                    <li><strong>Natureza:</strong> Perda <strong>DEFINITIVA</strong> da propriedade. O bem passa a ser do Estado.</li>
+                                    <li><strong>Indenização:</strong> É a regra. Deve ser <strong>PRÉVIA, JUSTA e em DINHEIRO</strong> (salvo exceções). O Estado paga para tomar o bem.</li>
+                                </ul>
+                            </li>
+                            <li><strong>➡️ REQUISIÇÃO:</strong>
+                                <ul>
+                                    <li><strong>Natureza:</strong> Uso <strong>TEMPORÁRIO</strong> de um bem ou serviço. O bem continua sendo do particular.</li>
+                                    <li><strong>Indenização:</strong> É a exceção. Só acontece <strong>SE HOUVER DANO</strong> e o pagamento é <strong>POSTERIOR (ulterior)</strong>.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p class="example"><strong>Analogia Prática:</strong> A prefeitura precisa construir um hospital (utilidade pública). Ela <strong>desapropria</strong> seu terreno, te paga o valor de mercado (indenização prévia) e o terreno passa a ser dela para sempre. Em outra situação, ocorre uma grande enchente (iminente perigo público). A Defesa Civil precisa de um local para abrigar as vítimas e <strong>requisita</strong> o uso do seu galpão por uma semana. Ao final, eles te devolvem o galpão. Se ele estiver danificado, o Estado te indenizará pelo prejuízo.</p>
+                        <p><strong>(Fonte: Aula21, p. 3 e 5)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A regra geral é que a indenização na desapropriação seja prévia, justa e em dinheiro. A Constituição, porém, prevê exceções em que o pagamento é feito por meio de títulos. Em qual das situações abaixo a indenização será paga em títulos da dívida pública/agrária?",
+                options: [
+                    "Desapropriação por necessidade pública, como para a construção de um posto de saúde.",
+                    "Desapropriação por utilidade pública, como para a duplicação de uma rodovia.",
+                    "Desapropriação de imóvel urbano que não cumpre sua função social (desapropriação-sanção).",
+                    "Requisição administrativa de um hospital particular durante uma pandemia.",
+                    "Qualquer desapropriação realizada pela União."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Punição pelo Descumprimento da Função Social:</strong> Exato! A regra é o pagamento em dinheiro, que garante liquidez imediata ao ex-proprietário. As exceções ocorrem quando a desapropriação tem um caráter de <strong>sanção</strong>, ou seja, uma punição ao proprietário que não está usando seu imóvel de forma adequada.</p>
+                        <p>A Constituição prevê duas hipóteses de desapropriação-sanção com pagamento em títulos:</p>
+                        <ul>
+                            <li><strong>🏙️ Imóvel Urbano (Art. 182, § 4º, III):</strong> Se o proprietário de um terreno em área urbana, incluído no plano diretor, não o utiliza ou o subutiliza, o Município pode desapropriá-lo pagando com <strong>títulos da dívida pública</strong>, resgatáveis em até 10 anos.</li>
+                            <li><strong>🏞️ Imóvel Rural (Art. 184):</strong> Se um latifúndio não cumpre sua função social (não é produtivo), a União pode desapropriá-lo para fins de reforma agrária, pagando com <strong>títulos da dívida agrária (TDA)</strong>, resgatáveis em até 20 anos.</li>
+                        </ul>
+                        <p class="example"><strong>Cenário Prático:</strong> Um grande investidor possui um enorme terreno vazio no centro de uma cidade, apenas para especulação imobiliária, enquanto há uma grande demanda por moradia. Após notificar o proprietário para que ele dê uma função ao imóvel (construir algo, por exemplo) e ele não o fazer, o Município pode iniciar o processo de desapropriação e, em vez de pagar milhões em dinheiro, pagará com títulos que o investidor só poderá resgatar ao longo de uma década.</p>
+                        <p><strong>(Fonte: Aula21, p. 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual é o pressuposto fático indispensável para que a autoridade pública possa realizar uma Requisição Administrativa?",
+                options: [
+                    "A existência de um interesse social relevante.",
+                    "A necessidade de realizar uma obra pública.",
+                    "A existência de um iminente perigo público.",
+                    "A ordem expressa de um juiz de direito.",
+                    "O não cumprimento da função social da propriedade."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Urgência como Gatilho:</strong> Perfeito! A Requisição Administrativa é uma medida drástica e excepcional. Ela não pode ser usada por mera conveniência da Administração. O 'gatilho' que autoriza seu uso é uma situação de <strong>emergência</strong>, um <strong>iminente perigo público</strong>.</p>
+                        <p>A Constituição exige essa urgência para justificar a intervenção na propriedade privada sem as formalidades de uma desapropriação. A ideia é que a demora para iniciar um processo de desapropriação poderia causar um dano muito maior à coletividade.</p>
+                        <div class="visual-aid">🔥 Perigo Iminente! ➡️ 🏃‍♂️ Ação Rápida (Requisição)</div>
+                        <p class="example"><strong>Exemplos de Iminente Perigo Público:</strong></p>
+                        <ul>
+                            <li>Uma enchente que desabriga centenas de famílias.</li>
+                            <li>O rompimento de uma barragem.</li>
+                            <li>Uma pandemia que exige o uso de leitos de hospitais particulares.</li>
+                            <li>Um grande incêndio florestal que exige o uso de um trator de uma fazenda próxima para abrir aceiros.</li>
+                        </ul>
+                        <p>Em todas essas situações, a urgência justifica que o Estado use temporariamente o bem particular para proteger a vida e a segurança da população.</p>
+                        <p><strong>(Fonte: Aula21, p. 5)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O direito de propriedade, conforme o Art. 5º, XXIII, da CF, deve atender à sua função social. O que isso significa?",
+                options: [
+                    "Que a propriedade é um direito absoluto e o proprietário pode usá-la como quiser.",
+                    "Que toda propriedade deve ser usada para gerar lucro.",
+                    "Que o direito de propriedade não é ilimitado e deve ser exercido em benefício não apenas do proprietário, mas também da coletividade.",
+                    "Que o Estado pode tomar qualquer propriedade a qualquer momento, sem justificativa.",
+                    "Que apenas propriedades rurais precisam cumprir uma função social."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Propriedade com Responsabilidade Social:</strong> Exato! A Constituição de 1988 superou a visão liberal clássica de que a propriedade era um direito absoluto. Ela introduziu a ideia de que o proprietário tem direitos, mas também tem <strong>deveres</strong> para com a sociedade.</p>
+                        <p>A função social é um <strong>limite interno</strong> ao direito de propriedade. Ela impõe que o uso do bem não seja egoístico e prejudicial à coletividade. O proprietário deve dar uma destinação útil e adequada ao seu bem, em conformidade com as leis (ambientais, urbanísticas, trabalhistas, etc.).</p>
+                        <div class="visual-aid">👤 Direito do Proprietário + 🌍 Dever com a Sociedade = ✅ Função Social</div>
+                        <p class="example"><strong>Na Prática:</strong> O dono de uma grande fazenda tem o direito de explorá-la economicamente (plantar, criar gado). No entanto, ele tem o dever de respeitar a legislação ambiental (não desmatar áreas de preservação), as leis trabalhistas (não usar mão de obra escrava) e de tornar a terra produtiva. Se ele não cumpre esses deveres, ele está descumprindo a função social de sua propriedade e pode sofrer sanções, como a desapropriação para reforma agrária.</p>
+                        <p><strong>(Fonte: Aula21, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A proteção constitucional a 'autores de inventos industriais', 'criações industriais' e 'marcas', visando o desenvolvimento tecnológico e econômico, refere-se a qual direito específico?",
+                options: [
+                    "Direito de Herança.",
+                    "Direito do Consumidor.",
+                    "Direito à Propriedade Intelectual (Direito Autoral).",
+                    "Direito à Propriedade Industrial.",
+                    "Direito de Petição."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Protegendo a Inovação e o Comércio:</strong> Perfeito! Você distinguiu corretamente os tipos de propriedade imaterial. O Art. 5º, XXIX, trata especificamente da <strong>Propriedade Industrial</strong>.</p>
+                        <p>Enquanto a Propriedade Intelectual (ou Direito Autoral, incisos XXVII e XXVIII) protege obras literárias, artísticas e científicas (livros, músicas, filmes), a Propriedade Industrial foca na proteção de criações voltadas para a <strong>atividade econômica, industrial e comercial</strong>.</p>
+                        <p>Os principais elementos protegidos são:</p>
+                        <ul>
+                            <li><strong>⚙️ Inventos Industriais:</strong> Novas tecnologias e produtos (protegidos por <strong>patentes</strong>).</li>
+                            <li><strong>🎨 Criações Industriais:</strong> O design, a forma ornamental de um objeto (protegido por <strong>desenho industrial</strong>).</li>
+                            <li><strong>®️ Marcas:</strong> Sinais que identificam produtos e serviços no mercado (protegidos por <strong>registro de marca</strong>).</li>
+                        </ul>
+                        <p class="example"><strong>Exemplo Prático:</strong> A fórmula química de um novo refrigerante pode ser patenteada. O design único de sua garrafa pode ser protegido como desenho industrial. O nome e o logotipo na garrafa são a marca registrada. Todos esses elementos compõem a Propriedade Industrial da empresa e são protegidos pela Constituição e pela Lei de Propriedade Industrial (Lei nº 9.279/96).</p>
+                        <p><strong>(Fonte: Aula21, p. 6)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de elite!</strong> Você demonstrou domínio completo sobre o Direito de Propriedade e suas formas de relativização. Este é um conhecimento fundamental e você está no caminho certo para a aprovação. Avante!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 07: Direito à Vida</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 07: Direito à Vida</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Direito à Vida</h1>
+                <p>Teste seus conhecimentos com base no material da Aula 07. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        Toda a lógica da aplicação está contida nesta tag <script>.
+        A propriedade `explanation` foi aprimorada para incluir uma "mini-aula" completa
+        com HTML formatado, exemplos e elementos visuais.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Conforme a doutrina apresentada na Aula 07, o direito à vida possui uma dupla acepção. O que significa a acepção em sentido positivo?",
+                options: [
+                    "O direito de não ser morto pelo Estado ou por terceiros.",
+                    "O direito a uma existência digna, com acesso a condições mínimas de bem-estar.",
+                    "A proibição da pena de morte em qualquer circunstância.",
+                    "O direito de dispor do próprio corpo como bem entender.",
+                    "A proteção da vida desde a concepção, sem exceções."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>As Duas Faces da Mesma Moeda:</strong> Perfeito! O direito à vida não é apenas sobre 'não morrer'. A doutrina moderna o divide em duas dimensões essenciais:</p>
+                        <ul>
+                            <li><strong>➡️ Sentido Negativo (Permanecer Vivo):</strong> Este é o aspecto mais básico. É um dever de abstenção do Estado e de terceiros. Eles não devem atentar contra a sua existência. É o direito de não ser morto.</li>
+                            <li><strong>✅ Sentido Positivo (Existência Digna):</strong> Esta é a sua resposta correta e a dimensão mais complexa. Não basta apenas sobreviver, é preciso viver com dignidade. Isso impõe ao Estado um dever de <strong>agir</strong>, de fornecer as condições materiais mínimas para uma vida digna, como saúde, educação, saneamento básico, etc.</li>
+                        </ul>
+                        <div class="visual-aid">💔 Viver ≠ ❤️ Viver com Dignidade</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Uma pessoa que mora na rua, sem acesso a comida ou atendimento médico, está biologicamente viva (sentido negativo preservado), mas seu direito à vida em sentido positivo está sendo violado, pois lhe falta uma existência digna. A ação do Estado para fornecer um abrigo e acesso a um posto de saúde concretiza o direito à vida em seu sentido positivo.</p>
+                        <p><strong>(Fonte: Aula07, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A Constituição Federal de 1988 proíbe a pena de morte como regra. Contudo, ela admite uma exceção expressa. Em qual situação a pena de morte é permitida?",
+                options: [
+                    "Em caso de crimes hediondos cometidos com extrema crueldade.",
+                    "Em caso de traição à pátria em tempos de paz.",
+                    "Em caso de terrorismo seguido de morte.",
+                    "Em caso de guerra declarada, nos termos da lei.",
+                    "Em nenhuma hipótese, pois o direito à vida é absoluto."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Exceção Máxima:</strong> Exato! Esta é uma das exceções mais conhecidas e cobradas em provas. Embora o Brasil seja, em regra, um país abolicionista quanto à pena de morte, a própria Constituição (Art. 5º, XLVII, 'a') crava a única situação em que ela pode ser aplicada.</p>
+                        <p>A condição é a existência de uma <strong>guerra declarada</strong>. A competência para declarar guerra é do Presidente da República, mas ele precisa ser autorizado ou referendado pelo Congresso Nacional (Art. 84, XIX, da CF).</p>
+                        <div class="visual-aid">🕊️ Tempos de Paz = Pena de Morte PROIBIDA<br>⚔️ Guerra Declarada = Pena de Morte PERMITIDA (para crimes militares específicos)</div>
+                        <p class="example"><strong>Cenário Hipotético:</strong> Se o Brasil entrasse em guerra formalmente declarada com outro país, um militar que cometesse um crime grave previsto no Código Penal Militar para tempos de guerra (como traição, covardia ou espionagem) poderia ser condenado à morte por fuzilamento. Note que a pena não se aplicaria a civis ou a crimes comuns, mesmo durante a guerra.</p>
+                        <p><strong>(Fonte: Aula07, p. 2 e 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O Código Penal brasileiro (art. 128) prevê hipóteses em que o aborto, embora continue sendo um fato típico, não é punido. Quais são essas duas hipóteses legais?",
+                options: [
+                    "Aborto por razões socioeconômicas e em caso de feto anencéfalo.",
+                    "Aborto necessário (para salvar a vida da gestante) e aborto em caso de gravidez resultante de estupro.",
+                    "Aborto eugenésico (feto com má-formação) e aborto em caso de estupro.",
+                    "Aborto até a 12ª semana de gestação e aborto para salvar a vida da gestante.",
+                    "Qualquer tipo de aborto, desde que com o consentimento do pai."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>As Excludentes de Ilicitude do Aborto:</strong> Resposta precisa! É fundamental distinguir as hipóteses previstas em lei daquelas criadas pela jurisprudência. O Art. 128 do Código Penal é claro ao listar as duas situações em que o médico que realiza o procedimento não comete crime. São as chamadas 'excludentes de ilicitude':</p>
+                        <ul>
+                            <li><strong>🤰 Aborto Necessário (ou Terapêutico):</strong> Ocorre quando não há outro meio de salvar a vida da gestante. É uma situação de estado de necessidade, onde se pondera entre dois bens jurídicos (a vida da mãe e a vida do feto) e a lei opta por proteger a vida da mulher já nascida.</li>
+                            <li><strong>💔 Aborto em caso de Estupro (ou Sentimental/Humanitário):</strong> Ocorre quando a gravidez é resultado de um crime de estupro. Neste caso, a lei busca proteger a dignidade e a saúde psicológica da mulher, não a obrigando a levar a termo uma gestação fruto de um ato tão violento. É necessário o consentimento da gestante (ou de seu representante, se incapaz).</li>
+                        </ul>
+                        <p class="example"><strong>Cenário do Dia a Dia:</strong> Uma mulher com uma gravidez ectópica (fora do útero) com risco de rompimento da trompa e hemorragia fatal pode se submeter a um aborto necessário. Outra mulher, vítima de violência sexual que resultou em gravidez, pode legalmente optar por interromper a gestação em um hospital, sem que ela ou o médico sejam punidos.</p>
+                        <p><strong>(Fonte: Aula07, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Além das hipóteses legais, o Supremo Tribunal Federal (STF), no julgamento da ADPF 54, pacificou o entendimento sobre a interrupção da gestação de fetos anencéfalos. Qual foi a decisão da Corte?",
+                options: [
+                    "Considerou a prática como crime de homicídio.",
+                    "Autorizou o procedimento, mas o equiparou a uma das excludentes de ilicitude do Código Penal.",
+                    "Proibiu o procedimento, por considerar que viola o direito à vida do feto.",
+                    "Considerou a prática um fato atípico, ou seja, a interrupção da gestação de feto anencéfalo não é crime de aborto.",
+                    "Delegou a decisão para o Congresso Nacional legislar sobre o tema."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Jurisprudência como Fonte do Direito:</strong> Excelente! Você demonstrou estar atualizado com as decisões mais importantes do STF. A ADPF 54 é um marco.</p>
+                        <p>A decisão do STF foi além das hipóteses do Código Penal. A Corte entendeu que obrigar uma mulher a manter a gestação de um feto que não tem nenhuma chance de vida extrauterina (devido à ausência de cérebro) seria um ato de tortura e uma violação à sua dignidade, saúde e liberdade. Por isso, a Corte decidiu que essa interrupção <strong>não é crime</strong>. Tecnicamente, a conduta é <strong>atípica</strong>. </p>
+                        <p><strong>Diferença crucial:</strong> Nas hipóteses do Código Penal, o fato é típico (é aborto), mas não é ilícito (é justificado). No caso do feto anencéfalo, o STF disse que o fato nem sequer se enquadra na definição de crime de aborto, pois não há potencial de vida a ser protegido.</p>
+                        <div class="visual-aid">⚖️ Aborto Legal (CP) = Fato Típico, mas Justificado<br>🧠 Anencefalia (STF) = Fato Atípico (Nem é crime)</div>
+                        <p><strong>(Fonte: Aula07, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A 'Lei do Abate', prevista no Código Brasileiro de Aeronáutica, permite a destruição de aeronave considerada hostil. Essa previsão representa uma relativização de qual direito fundamental?",
+                options: [
+                    "Direito de propriedade, pois a aeronave é destruída.",
+                    "Direito de ir e vir, pois impede o voo.",
+                    "Direito à vida, pois a destruição da aeronave invariavelmente ocasionará a morte dos tripulantes.",
+                    "Direito à segurança, pois a medida visa proteger o espaço aéreo.",
+                    "Direito à soberania nacional."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Soberania e a Relativização Extrema:</strong> Resposta precisa. A 'Lei do Abate' é um exemplo drástico, mas real, de como o direito à vida não é absoluto.</p>
+                        <p>A medida é extrema e só pode ser aplicada após esgotados todos os outros meios coercitivos (avisos, interceptação, etc.). A decisão final de classificar a aeronave como hostil e autorizar sua destruição cabe ao Presidente da República (ou autoridade delegada). O objetivo é proteger a soberania nacional e a segurança da população contra ameaças graves (como o narcotráfico ou terrorismo).</p>
+                        <p>Embora o objetivo direto seja neutralizar a aeronave, a consequência inevitável e previsível é a morte de quem está a bordo. Portanto, a lei relativiza o <strong>direito à vida</strong> dos tripulantes em prol de um interesse maior da coletividade (segurança e soberania).</p>
+                        <div class="visual-aid">✈️ Hostil ➡️ 🔥 Destruição ➡️ 💔 Vidas Perdidas</div>
+                        <p class="example"><strong>Cenário de Aplicação:</strong> Uma aeronave não identificada entra no espaço aéreo brasileiro, não responde aos chamados da Força Aérea, recusa-se a pousar em local determinado e realiza manobras evasivas típicas do transporte de drogas. Após esgotar todos os avisos, a autoridade competente poderia autorizar sua destruição para impedir que a carga ilícita chegue ao seu destino, mesmo que isso custe a vida dos tripulantes.</p>
+                        <p><strong>(Fonte: Aula07, p. 3)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho excepcional!</strong> Você gabaritou um tema complexo e cheio de nuances. O domínio sobre as relativizações do Direito à Vida é um grande passo para a aprovação. Mantenha a excelência!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

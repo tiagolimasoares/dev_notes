@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 18: Sigilo de Correspondência</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 18: Sigilo de Correspondência</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 4</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direito à Privacidade: Sigilo de Correspondência</h1>
+                <p>Teste seus conhecimentos com base na Aula 18. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "De acordo com o Art. 5º, XII, da CF, o sigilo da correspondência é inviolável. Qual das alternativas abaixo apresenta uma exceção a essa regra que NÃO depende de autorização judicial?",
+                options: [
+                    "Suspeita de que a carta contenha críticas ao governo.",
+                    "Abertura de carta que apresente indícios de conter objeto sujeito a pagamento de tributos, conforme a Lei dos Serviços Postais.",
+                    "Abertura de carta de um investigado por ordem do Delegado de Polícia.",
+                    "Abertura de qualquer encomenda postada nos Correios, para fins de fiscalização de rotina.",
+                    "Abertura de correspondência de um político em ano eleitoral."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>As Exceções Legais à Inviolabilidade:</strong> Perfeito! A regra geral é a inviolabilidade, mas a própria legislação infraconstitucional, em harmonia com a Constituição, prevê exceções pontuais para proteger outros interesses públicos relevantes, como a arrecadação e a segurança.</p>
+                        <p>A <strong>Lei nº 6.538/78 (Lei dos Serviços Postais)</strong> autoriza os Correios a abrirem correspondências em situações específicas, sem necessidade de ordem judicial. A sua resposta é uma delas. As principais são:</p>
+                        <ul>
+                            <li>📦 Suspeita de conter objeto sujeito a tributo (ex: um produto importado não declarado).</li>
+                            <li>🚫 Suspeita de conter objeto proibido (ex: drogas, armas).</li>
+                            <li>🤷 Impossibilidade de entrega e devolução (carta sem remetente e com destinatário desconhecido).</li>
+                        </ul>
+                        <div class="visual-aid">✉️ Carta Comum = 🛡️ Sigilo Total<br>📦 Encomenda Suspeita = 🔍 Fiscalização Permitida</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Você compra um celular em um site internacional e o vendedor o envia como se fosse um 'livro' para não pagar imposto. O fiscal da Receita Federal que atua dentro dos Correios, ao passar a encomenda no raio-x, percebe o formato do aparelho. Ele tem autoridade legal para abrir o pacote, constatar a irregularidade e efetuar a tributação, sem precisar de um mandado judicial para isso.</p>
+                        <p><strong>(Fonte: Aula18, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A Lei de Execução Penal (LEP) prevê que o direito do preso ao contato com o mundo exterior por meio de correspondência escrita pode ser:",
+                options: [
+                    "Suspenso ou restringido por ato motivado do diretor do presídio.",
+                    "Absoluto, não podendo ser limitado em nenhuma hipótese.",
+                    "Suspenso ou restringido por ato motivado do juiz da execução penal.",
+                    "Limitado apenas com autorização do Ministério Público.",
+                    "Restringido apenas se a carta não for para um familiar."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Controle Judicial na Execução Penal:</strong> Exato! O direito à correspondência do preso não é absoluto. Ele pode ser relativizado para garantir a segurança e a disciplina dentro do estabelecimento prisional e para impedir que o preso continue a comandar atividades criminosas de dentro da cadeia.</p>
+                        <p>No entanto, essa restrição não pode ser arbitrária. A Lei de Execução Penal (Art. 41, XV, e seu parágrafo único) estabelece que a competência para suspender ou restringir esse direito é do <strong>juiz da execução penal</strong>, e a decisão precisa ser <strong>motivada</strong>. O diretor do presídio pode até representar ao juiz, mas a decisão final é judicial.</p>
+                        <div class="visual-aid">⛓️ Preso Escrevendo Carta ➡️ 🧑‍⚖️ Juiz da Execução Pode Limitar (com justificativa)</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> A direção de um presídio descobre, por meio de uma investigação, que o líder de uma facção está usando cartas enviadas a seus familiares para ordenar ataques a policiais. A direção comunica o fato ao juiz da execução. O juiz, então, pode proferir uma decisão fundamentada determinando que, por um período, todas as cartas daquele detento específico sejam lidas pela administração penitenciária antes de serem enviadas, ou até mesmo suspendendo temporariamente seu direito de se corresponder.</p>
+                        <p><strong>(Fonte: Aula18, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a recente jurisprudência do STF (RE 1116949), a abertura de uma carta em um estabelecimento penitenciário, sem autorização judicial, é considerada lícita quando:",
+                options: [
+                    "Em qualquer situação, como medida de segurança padrão.",
+                    "Apenas se o preso autorizar expressamente a abertura.",
+                    "Nunca, pois a prova será sempre ilícita.",
+                    "Quando houver fundados indícios da prática de atividades ilícitas.",
+                    "Apenas se a carta for destinada a outro preso."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Nova Tese do STF para Presídios:</strong> Perfeito! Você está atualizado com a mais recente e importante decisão sobre o tema. O STF, no Tema 1041, alterou seu entendimento anterior.</p>
+                        <p>A Corte reconheceu a realidade do sistema prisional e a necessidade de o Estado ter ferramentas para combater o crime organizado que atua de dentro das cadeias. Assim, flexibilizou a regra, permitindo que a administração penitenciária abra correspondências <strong>sem ordem judicial</strong>, desde que não seja uma devassa aleatória. É preciso que existam <strong>fundados indícios</strong> (uma suspeita concreta, baseada em elementos objetivos) de que a correspondência está sendo usada para fins criminosos.</p>
+                        <div class="visual-aid">✉️ Carta Suspeita no Presídio ➡️ 👮‍♂️ Agente Pode Abrir (com fundada suspeita)</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Um agente penitenciário, ao manusear uma carta endereçada a um detento conhecido por seu envolvimento com o tráfico, percebe um volume ou um cheiro atípico no envelope. Isso constitui um 'fundado indício'. Ele pode, então, abrir a correspondência na presença de testemunhas e, se encontrar droga, o material será uma prova lícita para um novo processo criminal contra o detento e o remetente.</p>
+                        <p><strong>(Fonte: Aula18, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Em relação à abertura de encomendas postadas nos Correios, a tese fixada pelo STF no Tema 1041 estabelece que a prova obtida será lícita quando:",
+                options: [
+                    "A encomenda for aberta por um funcionário dos Correios em qualquer circunstância.",
+                    "A abertura ocorrer na presença do destinatário.",
+                    "Houver fundados indícios da prática de atividade ilícita, devendo as providências ser formalizadas.",
+                    "Houver autorização judicial prévia, em todos os casos.",
+                    "A encomenda não possuir declaração de conteúdo."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Nova Tese do STF para os Correios:</strong> Exato! O STF aplicou um raciocínio semelhante ao dos presídios para as encomendas em geral que tramitam pelos Correios, mas com uma ressalva importante.</p>
+                        <p>A Corte também permitiu a abertura <strong>sem ordem judicial</strong> quando houver <strong>fundados indícios</strong> de crime. A grande diferença é a exigência de que o procedimento seja <strong>formalizado</strong>. Isso significa que o agente (seja um funcionário dos Correios ou um policial que atua em parceria) deve documentar o motivo da suspeita e os passos da abertura, para que haja um controle posterior da legalidade do ato, seja pela própria administração ou pelo judiciário.</p>
+                        <div class="visual-aid">📦 Pacote Suspeito nos Correios ➡️ 👮‍♂️ Agente Pode Abrir (com fundada suspeita + ✍️ formalização)</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um cão farejador da Polícia Federal aponta para uma caixa específica em um centro de distribuição dos Correios. Isso é um 'fundado indício'. Os policiais, na presença de um funcionário dos Correios, podem abrir a caixa. Eles devem, então, lavrar um auto, descrevendo o motivo da suspeita (indicação do cão), o que foi encontrado (ex: tabletes de cocaína) e quem participou da ação. Essa prova será lícita.</p>
+                        <p><strong>(Fonte: Aula18, p. 3)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre a jurisprudência atualizada do STF acerca do sigilo de correspondência. Este é um conhecimento de ponta que o coloca em grande vantagem. Avante!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

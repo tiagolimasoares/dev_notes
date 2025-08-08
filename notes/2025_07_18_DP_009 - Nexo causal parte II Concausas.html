@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Fato Típico: Nexo Causal (Parte II)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilos Globais e Paleta de Cores */
+        :root {
+            --primary-blue: #0A3D62;
+            --secondary-blue: #1E639B;
+            --light-gray: #F0F2F5;
+            --medium-gray: #D1D5DB;
+            --dark-gray: #4B5563;
+            --text-color: #1F2937;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            display: flex;
+        }
+
+        /* Estilo da Sidebar */
+        #sidebar {
+            width: 250px;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 2rem 1rem;
+            transition: width 0.3s;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        #sidebar h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--secondary-blue);
+            padding-bottom: 1rem;
+        }
+
+        #sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #sidebar ul li a {
+            display: block;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--white);
+            transition: background-color 0.3s, color 0.3s;
+            font-weight: 500;
+        }
+
+        #sidebar ul li a:hover, #sidebar ul li a.active {
+            background-color: var(--white);
+            color: var(--primary-blue);
+        }
+
+        /* Conteúdo Principal */
+        #main-content {
+            margin-left: 250px;
+            padding: 2rem 3rem;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s, width 0.3s;
+        }
+
+        /* Estilo dos Cards de Questão */
+        .question-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary-blue);
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilo das Alternativas */
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .option:hover {
+            background-color: #EBF5FF;
+            border-color: var(--secondary-blue);
+        }
+        
+        .option.correct {
+            background-color: var(--success-green);
+            color: var(--white);
+            border-color: #059669;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-red);
+            color: var(--white);
+            border-color: #DC2626;
+        }
+        
+        .option.eliminated {
+            text-decoration: line-through;
+            background-color: var(--medium-gray);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 1rem;
+            min-width: 20px;
+        }
+        
+        .scissor-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: color 0.2s;
+        }
+        
+        .scissor-icon:hover {
+            color: var(--error-red);
+        }
+        .option.eliminated .scissor-icon, .option.correct .scissor-icon, .option.incorrect .scissor-icon {
+            display: none;
+        }
+
+        /* Estilo do Feedback */
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #D1FAE5;
+            border-left: 5px solid var(--success-green);
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #FEE2E2;
+            border-left: 5px solid var(--error-red);
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feedback-explanation {
+            line-height: 1.6;
+        }
+        
+        .feedback-example {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            border-left: 3px solid var(--secondary-blue);
+        }
+
+        /* Seção de Relatório */
+        #report-section {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #review-section {
+            margin-top: 2rem;
+        }
+
+        .review-card {
+            background-color: #FFFBEB;
+            border: 1px solid #FBBF24;
+            border-left: 5px solid #F59E0B;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Direito Penal</h2>
+        <ul>
+            <li><a href="#quiz-section" onclick="scrollToSection('quiz-section')" class="active">Questões</a></li>
+            <li><a href="#report-section" onclick="scrollToSection('report-section')">Relatório</a></li>
+        </ul>
+    </div>
+
+    <div id="main-content">
+        <h1 class="text-3xl font-bold mb-2 text-[var(--primary-blue)]">Questões de Fixação: Fato Típico - Nexo Causal (Parte II)</h1>
+        <p class="mb-8 text-[var(--dark-gray)]">Aula 23 - Analise cada questão e selecione a alternativa correta. Use o ícone de tesoura <i class="fas fa-cut"></i> para eliminar as alternativas que julgar incorretas.</p>
+
+        <div id="quiz-section">
+            <!-- As questões serão inseridas aqui via JavaScript -->
+        </div>
+
+        <div id="report-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-6 text-[var(--primary-blue)]">Relatório de Desempenho</h2>
+            <div class="w-full md:w-1/2 mx-auto mb-8">
+                <canvas id="performance-chart"></canvas>
+            </div>
+            <div id="review-section">
+                <!-- A revisão dos erros será inserida aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // DOCUMENTAÇÃO GERAL DO SCRIPT (JavaScript)
+    // Módulo da Aula 23: Nexo Causal (Parte II) - Concausas.
+    // O script foi populado com questões que exploram as diferentes espécies de concausas e suas consequências jurídicas,
+    // com foco especial na regra de rompimento do nexo causal.
+
+    const questions = [
+        {
+            question: "As concausas absolutamente independentes rompem o nexo causal, fazendo com que o agente responda apenas pelos atos já praticados. Qual das situações abaixo descreve uma concausa absolutamente independente preexistente?",
+            options: [
+                "'A' atira em 'B', que é socorrido, mas morre no hospital devido a um incêndio.",
+                "'A' atira em 'B' no exato momento em que 'B' é atingido por um raio e morre em função da descarga elétrica.",
+                "'A' ministra veneno em 'B'. Antes que o veneno faça efeito, 'C' aparece e mata 'B' a tiros.",
+                "'A' atira em 'B', que morre não pelo tiro, mas por ter sido envenenado por 'C' uma hora antes da conduta de 'A'.",
+                "'A' fere 'B', que é hemofílico e morre de hemorragia em decorrência do ferimento."
+            ],
+            answer: 3,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (D):</strong></p>' +
+                    '<p>As <strong>concausas absolutamente independentes</strong> são aquelas que produzem o resultado por si sós, sem qualquer relação de origem com a conduta do agente. Elas podem ser:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Preexistente:</strong> A causa real da morte já existia <strong>antes</strong> da conduta do agente. Na alternativa D, a causa efetiva da morte (veneno) já estava no organismo da vítima quando "A" atirou. A conduta de "A" não deu origem ao envenenamento.</li>' +
+                        '<li class="mt-1"><strong>- Concomitante (Alternativa B):</strong> A causa real ocorre <strong>ao mesmo tempo</strong> que a conduta do agente (o raio).</li>' +
+                        '<li class="mt-1"><strong>- Superveniente (Alternativa C):</strong> A causa real ocorre <strong>depois</strong> da conduta do agente (os tiros de "C").</li>' +
+                    '</ul>' +
+                    '<p>Em todos esses casos, o nexo causal é rompido, e "A" responde apenas por tentativa de homicídio, pois sua conduta não foi a que, de fato, causou a morte.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> "A" quer matar seu pai "B", que está internado, e desliga os aparelhos que o mantêm vivo. Contudo, a autópsia revela que "B" já havia morrido de infarto fulminante minutos antes. O infarto é uma concausa absolutamente independente preexistente. "A" responde por tentativa de homicídio.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 23, p. 2-3</em></p>',
+            topic: "Concausas Absolutamente Independentes"
+        },
+        {
+            question: "Diferentemente das causas absolutamente independentes, as concausas relativamente independentes, em regra, não rompem o nexo de causalidade. Qual das situações abaixo exemplifica uma concausa relativamente independente preexistente?",
+            options: [
+                "'A' atira em 'B', que morre devido a um incêndio no hospital.",
+                "'A' fere levemente 'B'. No trajeto para o hospital, a ambulância capota e 'B' morre.",
+                "'A' fere 'B', que, por ser hemofílico (uma condição preexistente), morre de hemorragia, resultado que não ocorreria em uma pessoa saudável.",
+                "'A' atira em 'B', que morre instantaneamente.",
+                "'A' envenena 'B', mas 'C' mata 'B' a tiros antes que o veneno faça efeito."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>As <strong>concausas relativamente independentes</strong> são aquelas que, embora não tenham sido criadas pelo agente, se unem à sua conduta para produzir o resultado. A conduta do agente dá início a um processo causal que é influenciado por essa outra causa.</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Preexistente:</strong> A concausa (a condição particular da vítima) já existia antes da conduta do agente. A hemofilia de "B" é o exemplo clássico. A conduta de "A" (ferir) se soma à condição de "B" (hemofilia) para produzir a morte.</li>' +
+                    '</ul>' +
+                    '<p>A regra para as concausas relativamente independentes (preexistentes e concomitantes) é a da <i>conditio sine qua non</i>. O agente responde pelo resultado, pois, sem sua conduta, o resultado não teria ocorrido. Se eliminarmos a facada, a hemofilia, por si só, não mataria "B" naquele momento.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> "A" empurra levemente "B", que tem "ossos de vidro" (osteogênese imperfeita), uma condição preexistente. "B" cai, quebra a bacia e morre de complicações. A conduta de "A" (empurrão) foi a causa do resultado, somada à condição da vítima. "A" responde pelo resultado morte (a título de dolo ou culpa, a depender do caso).</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 23, p. 3-4</em></p>',
+            topic: "Concausas Relativamente Independentes"
+        },
+        {
+            question: "O Art. 13, § 1º, do Código Penal estabelece uma exceção à teoria da equivalência dos antecedentes, rompendo o nexo causal. Para que essa regra se aplique, a causa superveniente deve ser:",
+            options: [
+                "Absolutamente independente.",
+                "Relativamente independente e estar na linha de desdobramento normal da conduta.",
+                "Relativamente independente e, por si só, produzir o resultado, saindo da linha de desdobramento normal da conduta.",
+                "Preexistente à conduta do agente.",
+                "Concomitante à conduta do agente."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>Esta é a regra mais complexa e importante do tema. O art. 13, § 1º, é a aplicação excepcional da Teoria da Causalidade Adequada. Ele quebra o nexo causal quando <strong>TODOS</strong> os seguintes requisitos estão presentes:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>1. Causa Superveniente:</strong> Ocorre <strong>depois</strong> da conduta inicial do agente.</li>' +
+                        '<li class="mt-1"><strong>2. Relativamente Independente:</strong> Origina-se, de alguma forma, da conduta inicial (ex: a vítima só estava na ambulância por causa do tiro).</li>' +
+                        '<li class="mt-1"><strong>3. Por si só, produz o resultado:</strong> Este é o ponto-chave. A causa superveniente é tão <strong>extraordinária e imprevisível</strong> que ela quebra o curso natural dos acontecimentos. Ela tem força para, sozinha, causar a morte, independentemente da gravidade da lesão inicial.</li>' +
+                    '</ul>' +
+                    '<p>Quando isso ocorre, o agente inicial não responde pelo resultado final (morte), mas apenas pelos atos anteriores (tentativa).</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> "A" fere "B" com um tiro no braço. "B" é socorrido e levado ao hospital. No hospital, ocorre um vazamento de gás e uma explosão que mata todos na enfermaria, incluindo "B". A explosão é uma causa superveniente, relativamente independente, que por si só produziu o resultado. "A" responde por tentativa de homicídio.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 23, p. 4-5</em></p>',
+            topic: "Art. 13, § 1º - Causa Superveniente que Rompe o Nexo Causal"
+        },
+        {
+            question: "Considere a seguinte situação: 'A', com a intenção de matar, fere 'B' com uma facada. 'B' é levado ao hospital, mas, devido a um erro médico grosseiro durante a cirurgia, vem a falecer. O erro médico, nesse caso, é uma concausa superveniente relativamente independente. Ele rompe o nexo causal, fazendo 'A' responder apenas por tentativa?",
+            options: [
+                "Sim, pois o erro médico sempre rompe o nexo causal.",
+                "Não, pois o erro médico é considerado um desdobramento previsível e natural da conduta de ferir alguém, não produzindo o resultado 'por si só'.",
+                "Sim, pois o erro médico é uma causa absolutamente independente.",
+                "Depende, se o erro médico foi doloso, rompe o nexo; se foi culposo, não rompe.",
+                "Não, pois a única causa que rompe o nexo causal é a preexistente."
+            ],
+            answer: 1,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (B):</strong></p>' +
+                    '<p>Aqui aplicamos o raciocínio do art. 13, § 1º, para diferenciar o que é um desdobramento extraordinário de um desdobramento normal. A jurisprudência e a doutrina entendem que complicações decorrentes do tratamento médico (como infecção hospitalar ou até mesmo um erro médico não grosseiro) estão na <strong>linha de desdobramento normal e previsível</strong> de quem fere alguém.</p>' +
+                    '<p>Quem esfaqueia uma pessoa cria o risco de ela precisar de uma cirurgia, e toda cirurgia tem riscos. Portanto, o erro médico (salvo se for algo completamente bizarro e desconectado) <strong>NÃO</strong> é uma causa que, "por si só", produz o resultado. Ela apenas se soma à conduta inicial. Assim, o nexo causal <strong>NÃO é rompido</strong>, e o agente "A" responde pelo homicídio consumado.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático (para diferenciar):</strong><br><strong>NÃO ROMPE O NEXO:</strong> "A" atira em "B". No hospital, "B" morre por infecção hospitalar. "A" responde por homicídio consumado.<br><strong>ROMPE O NEXO:</strong> "A" atira em "B". No hospital, o médico inimigo de "B" aproveita a cirurgia para injetar veneno na vítima. O envenenamento é um evento extraordinário que, por si só, causou a morte. "A" responde por tentativa.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 23, p. 4-5 (raciocínio aplicado)</em></p>',
+            topic: "Desdobramento Causal Normal vs. Extraordinário"
+        }
+    ];
+
+    const userAnswers = new Array(questions.length).fill(null);
+    const quizContainer = document.getElementById('quiz-section');
+    const reportSection = document.getElementById('report-section');
+    let performanceChart = null;
+
+    function renderQuestions() {
+        let quizHTML = '';
+        questions.forEach((q, index) => {
+            quizHTML +=
+                '<div class="question-card" id="question-' + index + '">' +
+                    '<p class="question-title">' + (index + 1) + '. ' + q.question + '</p>' +
+                    '<div class="options-container">';
+            q.options.forEach((option, optionIndex) => {
+                quizHTML +=
+                    '<div class="option" data-question="' + index + '" data-option="' + optionIndex + '">' +
+                        '<span class="option-letter">' + String.fromCharCode(65 + optionIndex) + '</span>' +
+                        '<span class="option-text">' + option + '</span>' +
+                        '<i class="fas fa-cut scissor-icon" title="Eliminar alternativa"></i>' +
+                    '</div>';
+            });
+            quizHTML +=
+                    '</div>' +
+                    '<div class="feedback" id="feedback-' + index + '"></div>' +
+                '</div>';
+        });
+        quizContainer.innerHTML = quizHTML;
+        addEventListeners();
+    }
+
+    function addEventListeners() {
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', handleOptionSelect);
+        });
+        document.querySelectorAll('.scissor-icon').forEach(icon => {
+            icon.addEventListener('click', handleEliminateOption);
+        });
+    }
+
+    function handleEliminateOption(e) {
+        e.stopPropagation();
+        const optionDiv = e.target.parentElement;
+        if (!optionDiv.classList.contains('eliminated') && userAnswers[optionDiv.dataset.question] === null) {
+            optionDiv.classList.add('eliminated');
+        }
+    }
+
+    function handleOptionSelect(e) {
+        const selectedOption = e.currentTarget;
+        const questionIndex = parseInt(selectedOption.dataset.question);
+        const optionIndex = parseInt(selectedOption.dataset.option);
+
+        if (userAnswers[questionIndex] !== null || selectedOption.classList.contains('eliminated')) {
+            return;
+        }
+
+        const isCorrect = optionIndex === questions[questionIndex].answer;
+        userAnswers[questionIndex] = { answered: optionIndex, correct: isCorrect };
+
+        const optionsContainer = selectedOption.parentElement;
+        optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+        selectedOption.classList.add(isCorrect ? 'correct' : 'incorrect');
+        
+        optionsContainer.querySelectorAll('.scissor-icon').forEach(icon => icon.style.display = 'none');
+
+        showFeedback(questionIndex, isCorrect);
+        
+        if (userAnswers.every(answer => answer !== null)) {
+            reportSection.classList.remove('hidden');
+            generateReport();
+            scrollToSection('report-section');
+        }
+    }
+
+    function showFeedback(questionIndex, isCorrect) {
+        const feedbackDiv = document.getElementById('feedback-' + questionIndex);
+        const questionData = questions[questionIndex];
+        
+        let feedbackHTML = 
+            '<p class="feedback-title">' + (isCorrect ? 'Resposta Correta! Análise do Professor:' : 'Resposta Incorreta. Análise do Professor:') + '</p>' +
+            '<div>' + questionData.explanation + '</div>';
+        
+        feedbackDiv.innerHTML = feedbackHTML;
+        feedbackDiv.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    }
+    
+    function generateReport() {
+        const correctAnswers = userAnswers.filter(a => a.correct).length;
+        const incorrectAnswers = questions.length - correctAnswers;
+
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        if (performanceChart) {
+            performanceChart.destroy();
+        }
+        performanceChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Acertos', 'Erros'],
+                datasets: [{
+                    data: [correctAnswers, incorrectAnswers],
+                    backgroundColor: ['var(--success-green)', 'var(--error-red)'],
+                    borderColor: ['var(--white)'],
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 14 }, padding: 20 } },
+                    title: { display: true, text: 'Seu Desempenho Geral', font: { size: 18, weight: 'bold' }, padding: { bottom: 20 } }
+                }
+            }
+        });
+
+        const reviewSection = document.getElementById('review-section');
+        let reviewHTML = '<h3 class="text-xl font-bold mb-4 text-[var(--primary-blue)]">Pontos para Revisão</h3>';
+        const incorrectQuestions = userAnswers
+            .map((answer, index) => ({...answer, index}))
+            .filter(answer => !answer.correct);
+
+        if (incorrectQuestions.length === 0) {
+            reviewHTML += '<p class="text-lg text-[var(--success-green)] font-semibold">Performance de elite! Você demonstrou total domínio sobre as complexas regras das concausas.</p>';
+        } else {
+            reviewHTML += '<p class="mb-4 text-[var(--dark-gray)]">Você errou ' + incorrectQuestions.length + ' questão(ões). O diabo mora nos detalhes do nexo causal. Revise estes pontos para fortalecer sua análise:</p>';
+            incorrectQuestions.forEach(q => {
+                const originalQuestion = questions[q.index];
+                reviewHTML +=
+                    '<div class="review-card">' +
+                        '<h4 class="font-bold text-lg mb-2 text-[#D97706]">' + originalQuestion.topic + '</h4>' +
+                        '<p class="mb-3"><strong>Na questão:</strong> "' + originalQuestion.question + '"</p>' +
+                        '<p class="font-semibold">Relembre o ponto-chave:</p>' +
+                        originalQuestion.explanation +
+                    '</div>';
+            });
+        }
+        reviewSection.innerHTML = reviewHTML;
+    }
+
+    function scrollToSection(sectionId) {
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+        const sections = ['quiz-section', 'report-section'];
+        let currentSection = '';
+
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 150 && rect.bottom >= 150) {
+                    currentSection = sectionId;
+                }
+            }
+        });
+        
+        const sidebarLinks = document.querySelectorAll('#sidebar ul li a');
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if(link.getAttribute('href') === '#' + currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', renderQuestions);
+    </script>
+
+</body>
+</html>

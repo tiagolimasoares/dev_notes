@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 11: Liberdade de Consciência, Crença e Culto</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 11: Liberdade de Consciência, Crença e Culto</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 6</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direito à Liberdade de Consciência, Crença e Culto</h1>
+                <p>Teste seus conhecimentos com base na Aula 11. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "De acordo com o Art. 5º, VIII, da CF, um cidadão pode ser privado de seus direitos por motivo de crença religiosa ou convicção filosófica/política quando:",
+                options: [
+                    "Apenas invocar tal motivo para não cumprir uma obrigação legal a todos imposta.",
+                    "Recusar-se a cumprir a prestação alternativa fixada em lei, mesmo sem ter invocado a escusa de consciência.",
+                    "Invocar a escusa de consciência para não cumprir obrigação legal a todos imposta E, cumulativamente, recusar-se a cumprir a prestação alternativa.",
+                    "Sua religião for considerada contrária aos bons costumes pela maioria da população.",
+                    "A obrigação legal for de natureza militar, caso em que a recusa é absoluta."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Dupla Condição para a Sanção:</strong> Perfeito! Você identificou a estrutura cumulativa do dispositivo constitucional. A sanção (privação de direitos) não é automática. Ela só ocorre se o cidadão preencher <strong>dois requisitos</strong>, um após o outro:</p>
+                        <ol>
+                            <li><strong>1º Passo (Invocar a Escusa):</strong> O cidadão se recusa a cumprir uma obrigação que vale para todos (ex: serviço militar obrigatório, ser jurado) alegando que isso fere sua consciência ou crença.</li>
+                            <li><strong>2º Passo (Recusar a Alternativa):</strong> O Estado, então, oferece uma 'prestação alternativa' (um serviço substituto que não fere a crença dele). Se, e somente se, o cidadão também se recusar a cumprir essa segunda obrigação, ele sofrerá a sanção.</li>
+                        </ol>
+                        <div class="visual-aid">Recusa da Obrigação Original + Recusa da Prestação Alternativa = ⚖️ Sanção</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> João é convocado para o serviço militar, mas sua religião o proíbe de usar armas. Ele invoca a escusa de consciência (1º passo). As Forças Armadas, então, o designam para prestar um serviço administrativo em um quartel (prestação alternativa). Se João aceitar e cumprir, nenhum direito seu será afetado. Se ele se recusar a fazer o serviço administrativo (2º passo), aí sim ele estará sujeito à sanção de perda/suspensão dos direitos políticos.</p>
+                        <p><strong>(Fonte: Aula11, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual é a consequência para o indivíduo que, após invocar a escusa de consciência, recusa-se a cumprir a prestação alternativa, segundo a literalidade do Art. 15, IV, da CF?",
+                options: [
+                    "Prisão por desobediência.",
+                    "Multa pecuniária.",
+                    "Suspensão dos direitos políticos.",
+                    "Perda da nacionalidade brasileira.",
+                    "Perda dos direitos políticos."
+                ],
+                answer: 4,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Controvérsia Doutrinária e o Texto da Lei:</strong> Excelente! Você demonstrou conhecimento sobre um ponto polêmico e soube diferenciar a literalidade da lei da divergência doutrinária. A Aula 11 destaca essa polêmica.</p>
+                        <p>O Art. 15 da Constituição, que trata dos casos de <strong>perda ou suspensão</strong> dos direitos políticos, diz em seu inciso IV que haverá a <strong>PERDA</strong> dos direitos no caso de 'recusa de cumprir obrigação a todos imposta ou prestação alternativa, nos termos do art. 5º, VIII'.</p>
+                        <p><strong>Atenção para a prova:</strong></p>
+                        <ul>
+                            <li>Se a questão perguntar 'segundo a literalidade da Constituição' ou 'conforme o Art. 15, IV', a resposta é <strong>PERDA</strong>.</li>
+                            <li>Se a questão abrir margem para a doutrina ou jurisprudência, é preciso ter cuidado, pois muitos autores (como citado na aula) defendem que se trata de uma <strong>SUSPENSÃO</strong>, já que os direitos podem ser readquiridos com o cumprimento posterior da obrigação.</li>
+                        </ul>
+                        <p class="example"><strong>Como a banca pode cobrar:</strong> Uma questão da banca CEBRASPE/CESPE poderia afirmar: 'De acordo com o texto constitucional, a recusa em cumprir prestação alternativa, nos termos da lei, acarreta a suspensão dos direitos políticos.' Esta assertiva estaria <strong>ERRADA</strong>, pois o texto fala em perda.</p>
+                        <p><strong>(Fonte: Aula11, p. 3, 4 e 5)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a jurisprudência do STF (RE 611874), um candidato de concurso público que invoca escusa de consciência por motivo religioso pode ter a data de uma etapa do certame alterada?",
+                options: [
+                    "Não, em nenhuma hipótese, pois prevalece o princípio da isonomia e as regras do edital.",
+                    "Sim, desde que a alteração seja razoável, preserve a igualdade entre os candidatos e não gere ônus desproporcional à Administração.",
+                    "Sim, mas apenas para o Teste de Aptidão Física (TAF), não para provas escritas.",
+                    "Não, pois o Estado é laico e não pode privilegiar nenhuma religião.",
+                    "Sim, bastando a simples alegação do candidato, que tem presunção de veracidade."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Ponderando Direitos no Concurso Público:</strong> Resposta precisa. O STF, nessa decisão, buscou um equilíbrio. Não se trata de um direito absoluto à remarcação, mas também não há uma vedação absoluta.</p>
+                        <p>A Corte estabeleceu <strong>condições</strong> para que a remarcação seja possível, transferindo para a Administração Pública o dever de analisar o caso concreto e decidir de forma fundamentada. Os critérios são:</p>
+                        <ul>
+                            <li><strong>Razoabilidade da Alteração:</strong> É viável mudar a data/horário? (Ex: aplicar a prova em um horário alternativo no mesmo dia).</li>
+                            <li><strong>Preservação da Isonomia:</strong> A mudança não pode dar uma vantagem indevida ao candidato em relação aos demais (Ex: dar-lhe mais tempo de estudo).</li>
+                            <li><strong>Ônus Desproporcional:</strong> A alteração não pode gerar um custo ou uma complexidade logística excessiva para a Administração.</li>
+                        </ul>
+                        <p class="example"><strong>Cenário Prático:</strong> Um concurso marca a prova objetiva para um sábado. Um candidato judeu ou adventista, que guarda o sábado, solicita fazer a prova após o pôr do sol. A Administração pode confiná-lo em uma sala durante o dia e aplicar a mesma prova à noite. Isso é <strong>razoável</strong>, mantém a <strong>isonomia</strong> (ele não viu a prova antes) e o <strong>ônus</strong> é administrável. Portanto, a remarcação seria possível.</p>
+                        <p><strong>(Fonte: Aula11, p. 6)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Sobre o conceito de Estado Laico no Brasil, é correto afirmar que:",
+                options: [
+                    "O Estado é ateu e deve combater ativamente qualquer manifestação religiosa.",
+                    "O Estado não possui uma religião oficial, mas deve garantir a liberdade de crença e proteger os locais de culto.",
+                    "O Estado permite a presença de símbolos religiosos em prédios públicos apenas se forem do cristianismo, por ser a religião majoritária.",
+                    "O ensino religioso em escolas públicas é proibido em qualquer modalidade.",
+                    "O Estado Laico impede o reconhecimento de efeitos civis ao casamento religioso."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Laicidade Positiva, Não Laicismo:</strong> Perfeito! É crucial não confundir o Estado Laico brasileiro com um Estado antirreligioso (laicismo). A laicidade no Brasil é <strong>positiva</strong> ou <strong>colaborativa</strong>.</p>
+                        <p>Isso significa que:</p>
+                        <ul>
+                            <li><strong>Neutralidade:</strong> O Estado não adota uma religião oficial e deve tratar todas com igualdade.</li>
+                            <li><strong>Não Indiferença:</strong> O Estado não é indiferente ao fenômeno religioso. Pelo contrário, ele tem o dever de <strong>proteger e garantir</strong> a liberdade de crença e o livre exercício dos cultos (Art. 5º, VI).</li>
+                        </ul>
+                        <div class="visual-aid">✝️☪️✡️ O Estado não escolhe uma, mas protege TODAS.</div>
+                        <p class="example"><strong>Ações que demonstram a laicidade positiva:</strong> A garantia de assistência religiosa em presídios e hospitais (Art. 5º, VII), a imunidade tributária de templos (Art. 150, VI, 'b'), o reconhecimento do casamento religioso para efeitos civis (Art. 226, § 2º) e a própria decisão do STF que permitiu o sacrifício de animais em rituais como forma de proteger a liberdade de culto.</p>
+                        <p><strong>(Fonte: Aula11, p. 7)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual foi o entendimento do STF sobre a constitucionalidade de lei estadual que permite o sacrifício ritual de animais em cultos de religiões de matriz africana?",
+                options: [
+                    "A lei é inconstitucional, pois a proteção ao meio ambiente e a vedação à crueldade contra animais prevalecem.",
+                    "A lei é constitucional, pois a proteção à liberdade religiosa, nesse caso, prepondera sobre a proteção aos animais.",
+                    "A lei é constitucional, mas o sacrifício só pode ser feito sem derramamento de sangue.",
+                    "A lei é inconstitucional, pois o Estado é laico e não pode legislar sobre rituais religiosos.",
+                    "A decisão foi adiada, e o tema ainda está pendente de julgamento."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Ponderação entre Direitos Fundamentais:</strong> Resposta precisa! Neste caso (RE 494601), o STF se deparou com um conflito entre dois valores constitucionais: a <strong>liberdade de culto</strong> (Art. 5º, VI) e a <strong>proteção da fauna contra a crueldade</strong> (Art. 225, § 1º, VII).</p>
+                        <p>A Corte decidiu que a prática do sacrifício ritual, inserida no contexto sagrado das religiões de matriz africana, é uma manifestação essencial de sua fé e, portanto, está protegida pela liberdade religiosa. O STF entendeu que a vedação à crueldade contra animais não é absoluta e que, neste caso específico, ela é relativizada para garantir o livre exercício do culto.</p>
+                        <div class="visual-aid">🕊️ Liberdade de Culto vs. 🐾 Proteção Animal ➡️ Vitória da Liberdade de Culto (no contexto ritualístico)</div>
+                        <p class="example"><strong>Importante distinção:</strong> A decisão não libera a crueldade contra animais de forma geral. Uma rinha de galos, por exemplo, continua sendo crime, pois não está amparada por nenhuma liberdade religiosa. A proteção ao sacrifício ritual é específica para o exercício da fé, onde o ato tem um significado sagrado e não um fim de mero entretenimento ou violência.</p>
+                        <p><strong>(Fonte: Aula11, p. 7)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Sobre o ensino religioso em escolas públicas, o STF decidiu que ele deve ser:",
+                options: [
+                    "Obrigatório para todos os alunos, com base na tradição cristã do país.",
+                    "De matrícula facultativa e de natureza confessional, permitindo que as diversas crenças apresentem seus credos.",
+                    "Proibido, pois viola a laicidade do Estado.",
+                    "Permitido, mas apenas na modalidade não confessional, abordando a história das religiões de forma neutra.",
+                    "De matrícula obrigatória, mas os pais podem escolher a religião a ser ensinada."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Modelo Confessional Facultativo:</strong> Exato! No julgamento da ADI 4439, o STF validou o modelo de ensino religioso que permite às escolas públicas oferecerem aulas baseadas nos credos de diferentes religiões.</p>
+                        <p>Os pontos centrais da decisão foram:</p>
+                        <ul>
+                            <li><strong>Matrícula Facultativa:</strong> Ninguém é obrigado a se matricular. O aluno (ou seus pais) escolhe se quer ou não cursar a disciplina. Isso preserva a liberdade de quem não tem religião ou prefere não ter essa instrução na escola.</li>
+                            <li><strong>Natureza Confessional:</strong> O ensino pode ser ministrado de acordo com os preceitos de uma determinada confissão religiosa (católica, evangélica, espírita, etc.), por representantes credenciados por ela. A Corte entendeu que um ensino puramente histórico ou filosófico não atenderia ao propósito do dispositivo constitucional.</li>
+                            <li><strong>Igualdade de Condições:</strong> O Estado deve permitir que as diversas religiões, em igualdade de condições, possam oferecer seu ensino, sem privilegiar uma em detrimento de outra.</li>
+                        </ul>
+                        <p class="example"><strong>Na prática:</strong> Uma escola pública pode oferecer, em seu horário normal, aulas de 'Ensino Religioso Católico' e 'Ensino Religioso Evangélico'. O aluno João, que é católico, se matricula na primeira. A aluna Maria, que é evangélica, se matricula na segunda. O aluno Pedro, que é ateu, não se matricula em nenhuma e não é prejudicado por isso. Isso respeita a laicidade e a liberdade de todos.</p>
+                        <p><strong>(Fonte: Aula11, p. 8)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de elite!</strong> Você demonstrou domínio completo sobre os complexos temas da liberdade religiosa e da laicidade do Estado. Este é um grande diferencial competitivo. Mantenha o foco!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

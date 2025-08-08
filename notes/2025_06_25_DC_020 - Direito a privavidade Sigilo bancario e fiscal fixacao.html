@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 19: Sigilo Bancário e Fiscal</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 19: Sigilo Bancário e Fiscal</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direito à Privacidade: Sigilo Bancário e Fiscal</h1>
+                <p>Teste seus conhecimentos com base na Aula 19. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Qual das seguintes entidades pode decretar a quebra de sigilo bancário de um investigado SEM a necessidade de autorização judicial?",
+                options: [
+                    "Polícia Federal",
+                    "Ministério Público Estadual",
+                    "Tribunal de Contas da União (TCU)",
+                    "Comissão Parlamentar de Inquérito (CPI) Federal ou Estadual",
+                    "Polícia Civil"
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Os Poderes de Investigação da CPI:</strong> Perfeito! As CPIs, tanto federais (Congresso) quanto estaduais (Assembleias Legislativas), possuem 'poderes de investigação próprios das autoridades judiciais', conforme o Art. 58, § 3º, da CF. Isso lhes confere a prerrogativa de determinar a quebra de sigilos bancário, fiscal e de dados diretamente, sem precisar pedir ao Judiciário.</p>
+                        <p><strong>Atenção à pegadinha:</strong> Essa prerrogativa <strong>NÃO se estende às CPIs Municipais</strong> (Câmaras de Vereadores), pois a Constituição não lhes conferiu tal poder. Elas podem investigar, mas se precisarem quebrar um sigilo, terão que solicitar a um juiz.</p>
+                        <div class="visual-aid">🏛️ CPI Federal/Estadual ➡️ 🔓 Quebra Direta<br>🏢 CPI Municipal ➡️ 🧑‍⚖️ Pede ao Juiz</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Uma CPI no Senado que investiga desvios de verbas públicas suspeita que um empresário está recebendo propina em sua conta bancária. O presidente da CPI pode expedir um ofício diretamente ao banco, determinando o envio dos extratos do investigado. O banco é obrigado a cumprir. Se fosse uma CPI municipal, o presidente da comissão teria que fazer um pedido formal a um juiz, que analisaria e, se concordasse, expediria a ordem ao banco.</p>
+                        <p><strong>(Fonte: Aula19, p. 2 e 7)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a jurisprudência do STF, a Receita Federal (Fisco) pode requisitar diretamente das instituições financeiras informações sobre as movimentações bancárias dos contribuintes, sem prévia autorização judicial?",
+                options: [
+                    "Não, em nenhuma hipótese, pois isso violaria o sigilo bancário.",
+                    "Sim, pois o STF entendeu que não há 'quebra', mas sim 'transferência de sigilo' dos bancos para o Fisco, que também tem o dever de mantê-lo.",
+                    "Não, a menos que o contribuinte autorize expressamente.",
+                    "Sim, mas apenas para contribuintes que são pessoas jurídicas, não físicas.",
+                    "Sim, mas apenas se houver um processo criminal já instaurado contra o contribuinte."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A 'Transferência de Sigilo':</strong> Exato! Esta é uma das decisões mais importantes do STF em matéria tributária e de sigilo. Ao julgar a constitucionalidade da Lei Complementar nº 105/2001, a Corte criou a tese da 'transferência de sigilo'.</p>
+                        <p>O raciocínio é que o sigilo não está sendo 'quebrado' e exposto ao público. Ele está apenas sendo <strong>transferido</strong> de uma entidade que tem o dever de sigilo (o banco) para outra que também tem o dever de sigilo (o Fisco). O objetivo é permitir que a Receita Federal possa fiscalizar e combater a sonegação de impostos de forma mais eficaz.</p>
+                        <div class="visual-aid">🏦 Banco (com sigilo) ➡️ 💼 Fisco (com sigilo)</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> A Receita Federal, ao analisar a declaração de Imposto de Renda de uma pessoa, percebe que ela declarou uma renda de R$ 5 mil por mês, mas os dados do cartão de crédito mostram gastos de R$ 30 mil mensais. Para verificar a origem desse dinheiro, a Receita pode requisitar diretamente ao banco os extratos da conta dessa pessoa para cruzar as informações e verificar se há sonegação fiscal, sem precisar pedir autorização a um juiz.</p>
+                        <p><strong>(Fonte: Aula19, p. 2, 3 e 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Em regra, o Ministério Público e as Polícias (Civil e Federal) podem decretar a quebra de sigilo bancário?",
+                options: [
+                    "Sim, ambos podem, pois são órgãos de persecução penal.",
+                    "Apenas o Ministério Público pode; a Polícia precisa pedir ao MP.",
+                    "Apenas a Polícia pode; o Ministério Público precisa pedir à Polícia.",
+                    "Não, ambos necessitam de autorização judicial para a quebra de sigilo bancário.",
+                    "Sim, mas apenas em casos de crimes hediondos."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Reserva de Jurisdição para a Persecução Penal:</strong> Perfeito! Esta é a regra geral e um ponto fundamental para sua prova. Diferente das CPIs e do Fisco, os órgãos da persecução penal, como o Ministério Público e as Polícias, <strong>NÃO</strong> possuem poder para, por ato próprio, quebrar o sigilo bancário de um cidadão.</p>
+                        <p>Essa quebra de sigilo é considerada uma medida invasiva que só pode ser autorizada pelo Poder Judiciário, que atua como um garantidor dos direitos fundamentais do investigado. O juiz analisará se a medida é necessária, adequada e proporcional.</p>
+                        <div class="visual-aid">👮‍♂️ Polícia/MP Suspeita ➡️ 📝 Pede ao Juiz ➡️ 🧑‍⚖️ Juiz Analisa e Autoriza ➡️ 🔓 Quebra do Sigilo</div>
+                        <p class="example"><strong>Cenário de Investigação:</strong> Um delegado da Polícia Federal, investigando um crime de lavagem de dinheiro, precisa analisar as contas bancárias de um suspeito. Ele não pode ir diretamente ao banco. Ele deve elaborar uma representação, com todos os indícios que já possui, e enviá-la ao juiz competente. O juiz, se convencido da necessidade da medida, expedirá uma ordem judicial ao banco para que forneça os dados. O mesmo procedimento vale para o Promotor de Justiça.</p>
+                        <p><strong>(Fonte: Aula19, p. 5, 6 e 7)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O STF (Tema 990) decidiu que o compartilhamento de informações bancárias e fiscais, obtidas pela Receita Federal, com o Ministério Público para fins de persecução penal:",
+                options: [
+                    "É inconstitucional, pois viola o sigilo.",
+                    "É constitucional e não exige prévia autorização judicial.",
+                    "É constitucional, mas exige prévia autorização judicial para cada compartilhamento.",
+                    "É permitido, mas apenas para o Ministério Público Federal, não para os estaduais.",
+                    "É permitido, mas as informações não podem ser usadas como prova no processo penal."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Ponte entre o Fisco e o MP:</strong> Exato! Esta é outra decisão crucial do STF. A Corte entendeu que, se a Receita Federal, durante uma fiscalização, encontra indícios de um crime (como sonegação fiscal, lavagem de dinheiro, etc.), ela pode e deve compartilhar essas informações (incluindo os dados bancários que obteve legalmente) com o Ministério Público, que é o titular da ação penal.</p>
+                        <p>O raciocínio é o da eficiência e da colaboração entre os órgãos do Estado. Não seria razoável exigir que o MP pedisse novamente ao juiz por uma informação que o Estado (na figura do Fisco) já possui legalmente. Ocorre, novamente, uma 'transferência de sigilo' entre órgãos estatais, ambos com o dever de proteger os dados.</p>
+                        <div class="visual-aid">💼 Fisco (com dados) ➡️ 🤝 MP (para investigar crime) = ✅ Permitido sem nova ordem judicial</div>
+                        <p class="example"><strong>Na Prática:</strong> A Receita Federal, ao auditar uma empresa, descobre uma complexa rede de notas frias e movimentações bancárias suspeitas que indicam lavagem de dinheiro. A Receita pode, por meio de um procedimento formal e sigiloso, enviar todo o relatório da fiscalização, incluindo os extratos bancários, para o Ministério Público, para que este possa oferecer uma denúncia criminal contra os envolvidos.</p>
+                        <p><strong>(Fonte: Aula19, p. 6)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Conforme a Aula 19, a quebra do sigilo fiscal de um cidadão pode ser decretada por qual(is) autoridade(s)?",
+                options: [
+                    "Apenas pela autoridade judicial.",
+                    "Apenas pelas CPIs (Federais e Estaduais).",
+                    "Pela autoridade judicial ou pelas CPIs.",
+                    "Pela autoridade judicial, pelas CPIs ou pelo Fisco.",
+                    "Apenas pelo Ministro da Fazenda."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>As Chaves do Sigilo Fiscal:</strong> Perfeito! A regra para o sigilo fiscal é mais restritiva que a do sigilo bancário. Enquanto o sigilo bancário pode ser acessado pelo Fisco sem ordem judicial (na modalidade de transferência de sigilo), o sigilo fiscal (que abrange o conjunto de declarações e informações do contribuinte) tem sua quebra reservada a menos autoridades.</p>
+                        <p>A aula destaca que apenas duas entidades têm o poder de decretar a quebra do sigilo fiscal:</p>
+                        <ul>
+                            <li><strong>🧑‍⚖️ Autoridade Judicial:</strong> O juiz, mediante decisão fundamentada, em um processo.</li>
+                            <li><strong>🏛️ CPIs (Federais e Estaduais):</strong> Em virtude de seus poderes de investigação próprios de autoridade judicial.</li>
+                        </ul>
+                        <p class="example"><strong>Diferença Importante:</strong> A Receita Federal tem acesso aos dados fiscais para suas atividades internas de fiscalização, mas a 'quebra' do sigilo, no sentido de expor esses dados a terceiros em uma investigação mais ampla, segue essa regra mais rígida. Por exemplo, em uma investigação criminal, o delegado ou o promotor precisariam de uma ordem judicial para ter acesso à íntegra das declarações de imposto de renda de um suspeito.</p>
+                        <p><strong>(Fonte: Aula19, p. 8)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de altíssimo nível!</strong> Você demonstrou total domínio sobre as complexas regras de quebra de sigilo bancário e fiscal. Este é um conhecimento que o diferencia da concorrência. Continue focado!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

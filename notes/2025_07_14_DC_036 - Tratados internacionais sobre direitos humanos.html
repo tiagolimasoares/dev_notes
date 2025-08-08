@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 35: Disposições Finais</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 35: Disposições Finais</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 4</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Disposições Finais</h1>
+                <p>Teste seus conhecimentos com base na Aula 35. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Para que um tratado internacional sobre direitos humanos seja equivalente a uma emenda constitucional, ele precisa ser aprovado em:",
+                options: [
+                    "Cada Casa do Congresso Nacional, em turno único, por maioria absoluta.",
+                    "Sessão conjunta do Congresso Nacional, em dois turnos, por três quintos dos votos.",
+                    "Cada Casa do Congresso Nacional, em dois turnos, por três quintos dos votos.",
+                    "Cada Casa do Congresso Nacional, em dois turnos, por maioria absoluta.",
+                    "Referendo popular, após aprovação simples no Congresso."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Rito de Internalização Qualificada:</strong> Perfeito! O Art. 5º, § 3º, da CF, estabelece um procedimento especial e rigoroso, idêntico ao de uma Proposta de Emenda à Constituição (PEC), para que um tratado de direitos humanos alcance o status máximo em nosso ordenamento.</p>
+                        <p>Os requisitos são <strong>cumulativos</strong>:</p>
+                        <ul>
+                            <li><strong>🏛️ Bicameral:</strong> A votação deve ocorrer nas duas Casas do Congresso (Câmara dos Deputados e Senado Federal).</li>
+                            <li><strong>🔄 Duplo Turno:</strong> Em cada uma das Casas, o tratado deve ser votado e aprovado <strong>duas vezes</strong>.</li>
+                            <li><strong>💯 Quórum Qualificado:</strong> Em ambas as votações, em ambas as Casas, é preciso alcançar no mínimo <strong>três quintos (3/5)</strong> dos votos dos respectivos membros.</li>
+                        </ul>
+                        <div class="visual-aid">Câmara (2 turnos, 3/5) + Senado (2 turnos, 3/5) = ✨ Status de Emenda Constitucional</div>
+                        <p class="example"><strong>Exemplo Real:</strong> A <strong>Convenção da ONU sobre os Direitos das Pessoas com Deficiência</strong> foi o primeiro (e um dos poucos) tratado a passar por esse rito completo no Brasil. Por isso, hoje, suas normas têm a mesma força de um artigo da Constituição e não podem ser contrariadas por leis comuns.</p>
+                        <p><strong>(Fonte: Aula35, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Um tratado internacional sobre direitos humanos que é aprovado pelo Congresso Nacional, mas sem seguir o rito especial do Art. 5º, § 3º (ou seja, é aprovado como uma lei comum), terá qual status hierárquico?",
+                options: [
+                    "Status de Emenda Constitucional.",
+                    "Status de Lei Ordinária.",
+                    "Status Supralegal (acima das leis, mas abaixo da Constituição).",
+                    "Não terá validade jurídica.",
+                    "Status de Lei Complementar."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O 'Mezanino' da Pirâmide Normativa:</strong> Exato! Esta é uma das construções jurisprudenciais mais importantes do STF. Quando um tratado de direitos humanos é aprovado, mas pelo rito comum (maioria simples ou absoluta, a depender do caso), ele não é rebaixado a uma simples lei, nem elevado à Constituição.</p>
+                        <p>O STF decidiu que, pela sua importância material (proteger direitos humanos), ele adquire um status especial: <strong>supralegal</strong>. Ele fica em um 'andar' intermediário na pirâmide de Kelsen.</p>
+                        <div class="visual-aid">🥇 Topo: Constituição<br>🥈 Mezanino: Tratados de DH Supralegais<br>🥉 Base: Leis (Ordinárias, etc.)</div>
+                        <p class="example"><strong>Exemplo Clássico:</strong> O <strong>Pacto de San José da Costa Rica</strong>. Ele foi aprovado antes da Emenda Constitucional 45/2004, pelo rito comum. O Pacto proíbe a prisão civil por dívida, exceto para o devedor de alimentos. A legislação brasileira previa a prisão do depositário infiel. O STF, com base no status <strong>supralegal</strong> do Pacto, declarou que a lei brasileira que permitia essa prisão não era mais válida, pois uma norma inferior (a lei) não pode contrariar uma superior (o tratado supralegal).</p>
+                        <p><strong>(Fonte: Aula35, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Se o Brasil assina e o Congresso aprova um tratado internacional sobre comércio de commodities agrícolas, qual será o status hierárquico desse tratado em nosso ordenamento jurídico?",
+                options: [
+                    "Status de Emenda Constitucional, pois todo tratado é superior às leis.",
+                    "Status Supralegal, pois foi aprovado pelo Congresso.",
+                    "Status de Lei Ordinária.",
+                    "Status Constitucional, se aprovado por 3/5 dos votos.",
+                    "Dependerá de um decreto do Presidente da República."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Natureza do Tratado Define sua Posição:</strong> Perfeito! A 'escada' hierárquica dos tratados depende fundamentalmente de seu <strong>conteúdo</strong>.</p>
+                        <p>Os status especiais (constitucional ou supralegal) são reservados <strong>exclusivamente</strong> para tratados que versem sobre <strong>DIREITOS HUMANOS</strong>. Se o tratado trata de qualquer outro assunto (comércio, tributação, meio ambiente, cooperação técnica), ele não tem esse privilégio.</p>
+                        <p>Um tratado comum, ao ser aprovado pelo Congresso e promulgado, ingressa no ordenamento jurídico com a mesma força de uma <strong>lei ordinária federal</strong>.</p>
+                        <div class="visual-aid">🌍 Tratado sobre Direitos Humanos ➡️ Status Especial (Constitucional ou Supralegal)<br>🚢 Tratado sobre Comércio/Outros Temas ➡️ Status de Lei Ordinária</div>
+                        <p class="example"><strong>Na Prática:</strong> O tratado sobre comércio de commodities do exemplo, após aprovado, terá a mesma força de uma lei federal. Isso significa que ele pode revogar leis federais anteriores sobre o mesmo tema, mas também pode ser revogado por uma lei federal posterior que trate do assunto de forma diferente.</p>
+                        <p><strong>(Fonte: Aula35, p. 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A Emenda Constitucional nº 115/22 incluiu um novo direito fundamental no rol do Art. 5º da Constituição. Que direito é esse?",
+                options: [
+                    "O direito à segurança pública.",
+                    "O direito à moradia.",
+                    "O direito à proteção de dados pessoais, inclusive nos meios digitais.",
+                    "O direito a um meio ambiente ecologicamente equilibrado.",
+                    "O direito à alimentação adequada."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Era da Proteção de Dados:</strong> Exato! Esta é a mais recente e uma das mais importantes atualizações no rol dos direitos e garantias fundamentais. A Emenda Constitucional 115, de fevereiro de 2022, inseriu o <strong>inciso LXXIX</strong> no Art. 5º.</p>
+                        <p>O texto diz: 'é assegurado, nos termos da lei, o direito à <strong>proteção dos dados pessoais, inclusive nos meios digitais</strong>'.</p>
+                        <p>Essa inclusão elevou a proteção de dados ao mais alto patamar jurídico do país, o nível de <strong>cláusula pétrea</strong> (Art. 60, § 4º, IV). Isso significa que nenhuma futura emenda constitucional poderá abolir esse direito. Essa mudança constitucional veio para dar um suporte ainda mais forte à legislação já existente, como a Lei Geral de Proteção de Dados (LGPD).</p>
+                        <div class="visual-aid">📲 Dados Pessoais ➡️ 🛡️ Proteção como Direito Fundamental</div>
+                        <p class="example"><strong>Impacto Prático:</strong> Com essa nova garantia, qualquer lei ou ato do poder público que viole de forma desproporcional a proteção dos seus dados pessoais pode ser declarado inconstitucional pelo STF com ainda mais fundamento. Reforça-se o seu direito de saber como seus dados são coletados, usados e compartilhados por empresas e pelo governo.</p>
+                        <p><strong>(Fonte: Aula35, p. 2)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre as disposições finais dos direitos individuais. Este é um conhecimento fundamental que fecha com chave de ouro o estudo do Art. 5º. Mantenha o foco!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

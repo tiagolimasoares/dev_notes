@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Direito Constitucional</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        Todo o estilo da página está contido dentro desta tag <style>.
+        Isso simplifica a distribuição, pois não é necessário um arquivo .css separado.
+        A paleta de cores e a estrutura seguem os princípios de um design clean e profissional.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback da Resposta --- */
+        .feedback {
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.95em;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left: 4px solid #2ecc71;
+            color: #27ae60;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left: 4px solid #e74c3c;
+            color: #c0392b;
+            display: block;
+        }
+        
+        .feedback p { margin: 0; }
+        .feedback strong { font-weight: 700; }
+        .feedback .explanation {
+            margin-top: 10px;
+            color: #2c3e50;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Foco na Aprovação</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 10</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Simulado Interativo: Teoria dos Direitos Fundamentais</h1>
+                <p>Teste seus conhecimentos com base no material de aula. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise os comentários para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        Toda a lógica da aplicação está contida nesta tag <script>.
+        Isso inclui:
+        - O array de questões (`questions`) com as alternativas e explicações.
+        - Funções para renderizar o quiz, processar respostas, gerar o gráfico e a aula de reforço.
+        - Event Listeners que "ouvem" os cliques do usuário e disparam as ações corretas.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- 1. DADOS DAS QUESTÕES (Baseado nos PDFs da Aula 01 a 06) ---
+        const questions = [
+            {
+                question: "Qual é a distinção conceitual correta entre Direitos Humanos e Direitos Fundamentais, conforme a doutrina majoritária?",
+                options: [
+                    "Direitos Humanos são direitos positivados na Constituição, enquanto Direitos Fundamentais estão em tratados internacionais.",
+                    "Não há distinção, os termos são sinônimos e podem ser usados de forma intercambiável.",
+                    "Direitos Humanos estão no plano internacional (tratados), enquanto Direitos Fundamentais são os direitos humanos positivados no plano interno (Constituição).",
+                    "Direitos Fundamentais se aplicam apenas aos cidadãos de um país, enquanto Direitos Humanos são universais.",
+                    "Direitos Humanos são garantias processuais, e Direitos Fundamentais são os direitos materiais."
+                ],
+                answer: 2,
+                explanation: "Correto. Conforme visto na Aula 01, a doutrina distingue os termos pela sua fonte e âmbito de aplicação. Os Direitos Humanos são aqueles consagrados em documentos de cunho internacional, como tratados e convenções. Já os Direitos Fundamentais são esses mesmos direitos quando internalizados e positivados na Constituição de um determinado Estado. (Fonte: Aula01, p. 2)"
+            },
+            {
+                question: "Sobre a hierarquia dos Tratados Internacionais de Direitos Humanos no Brasil, assinale a alternativa correta.",
+                options: [
+                    "Todos os tratados de direitos humanos, após aprovados, possuem status de Emenda Constitucional.",
+                    "Tratados de direitos humanos aprovados com quórum de emenda constitucional (art. 5º, § 3º, CF) são equivalentes às emendas; os demais possuem status de lei ordinária.",
+                    "Todos os tratados de direitos humanos possuem status supralegal, posicionando-se acima das leis e abaixo da Constituição.",
+                    "Tratados de direitos humanos aprovados com quórum de emenda constitucional (art. 5º, § 3º, CF) são equivalentes às emendas; os demais possuem status supralegal.",
+                    "A hierarquia de um tratado de direitos humanos é sempre definida por decreto do Presidente da República."
+                ],
+                answer: 3,
+                explanation: "Correto. Este é um ponto crucial da Aula 06. A Constituição, em seu art. 5º, § 3º, prevê um rito especial de aprovação (dois turnos, em cada Casa do Congresso, por três quintos dos votos) que confere aos tratados de direitos humanos o status de emenda constitucional. Contudo, aqueles que não seguem esse rito, mas são aprovados, adquirem, segundo o STF, um status especial: supralegal. Isso significa que estão acima das leis comuns, mas abaixo da Constituição. (Fonte: Aula06, p. 2)"
+            },
+            {
+                question: "A característica dos direitos fundamentais que admite a sua limitação por meio da ponderação de interesses para resolver conflitos entre eles, afastando a ideia de que são absolutos, é a:",
+                options: [
+                    "Inalienabilidade",
+                    "Imprescritibilidade",
+                    "Universalidade",
+                    "Irrenunciabilidade",
+                    "Relatividade"
+                ],
+                answer: 4,
+                explanation: "Correto. A Relatividade é a característica mais exigida em concursos. Ela estabelece que os direitos fundamentais não são absolutos e podem ser ponderados e limitados quando entram em colisão com outros direitos ou valores constitucionais, sempre com base no princípio da proporcionalidade. (Fonte: Aula02, p. 2)"
+            },
+            {
+                question: "De acordo com a Teoria das Gerações (ou Dimensões) dos Direitos Fundamentais, os direitos sociais, econômicos e culturais, que exigem uma prestação positiva do Estado (um 'fazer'), são classificados como direitos de:",
+                options: [
+                    "Primeira geração",
+                    "Segunda geração",
+                    "Terceira geração",
+                    "Quarta geração",
+                    "Quinta geração"
+                ],
+                answer: 1,
+                explanation: "Correto. A segunda geração de direitos, associada ao valor 'igualdade', corresponde aos direitos sociais, econômicos e culturais (ex: saúde, educação, trabalho). Diferente da primeira geração (liberdades), que exigia uma abstenção estatal, a segunda demanda uma atuação positiva do Estado para garantir condições mínimas de vida digna. (Fonte: Aula03, p. 3)"
+            },
+            {
+                question: "A aplicação dos direitos fundamentais nas relações entre particulares, em uma situação de desequilíbrio fático, como nas relações de trabalho ou de consumo, é denominada pela doutrina como:",
+                options: [
+                    "Eficácia vertical",
+                    "Eficácia horizontal",
+                    "Eficácia diagonal",
+                    "Eficácia irradiante",
+                    "Eficácia diferida"
+                ],
+                answer: 2,
+                explanation: "Correto. A Aula 04 esclarece essa terminologia. Enquanto a eficácia horizontal se aplica a relações entre particulares em teórica igualdade, a eficácia diagonal é o termo específico para a aplicação desses direitos em relações privadas onde há um desequilíbrio de poder, como entre empregador e empregado, ou fornecedor e consumidor. (Fonte: Aula04, p. 2)"
+            },
+            {
+                question: "O princípio que veda a supressão de direitos sociais já conquistados, impedindo o legislador de deliberadamente 'andar para trás' em matéria de proteção social, é conhecido como:",
+                options: [
+                    "Princípio da reserva do possível",
+                    "Princípio da máxima efetividade",
+                    "Teoria dos limites dos limites",
+                    "Proibição do retrocesso (ou Efeito Cliquet)",
+                    "Teoria interna das restrições"
+                ],
+                answer: 3,
+                explanation: "Correto. A proibição do retrocesso, também chamada de Efeito Cliquet, é um princípio que protege as conquistas sociais. Ele estabelece que, uma vez alcançado um determinado patamar de proteção de direitos sociais, o Estado não pode atuar de forma a revogá-lo ou reduzi-lo sem que haja uma justificativa muito forte e políticas compensatórias. (Fonte: Aula05, p. 3)"
+            },
+            {
+                question: "Conforme a Teoria dos Status de Jellinek, o direito de votar e ser votado, representando a capacidade do indivíduo de participar na formação da vontade do Estado, corresponde ao:",
+                options: [
+                    "Status passivo",
+                    "Status negativo",
+                    "Status positivo",
+                    "Status ativo",
+                    "Status de liberdade"
+                ],
+                answer: 3,
+                explanation: "Correto. A Teoria dos Status, detalhada na Aula 03, classifica as posições do indivíduo perante o Estado. O Status Ativo refere-se exatamente à dimensão da cidadania, ou seja, ao conjunto de direitos que permitem ao indivíduo participar ativamente da vida política e da gestão pública. (Fonte: Aula03, p. 2)"
+            },
+            {
+                question: "A afirmação de que as normas definidoras de direitos e garantias fundamentais 'têm aplicação imediata' (art. 5º, § 1º, da CF) significa que:",
+                options: [
+                    "Todas as normas de direitos fundamentais são autoaplicáveis e não necessitam de lei para produzir efeitos.",
+                    "Elas devem produzir todos os seus efeitos o mais rápido possível, mesmo que dependam de regulamentação, devendo o poder público agir para viabilizá-las.",
+                    "A aplicação só ocorre após a publicação de uma lei específica para cada direito.",
+                    "Elas revogam automaticamente toda a legislação anterior que seja incompatível.",
+                    "Somente o Poder Judiciário pode aplicá-las de forma imediata, os demais poderes não."
+                ],
+                answer: 1,
+                explanation: "Correto. Conforme a Aula 04, a 'aplicação imediata' não significa que toda norma é autoexecutável. Significa que, mesmo as normas que dependem de complementação legislativa, já possuem um grau de eficácia e devem ser aplicadas na maior medida possível, vinculando o legislador a editá-las e o administrador a concretizá-las. (Fonte: Aula04, p. 2)"
+            },
+            {
+                question: "No contexto da Teoria dos Direitos Fundamentais, o *Habeas Corpus* é um exemplo clássico de:",
+                options: [
+                    "Um direito fundamental de primeira geração.",
+                    "Uma garantia fundamental.",
+                    "Um direito social.",
+                    "Um direito humano previsto apenas em tratados.",
+                    "Um remédio com status supralegal."
+                ],
+                answer: 1,
+                explanation: "Correto. A Aula 01 faz a distinção clara: 'direitos' são os bens jurídicos em si (ex: a liberdade de locomoção), enquanto 'garantias' são os instrumentos criados para proteger esses direitos. O Habeas Corpus não é o direito em si, mas o instrumento (a garantia) que protege o direito de ir e vir. (Fonte: Aula01, p. 3)"
+            },
+            {
+                question: "A teoria que sustenta que os limites de um direito fundamental são estabelecidos pela necessidade de conciliá-lo com outros direitos de mesma hierarquia, por meio de um processo de ponderação, é a:",
+                options: [
+                    "Teoria Absoluta",
+                    "Teoria Interna",
+                    "Teoria Externa",
+                    "Teoria do Núcleo Essencial",
+                    "Teoria da Eficácia Imediata"
+                ],
+                answer: 2,
+                explanation: "Correto. A Aula 05 apresenta as teorias sobre as restrições aos direitos fundamentais. A Teoria Externa defende que os limites não estão previamente definidos no próprio direito, mas surgem 'de fora', ou seja, da colisão com outros direitos. A solução para esses conflitos é a ponderação, que define o limite do direito no caso concreto. (Fonte: Aula05, p. 2)"
+            },
+        ];
+
+        // --- 2. VARIÁVEIS DE ESTADO ---
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        // --- 3. RENDERIZAR O QUIZ ---
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        // --- 4. LIDAR COM A SELEÇÃO DE UMA ALTERNATIVA ---
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return; // Impede mudar a resposta
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = `<strong>Correto!</strong><div class="explanation">${questions[questionIndex].explanation}</div>`;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                feedbackEl.innerHTML = `<strong>Incorreto.</strong><div class="explanation">${questions[questionIndex].explanation}</div>`;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        // --- 5. LIDAR COM A ELIMINAÇÃO DE ALTERNATIVAS ---
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        // --- 6. ATUALIZAR O PROGRESSO ---
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        // --- 7. MOSTRAR RESULTADOS FINAIS ---
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        // --- 8. RENDERIZAR GRÁFICO ---
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        // --- 9. GERAR AULA DE REFORÇO ---
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = lessonContainer.innerHTML; 
+
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    const correctAnswerText = question.options[question.answer];
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <p><strong>Resposta correta:</strong> <span class="correct-answer">${String.fromCharCode(65 + question.answer)}) ${correctAnswerText}</span></p>
+                            <div class="explanation">
+                                <strong>Justificativa:</strong> ${question.explanation}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p>Parabéns! Você gabaritou o simulado. Continue com essa dedicação e a aprovação será certa.</p>";
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        // --- 10. EVENT LISTENERS ---
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

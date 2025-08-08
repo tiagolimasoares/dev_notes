@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aulas 08, 09 e 10: Liberdade de Expressão</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aulas 08 a 10: Liberdade</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 6</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direito à Liberdade e Liberdade de Expressão</h1>
+                <p>Teste seus conhecimentos com base nas Aulas 08, 09 e 10. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "A doutrina distingue a liberdade em dois sentidos. A 'liberdade negativa' corresponde a qual conceito?",
+                options: [
+                    "A capacidade do indivíduo de participar das decisões políticas e ser senhor de seu próprio destino.",
+                    "A obrigação do Estado de fornecer recursos para que o indivíduo seja livre.",
+                    "A possibilidade de o indivíduo agir sem a interferência ou coerção de terceiros, especialmente do Estado.",
+                    "A liberdade de renunciar aos seus próprios direitos fundamentais.",
+                    "O direito de se opor a qualquer lei, mesmo que democraticamente aprovada."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Liberdade de 'Não Ser Incomodado':</strong> Exato! Você captou a essência da distinção. A 'liberdade negativa', também chamada de 'liberdade civil', é a concepção clássica liberal.</p>
+                        <ul>
+                            <li><strong>Liberdade Negativa (Liberdade DE):</strong> Refere-se a uma esfera de autonomia onde ninguém, principalmente o Estado, pode interferir. É a liberdade <strong>de</strong> coerção, <strong>de</strong> opressão. Ela exige uma <strong>abstenção</strong> estatal.</li>
+                            <li><strong>Liberdade Positiva (Liberdade PARA):</strong> É a capacidade de autodeterminação, de ter as condições necessárias <strong>para</strong> agir e realizar seu potencial. Ela pode exigir uma <strong>atuação</strong> estatal (ex: fornecer educação para que a pessoa seja livre para escolher sua profissão).</li>
+                        </ul>
+                        <div class="visual-aid">⛔ Liberdade Negativa = Não interfira! <br> ✅ Liberdade Positiva = Ajude-me a ser capaz!</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Seu direito de escolher a religião que quer seguir (ou não seguir nenhuma) é uma <strong>liberdade negativa</strong>; o Estado não pode te obrigar a ir a uma igreja. Seu direito de votar e ser votado é uma faceta da <strong>liberdade positiva</strong>; o Estado deve criar e manter o sistema eleitoral para que você possa exercer essa capacidade de participar politicamente.</p>
+                        <p><strong>(Fonte: Aula08, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O art. 5º, IV, da Constituição Federal, ao mesmo tempo que garante a livre manifestação do pensamento, estabelece uma importante restrição. Qual é ela?",
+                options: [
+                    "A vedação de críticas a autoridades públicas.",
+                    "A necessidade de autorização prévia para manifestações.",
+                    "A proibição do discurso de ódio.",
+                    "A vedação ao anonimato.",
+                    "A obrigação de usar linguagem formal e respeitosa."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Liberdade com Responsabilidade:</strong> Perfeito! A Constituição estabelece um equilíbrio fundamental: você é livre para pensar e se expressar, mas não pode se esconder atrás do anonimato. A vedação ao anonimato é o que garante a <strong>responsabilização</strong>.</p>
+                        <p>O motivo é simples: se alguém, ao exercer sua liberdade de expressão, ofende a honra de outra pessoa, comete um crime ou causa um dano, o ofendido precisa saber quem é o autor para poder buscar a devida reparação na justiça (seja uma indenização cível ou uma punição criminal).</p>
+                        <div class="visual-aid">🗣️ Fale o que quiser, MAS 🆔 mostre quem você é.</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um usuário cria um perfil falso em uma rede social ('fake') para postar acusações mentirosas contra um candidato em época de eleição. Isso é um exercício ilegal da liberdade de expressão, pois viola a vedação ao anonimato. Se o autor for identificado (por meio de uma investigação que quebre o sigilo dos dados), ele poderá ser processado por crimes contra a honra e condenado a pagar indenização, pois não pode se proteger no anonimato.</p>
+                        <p><strong>(Fonte: Aula10, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a jurisprudência do STF (ADI 4815), a publicação de biografias de pessoas públicas exige qual condição?",
+                options: [
+                    "Autorização prévia da pessoa biografada ou de seus familiares.",
+                    "Análise e aprovação por uma comissão de censores.",
+                    "Não exige autorização prévia, sendo um exercício da liberdade de expressão, resguardado o direito à reparação posterior por danos.",
+                    "Autorização judicial para cada caso específico.",
+                    "A concordância de pelo menos 50% dos fatos narrados pelo biografado."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Censura Prévia, Nunca Mais:</strong> Resposta precisa, demonstrando conhecimento de uma decisão paradigmática do STF. A Corte, na ADI 4815, afirmou que exigir autorização prévia para a publicação de biografias seria uma forma de <strong>censura privada</strong>, o que é incompatível com a Constituição.</p>
+                        <p>O STF ponderou os direitos em conflito (liberdade de expressão e informação vs. privacidade e honra) e concluiu que a liberdade de expressão deve prevalecer <strong>a priori</strong>. A proteção da honra e da imagem não é feita por meio do bloqueio prévio da publicação, mas sim <strong>a posteriori</strong>, ou seja, depois da publicação.</p>
+                        <div class="visual-aid">📖 Publicar Biografia? ✅ SIM! <br> Autorização Prévia? ❌ NÃO! <br> Ofendeu? ⚖️ PROCESSO! </div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um autor decide escrever a biografia de um político famoso, incluindo passagens polêmicas e críticas. Ele pode escrever e publicar o livro sem pedir permissão ao político ou sua família. Contudo, se o político provar que o livro contém mentiras que ofenderam sua honra (dano material ou moral), ele pode processar o autor e a editora para receber uma indenização e, eventualmente, um direito de resposta, mas não podia ter impedido o livro de circular.</p>
+                        <p><strong>(Fonte: Aula09, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "No que tange à liberdade de expressão religiosa, o STF já decidiu que a incitação ao ódio público contra outras religiões, feita por um líder religioso, pode configurar qual crime?",
+                options: [
+                    "Apenas desrespeito a culto, um crime de menor potencial ofensivo.",
+                    "Não configura crime, pois está amparado pelo proselitismo religioso.",
+                    "Crime de racismo.",
+                    "Crime de calúnia ou difamação, dependendo do caso.",
+                    "Crime de ameaça contra a coletividade."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Fronteira entre Pregar e Odiar:</strong> Excelente! Você identificou o ponto exato da jurisprudência. O STF (RHC 146303) faz uma distinção crucial entre o proselitismo religioso (tentar convencer outros a se converterem, o que é permitido) e o discurso de ódio, que ataca e inferioriza outras crenças.</p>
+                        <p>Quando o discurso ultrapassa a crítica ou a comparação e passa a pregar o ódio, a discriminação e a violência contra seguidores de outras religiões, ele deixa de ser protegido pela liberdade de expressão e religiosa. Nesse caso, a conduta pode ser enquadrada como <strong>crime de racismo</strong>, na sua modalidade de preconceito religioso, que é inafiançável e imprescritível.</p>
+                        <div class="visual-aid">✝️☪️✡️ Proselitismo = Legal | 🔥 Discurso de Ódio = Crime de Racismo</div>
+                        <p class="example"><strong>Diferença na Prática:</strong> Um pastor dizer "minha religião é a verdadeira e vou te mostrar por quê" é proselitismo. Um pastor dizer "a religião 'X' é do demônio e seus seguidores devem ser expulsos de nossa cidade" é discurso de ódio, potencialmente enquadrado como racismo.</p>
+                        <p><strong>(Fonte: Aula10, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O direito de resposta, assegurado no art. 5º, V, da CF, deve ser proporcional ao agravo. Além disso, o que mais a Constituição garante à vítima da ofensa?",
+                options: [
+                    "Apenas a retratação pública do ofensor.",
+                    "A prisão imediata do ofensor.",
+                    "A indenização por dano material, moral ou à imagem.",
+                    "O direito de censurar futuras publicações do ofensor.",
+                    "A exclusão permanente do ofensor de qualquer meio de comunicação."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Reparação Completa do Dano:</strong> Perfeito! A Constituição busca oferecer uma reparação integral à vítima. Ela não se contenta apenas em dar à pessoa o direito de se defender no mesmo espaço em que foi atacada (direito de resposta).</p>
+                        <p>O texto constitucional é cumulativo. Ele garante o direito de resposta <strong>ALÉM</strong> da indenização. Isso significa que uma coisa não exclui a outra. A vítima pode ter ambos os direitos satisfeitos.</p>
+                        <ul>
+                            <li><strong>Direito de Resposta:</strong> Restabelece a verdade dos fatos, de forma proporcional ao ataque.</li>
+                            <li><strong>Indenização:</strong> Repara os prejuízos sofridos, que podem ser:
+                                <ul>
+                                    <li><strong>Materiais:</strong> Perdas financeiras diretas (ex: um contrato perdido por causa de uma notícia falsa).</li>
+                                    <li><strong>Morais:</strong> Sofrimento, angústia, abalo psicológico.</li>
+                                    <li><strong>À Imagem:</strong> Dano à reputação profissional ou pessoal.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p class="example"><strong>Exemplo Prático:</strong> Uma revista publica uma matéria de capa acusando falsamente um empresário de fraude. Ele pode exigir na justiça: 1) um <strong>direito de resposta</strong> com o mesmo destaque (na capa ou em página nobre) para desmentir a acusação, e CUMULATIVAMENTE, 2) uma <strong>indenização</strong> pelos negócios que perdeu e pelo abalo à sua honra e imagem.</p>
+                        <p><strong>(Fonte: Aula10, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Manifestações públicas que defendem a descriminalização de um tipo penal, como a 'marcha da maconha' (ADPF 187), são consideradas pelo STF como:",
+                options: [
+                    "Crime de apologia ao crime, devendo ser proibidas.",
+                    "Exercício legítimo da liberdade de expressão e de reunião, não configurando crime.",
+                    "Atos preparatórios de crime, sendo permitidos apenas em locais fechados.",
+                    "Permitidas, desde que não haja consumo da substância durante o ato.",
+                    "Crime de incitação ao crime, punível com detenção."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Debate de Ideias vs. Apologia ao Fato Criminoso:</strong> Resposta cirúrgica. Esta é outra distinção fundamental feita pelo STF. A Corte entendeu que há uma grande diferença entre defender a mudança de uma lei e fazer apologia a um fato criminoso concreto.</p>
+                        <p>Defender a mudança da legislação (ex: "a lei que proíbe o uso de maconha deveria ser revogada") é um exercício pleno da cidadania e da liberdade de expressão em uma democracia. É a forma como as leis evoluem. Proibir esse debate seria petrificar o ordenamento jurídico e impedir o progresso social.</p>
+                        <div class="visual-aid">🗣️ "Mudem a lei!" = OK! ✅ <br> 🔥 "Vamos todos cometer o crime X agora!" = ILEGAL! ❌</div>
+                        <p class="example"><strong>Diferença na Prática:</strong> Organizar uma passeata com cartazes pedindo ao Congresso Nacional que legalize o aborto é um ato democrático protegido pela liberdade de expressão (decisão do STF na ADPF 187 aplicada por analogia). Por outro lado, criar um site ensinando e incentivando mulheres a realizarem abortos clandestinos em casa seria apologia ou incitação ao crime, o que é ilegal.</p>
+                        <p><strong>(Fonte: Aula10, p. 5)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de elite!</strong> Gabaritar o tema da Liberdade de Expressão, com todas as suas nuances jurisprudenciais, é um feito notável. Você está no caminho certo para a aprovação. Mantenha o foco e a disciplina.</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

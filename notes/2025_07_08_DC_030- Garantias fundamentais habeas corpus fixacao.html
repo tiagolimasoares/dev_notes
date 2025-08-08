@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 29: Habeas Corpus</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 29: Habeas Corpus</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Remédios Constitucionais: Habeas Corpus</h1>
+                <p>Teste seus conhecimentos com base na Aula 29. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Um cidadão está na iminência de sofrer uma prisão que considera ilegal, por uma ordem de autoridade que abusa de seu poder. Qual é a espécie de Habeas Corpus cabível para essa situação?",
+                options: [
+                    "Habeas Corpus Repressivo",
+                    "Habeas Corpus Liberatório",
+                    "Habeas Corpus Coletivo",
+                    "Habeas Corpus Preventivo",
+                    "Não é cabível Habeas Corpus, mas sim Mandado de Segurança."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Agir Antes que o Pior Aconteça:</strong> Perfeito! Você identificou corretamente a espécie de HC adequada para a ameaça a direito. A doutrina clássica divide o Habeas Corpus em duas modalidades, baseadas no momento da coação:</p>
+                        <ul>
+                            <li><strong>✅ Preventivo (ou Salvo-Conduto):</strong> Utilizado quando a violação à liberdade de locomoção <strong>ainda não aconteceu</strong>, mas há uma <strong>ameaça real e iminente</strong>. O objetivo é obter uma ordem judicial (um 'salvo-conduto') que impeça a futura prisão ilegal. (É o caso da questão).</li>
+                            <li><strong>⛓️ Repressivo (ou Liberatório):</strong> Utilizado quando a violação <strong>já ocorreu</strong>. A pessoa já está presa ou sofrendo a coação ilegal. O objetivo é obter uma ordem de soltura (um 'alvará de soltura') para liberar o indivíduo.</li>
+                        </ul>
+                        <div class="visual-aid">😨 Ameaça de Prisão ➡️ HC Preventivo<br>⛓️ Prisão Efetivada ➡️ HC Repressivo</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um cidadão é intimado a depor em uma CPI e tem justo receio de que, durante seu depoimento, receberá uma voz de prisão ilegal. Ele pode impetrar um <strong>HC Preventivo</strong> para que o STF lhe conceda uma ordem que o impeça de ser preso durante a oitiva. Se, por outro lado, ele já tivesse sido preso na CPI, seu advogado impetraria um <strong>HC Repressivo</strong> para tentar sua soltura imediata.</p>
+                        <p><strong>(Fonte: Aula29, p. 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a Constituição Federal e a jurisprudência, quem tem legitimidade para impetrar um Habeas Corpus individual?",
+                options: [
+                    "Apenas o próprio paciente (a pessoa que sofre a coação).",
+                    "Apenas advogados com inscrição na OAB.",
+                    "Apenas o Ministério Público.",
+                    "Qualquer pessoa, física ou jurídica, nacional ou estrangeira, em seu favor ou de outrem.",
+                    "Apenas parentes consanguíneos até o 4º grau."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Ação Mais Democrática de Todas:</strong> Exato! O Habeas Corpus é conhecido como 'ação popular penal' por sua legitimidade universal. A Constituição e o Código de Processo Penal garantem que <strong>QUALQUER PESSOA</strong> pode impetrá-lo. Isso inclui:</p>
+                        <ul>
+                            <li><strong>O próprio paciente</strong> (a pessoa presa).</li>
+                            <li><strong>Um parente ou amigo.</strong></li>
+                            <li><strong>Um completo estranho</strong> que tome conhecimento da ilegalidade.</li>
+                            <li><strong>O Ministério Público.</strong></li>
+                            <li><strong>Uma pessoa jurídica</strong> (ex: uma ONG de direitos humanos).</li>
+                            <li><strong>Um estrangeiro</strong>, mesmo que não esteja no Brasil.</li>
+                        </ul>
+                        <p>Além disso, o HC não exige formalidades. Pode ser feito em qualquer papel, ou até mesmo oralmente, e não precisa de advogado (embora seja altamente recomendável).</p>
+                        <div class="visual-aid">🙋‍♂️ Quem pode impetrar HC? ✅ QUALQUER UM!</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Você está assistindo ao noticiário e vê uma reportagem sobre uma prisão que lhe parece claramente ilegal. Você, como cidadão, pode redigir um Habeas Corpus em uma folha de caderno e protocolá-lo no tribunal competente em favor daquela pessoa que você nem conhece. Essa é a amplitude da garantia constitucional.</p>
+                        <p><strong>(Fonte: Aula29, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Sobre o Habeas Corpus Coletivo, o STF (HC 143641/SP) admitiu sua possibilidade e, por analogia, aplicou os mesmos legitimados de outra ação constitucional. Que ação é essa?",
+                options: [
+                    "Ação Popular",
+                    "Mandado de Segurança Coletivo",
+                    "Ação Civil Pública",
+                    "Ação Direta de Inconstitucionalidade",
+                    "Mandado de Injunção Coletivo"
+                ],
+                answer: 4,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Criação Jurisprudencial para Proteger Grupos:</strong> Perfeito! Esta é uma questão de alto nível que exige conhecimento da jurisprudência. O HC Coletivo não está expresso na Constituição. Foi uma criação do STF para proteger a liberdade de grupos vulneráveis de forma mais eficiente.</p>
+                        <p>No famoso caso das mulheres grávidas e mães de crianças pequenas submetidas à prisão preventiva, o STF se deparou com a falta de uma lei sobre quem poderia impetrar o HC Coletivo. A solução foi aplicar, por <strong>analogia</strong>, a lista de legitimados do <strong>Mandado de Injunção Coletivo</strong>, prevista na Lei nº 13.300/2016.</p>
+                        <p><strong>Legitimados para o HC Coletivo (por analogia):</strong></p>
+                        <ul>
+                            <li>Ministério Público</li>
+                            <li>Partido político com representação no Congresso Nacional</li>
+                            <li>Organização sindical, entidade de classe ou associação (constituída há pelo menos 1 ano)</li>
+                            <li>Defensoria Pública</li>
+                        </ul>
+                        <p class="example"><strong>Na Prática:</strong> A Defensoria Pública, ao constatar que todos os presos de uma determinada penitenciária estão em celas superlotadas e condições desumanas (o que pode ser considerado uma forma de coação ilegal), pode impetrar um único <strong>Habeas Corpus Coletivo</strong> em favor de todos eles, em vez de centenas de HCs individuais, tornando a prestação da justiça mais célere e eficaz.</p>
+                        <p><strong>(Fonte: Aula29, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Embora o Código de Processo Penal (CPP) classifique o Habeas Corpus como um 'recurso', qual é a sua verdadeira natureza jurídica, segundo a doutrina majoritária?",
+                options: [
+                    "Um recurso ordinário.",
+                    "Um recurso especial.",
+                    "Um incidente processual.",
+                    "Uma ação de impugnação de natureza constitucional.",
+                    "Uma medida cautelar."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Essência de uma Ação, Não de um Recurso:</strong> Exato! A classificação no CPP é histórica e tecnicamente superada. A doutrina moderna é unânime em afirmar que o Habeas Corpus é uma <strong>ação autônoma</strong>, e não um recurso.</p>
+                        <p>A diferença é fundamental:</p>
+                        <ul>
+                            <li><strong>Recurso:</strong> É um meio de impugnar uma <strong>decisão judicial</strong> dentro de um <strong>processo que já existe</strong>. Ele não inicia uma nova relação processual.</li>
+                            <li><strong>Ação:</strong> É o ato de <strong>provocar o Poder Judiciário</strong>, de dar início a uma nova relação processual para proteger um direito.</li>
+                        </ul>
+                        <p>O Habeas Corpus pode ser impetrado contra um ato de qualquer autoridade (um delegado, um promotor, um particular), e não apenas contra uma decisão de um juiz. Ele inaugura uma nova relação processual. Por isso, sua natureza é de <strong>ação constitucional</strong>.</p>
+                        <div class="visual-aid">⚖️ Ação = Inicia um processo<br>🔄 Recurso = Continua um processo</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Um delegado de polícia mantém uma pessoa presa por mais tempo do que a lei permite, sem comunicar o juiz. Não há ainda um processo judicial. O advogado impetra um Habeas Corpus diretamente no tribunal. Ele está iniciando uma nova ação para questionar o ato do delegado, e não recorrendo de uma decisão judicial.</p>
+                        <p><strong>(Fonte: Aula29, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O Habeas Corpus pode ser utilizado para questionar qual tipo de punição disciplinar militar?",
+                options: [
+                    "Qualquer punição disciplinar militar, sem exceções.",
+                    "Apenas as punições que excedam 30 dias de prisão.",
+                    "Apenas as punições aplicadas a oficiais, não a praças.",
+                    "Nenhuma, pois o mérito da punição disciplinar militar não pode ser analisado via HC.",
+                    "Apenas as punições que não observam os pressupostos legais de sua aplicação (ilegalidade)."
+                ],
+                answer: 4,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Limite da Justiça Comum na Caserna:</strong> Perfeito! O Art. 142, § 2º, da CF, estabelece uma regra restritiva: 'não caberá habeas corpus em relação a punições disciplinares militares'. Isso visa proteger a hierarquia e a disciplina, pilares das Forças Armadas.</p>
+                        <p>No entanto, o STF interpreta essa regra de forma restrita. O que não se pode discutir via HC é o <strong>MÉRITO</strong> da punição. Ou seja, o juiz não pode reavaliar se a punição foi 'justa', 'conveniente' ou 'oportuna'.</p>
+                        <p>Contudo, o Judiciário <strong>PODE e DEVE</strong> analisar os aspectos de <strong>LEGALIDADE</strong> do ato. Se a punição foi aplicada por uma autoridade incompetente, se não foi dado o direito de defesa, ou se a punição não está prevista em lei, o ato é ilegal e pode ser contestado via Habeas Corpus.</p>
+                        <div class="visual-aid">🤔 Punição foi justa? ➡️ ❌ HC não analisa (mérito).<br>📜 Punição seguiu a lei? ➡️ ✅ HC pode analisar (legalidade).</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um sargento prende um soldado por 10 dias por uma falta disciplinar. O soldado não pode impetrar HC alegando que a punição foi 'severa demais' (discussão de mérito). Mas ele pode impetrar HC se provar que o sargento não tinha autoridade para aplicar aquela punição (ilegalidade por incompetência da autoridade) ou que ele não teve chance de se defender (ilegalidade por cerceamento de defesa).</p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de elite!</strong> Você demonstrou total domínio sobre o Habeas Corpus, o mais importante remédio para a sua futura atuação policial. Este conhecimento é um pilar da sua aprovação. Avante!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

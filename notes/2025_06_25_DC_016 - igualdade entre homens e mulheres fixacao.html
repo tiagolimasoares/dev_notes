@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 15: Igualdade entre Homens e Mulheres</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 15: Igualdade entre Homens e Mulheres</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Igualdade entre Homens e Mulheres</h1>
+                <p>Teste seus conhecimentos com base na Aula 15. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "A Constituição Federal, no Art. 5º, I, estabelece que 'homens e mulheres são iguais em direitos e obrigações'. No entanto, a própria Constituição prevê tratamentos diferenciados. Qual das alternativas apresenta um exemplo de diferenciação que concretiza a igualdade material?",
+                options: [
+                    "Exigir salários menores para mulheres na mesma função.",
+                    "Estabelecer requisitos de altura diferentes para homens e mulheres em concursos para as Forças Armadas.",
+                    "Proibir mulheres de exercerem cargos de chefia em empresas estatais.",
+                    "Conceder licença-paternidade com a mesma duração da licença-maternidade em todos os casos.",
+                    "Exigir que apenas homens prestem o serviço militar obrigatório."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Isonomia na Prática:</strong> Perfeito! Você compreendeu a essência da igualdade material aplicada à isonomia entre gêneros. Tratar desiguais (considerando suas diferenças biológicas e sociais) de forma desigual para alcançar a igualdade de resultados é o objetivo.</p>
+                        <p>A Constituição, embora pregue a igualdade, reconhece que existem diferenças fáticas. As diferenciações que ela promove não são para criar privilégios, mas para <strong>compensar desvantagens</strong> e promover a proteção.</p>
+                        <ul>
+                            <li><strong>❌ Discriminação Injustificada:</strong> Pagar salários diferentes para a mesma função (alternativa A) é uma violação direta da isonomia.</li>
+                            <li><strong>✅ Discriminação Justificada (Ação Afirmativa):</strong> Estabelecer requisitos físicos diferentes em um TAF (alternativa B) reconhece as diferenças biológicas médias entre homens e mulheres, tornando a competição mais justa. Da mesma forma, a proteção especial à maternidade (licença-maternidade) e ao mercado de trabalho feminino (Art. 5º, L e XX) são exemplos de tratamentos que visam a igualdade material.</li>
+                        </ul>
+                        <p class="example"><strong>Exemplo Prático:</strong> Em um concurso para a polícia, se a prova de corrida exigisse o mesmo tempo para homens e mulheres, a norma seria formalmente igual, mas materialmente desigual, pois desconsidera as diferenças de capacidade física média. Ao estabelecer índices diferentes, a regra se torna materialmente mais isonômica.</p>
+                        <p><strong>(Fonte: Aula15, p. 2 e 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a jurisprudência do STF (RE 630733), um candidato a concurso público que sofre uma lesão muscular na véspera do Teste de Aptidão Física (TAF) tem direito à remarcação da prova?",
+                options: [
+                    "Sim, pois se trata de um caso de força maior que justifica a remarcação.",
+                    "Sim, mas apenas se apresentar um atestado médico de um hospital público.",
+                    "Não, pois circunstâncias pessoais do candidato, ainda que de força maior, não conferem direito à remarcação, salvo se houver previsão no edital.",
+                    "Não, a menos que a lesão tenha ocorrido durante o aquecimento no local da prova.",
+                    "Sim, pois o princípio da razoabilidade obriga a Administração a conceder uma segunda chance."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Regra Geral do TAF:</strong> Exato! Esta é a regra geral e o entendimento pacificado pelo STF em sede de Repercussão Geral, o que significa que vale para todos os casos semelhantes. O princípio que prevalece aqui é o da <strong>isonomia entre os candidatos e a vinculação ao edital</strong>.</p>
+                        <p>O STF entende que permitir a remarcação por problemas pessoais (uma doença, uma contusão, um problema familiar) criaria uma situação de desigualdade com os demais candidatos, que se prepararam e compareceram aptos na data marcada. Além disso, geraria uma grande insegurança jurídica e um caos administrativo para as bancas examinadoras.</p>
+                        <div class="visual-aid">🤕 Candidato com Problema Pessoal ➡️ ❌ Sem Remarcação (Regra Geral)</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Carlos treinou por meses para o TAF da PRF. Na semana da prova, ele torce o tornozelo jogando futebol. Infelizmente, segundo a regra geral do STF, ele não terá direito a fazer a prova em outra data e será eliminado do concurso. A única chance seria se o próprio edital do concurso previsse essa possibilidade, o que é extremamente raro.</p>
+                        <p><strong>(Fonte: Aula15, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A regra geral sobre a impossibilidade de remarcação do TAF possui uma exceção importante, consolidada pelo STF no RE 1058333. A quem se aplica essa exceção?",
+                options: [
+                    "A candidatos que comprovem doença infectocontagiosa, como a COVID-19.",
+                    "A candidatos que estejam de luto por parente de primeiro grau.",
+                    "A candidatas gestantes, que têm o direito à remarcação do TAF, independentemente de previsão no edital.",
+                    "A candidatos que são servidores públicos e estavam em missão no dia da prova.",
+                    "A todos os candidatos, pois a regra anterior foi revogada."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Exceção que Protege a Maternidade:</strong> Perfeito! Você dominou a principal exceção à regra geral. O STF entendeu que a gravidez não é uma 'circunstância pessoal' comum, como uma doença ou uma lesão. É um evento fisiológico e social de grande importância, protegido pela Constituição.</p>
+                        <p>Obrigar uma mulher grávida a realizar um teste de esforço físico máximo seria colocar em risco tanto a sua saúde quanto a do feto, além de ser uma forma de discriminação que a forçaria a escolher entre a maternidade e a carreira pública. Por isso, a Corte garantiu o direito à remarcação para depois do parto, mesmo que o edital proíba.</p>
+                        <div class="visual-aid">🤰 Candidata Grávida ➡️ ✅ Direito à Remarcação (Exceção)</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Ana está grávida de 5 meses quando é convocada para o TAF da Polícia Civil. O edital do concurso diz que não haverá segunda chamada em nenhuma hipótese. Mesmo assim, com base na decisão do STF, Ana pode apresentar seus exames, não comparecer ao teste na data original, e exigir judicialmente o direito de realizar o TAF em uma data futura, após o período de recuperação do parto, sem ser eliminada do certame.</p>
+                        <p><strong>(Fonte: Aula15, p. 3 e 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A 'Teoria do Impacto Desproporcional' (ou discriminação indireta) se manifesta quando:",
+                options: [
+                    "Uma norma é criada com a intenção explícita de discriminar um grupo.",
+                    "Um ato administrativo beneficia diretamente um grupo em detrimento de outro.",
+                    "Uma norma ou prática, aparentemente neutra, acaba por gerar efeitos negativos desproporcionais sobre um grupo vulnerável.",
+                    "Uma decisão judicial aplica a lei de forma diferente para pessoas de classes sociais distintas.",
+                    "Um particular se recusa a contratar alguém com base em sua orientação sexual."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Discriminação 'Camuflada':</strong> Exato! Esta teoria é mais sutil e sofisticada. Ela não olha para a <strong>intenção</strong> do legislador ou do administrador, mas para o <strong>resultado prático</strong> da norma ou da política.</p>
+                        <p>A discriminação indireta ocorre quando uma regra, que parece ser igual para todos, na prática, acaba por prejudicar muito mais um determinado grupo vulnerável do que os outros, sem uma justificativa razoável para tal impacto.</p>
+                        <div class="visual-aid">📜 Norma Neutra na Aparência ➡️ 💣 Efeito Desproporcional na Prática</div>
+                        <p class="example"><strong>Exemplo do Material:</strong> Um edital de concurso para a polícia estabelece um índice de barra fixa quase idêntico para homens e mulheres (ex: 10 barras para homens e 9 para mulheres). A regra é <strong>aparentemente neutra</strong>, pois se aplica a todos. No entanto, o <strong>impacto</strong> dessa regra é <strong>desproporcionalmente negativo</strong> para as mulheres, pois desconsidera a diferença de força física nos membros superiores, tornando a aprovação feminina muito mais difícil. Essa regra poderia ser questionada com base na Teoria do Impacto Desproporcional.</p>
+                        <p><strong>(Fonte: Aula15, p. 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Conforme o Informativo 994 do STF, a exigência de requisitos legais diferenciados para homens e mulheres na concessão de pensão por morte de ex-servidores foi considerada:",
+                options: [
+                    "Constitucional, pois reconhece as diferenças sociais entre os gêneros.",
+                    "Inconstitucional, por transgressão ao princípio da isonomia.",
+                    "Constitucional, desde que a mulher comprove dependência econômica.",
+                    "Inconstitucional, mas apenas para servidores militares.",
+                    "Uma matéria de competência do legislador ordinário, sobre a qual o STF não pode opinar."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>Isonomia na Previdência:</strong> Perfeito! Você está atento à jurisprudência específica citada na aula. O STF, nesse julgado, reafirmou a força do Art. 5º, I, da Constituição.</p>
+                        <p>Leis antigas costumavam presumir que a mulher era dependente do marido, mas exigiam que o marido (viúvo) comprovasse dependência econômica para receber a pensão da esposa falecida. O STF considerou que essa diferenciação não se sustenta mais na sociedade atual e representa uma discriminação injustificada, baseada em estereótipos de gênero. A presunção de dependência ou a necessidade de comprovação deve ser igual para ambos os cônjuges ou companheiros.</p>
+                        <div class="visual-aid">👨 Homem = 👩 Mulher (Para fins de receber pensão por morte)</div>
+                        <p class="example"><strong>Na Prática:</strong> Se uma servidora pública federal falece, seu marido ou companheiro tem o mesmo direito de receber a pensão por morte que uma esposa ou companheira teria se o servidor falecido fosse homem, sem a necessidade de cumprir requisitos extras ou mais rigorosos. O tratamento deve ser espelhado, isonômico.</p>
+                        <p><strong>(Fonte: Aula15, p. 2)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de elite!</strong> Você demonstrou total domínio sobre as nuances da igualdade de gênero e a jurisprudência do STF. Este é um conhecimento refinado que o coloca à frente. Avante!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 31: Mandado de Segurança</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 31: Mandado de Segurança</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 4</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Remédios Constitucionais: Mandado de Segurança</h1>
+                <p>Teste seus conhecimentos com base na Aula 31. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "O Mandado de Segurança é conhecido por seu caráter residual. O que isso significa?",
+                options: [
+                    "Que ele só pode ser impetrado após o trânsito em julgado da decisão.",
+                    "Que ele é o remédio cabível apenas quando não for o caso de Habeas Corpus ou Habeas Data.",
+                    "Que ele serve para proteger apenas direitos que sobraram da Constituição de 1967.",
+                    "Que ele só pode ser usado contra atos de autoridades de baixo escalão.",
+                    "Que ele só pode ser impetrado como último recurso em um processo judicial."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O Remédio para 'Todo o Resto':</strong> Perfeito! O caráter residual é a definição mais importante do Mandado de Segurança (MS). Ele funciona como uma 'rede de segurança' para os direitos que não têm um remédio constitucional específico.</p>
+                        <p>A lógica é a seguinte:</p>
+                        <ul>
+                            <li>Se o seu direito violado é a <strong>liberdade de locomoção</strong> ➡️ o remédio é o <strong>Habeas Corpus</strong>.</li>
+                            <li>Se o seu direito violado é o de <strong>acessar ou retificar informações pessoais</strong> em bancos de dados ➡️ o remédio é o <strong>Habeas Data</strong>.</li>
+                            <li>Para <strong>TODOS OS OUTROS</strong> direitos líquidos e certos que não se encaixam acima ➡️ o remédio é o <strong>Mandado de Segurança</strong>.</li>
+                        </ul>
+                        <div class="visual-aid">🚶‍♂️HC | ℹ️ HD | 🛡️ MS (para o resto)</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um candidato aprovado dentro do número de vagas em um concurso público tem o direito líquido e certo à nomeação. Se a Administração Pública se recusa a nomeá-lo sem justificativa, ele não pode usar HC (sua locomoção não está em risco) nem HD (não é um problema de acesso a dados). O remédio correto é o <strong>Mandado de Segurança</strong> para proteger seu direito à nomeação.</p>
+                        <p><strong>(Fonte: Aula31, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O conceito de 'direito líquido e certo', requisito para o Mandado de Segurança, significa que o direito deve ser:",
+                options: [
+                    "Previsto em lei complementar e de valor monetário definido.",
+                    "Comprovado de plano, por meio de prova documental pré-constituída, sem a necessidade de produção de novas provas (dilação probatória).",
+                    "Inquestionável e que não admita nenhuma controvérsia, nem mesmo sobre a interpretação da lei.",
+                    "Um direito que já foi reconhecido em uma decisão judicial transitada em julgado.",
+                    "Um direito que pertence exclusivamente a uma pessoa física, não a uma pessoa jurídica."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Prova que 'Fala por Si':</strong> Exato! 'Líquido e certo' não significa que o direito é indiscutível, mas sim que a <strong>prova desse direito</strong> é clara, imediata e não precisa de mais nada para ser demonstrada. O Mandado de Segurança é um remédio de rito sumário, rápido. Ele não comporta a fase de produção de provas (ouvir testemunhas, fazer perícias, etc.).</p>
+                        <p>O impetrante precisa chegar ao Judiciário com a 'prova no bolso', pronta para ser apresentada. Por isso se diz que a prova deve ser <strong>pré-constituída</strong>.</p>
+                        <p><strong>Atenção à Súmula 625 do STF:</strong> A existência de uma <strong>controvérsia sobre a interpretação do direito (questão de direito)</strong> não impede o MS. O que não pode haver é controvérsia sobre os <strong>fatos</strong>.</p>
+                        <div class="visual-aid">📄 Prova Documental Pronta = ✅ MS Cabível<br>🗣️ Precisa Ouvir Testemunha = ❌ MS Não Cabível</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um servidor é demitido. Se ele tem o documento que prova que o processo administrativo disciplinar não lhe deu direito de defesa, ele tem prova pré-constituída de uma ilegalidade e pode impetrar MS. Mas se ele alega que foi demitido por perseguição e precisa ouvir testemunhas para provar isso, o MS não será o caminho adequado, pois exige dilação probatória.</p>
+                        <p><strong>(Fonte: Aula31, p. 2 e 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com a Lei nº 12.016/09, em qual das seguintes situações NÃO se concederá Mandado de Segurança?",
+                options: [
+                    "Contra ato de Ministro de Estado.",
+                    "Contra ato de autoridade pública que desrespeita um direito líquido e certo.",
+                    "Contra ato do qual caiba recurso administrativo com efeito suspensivo.",
+                    "Contra ato que fere o direito de nomeação em concurso público.",
+                    "Contra ato que apresenta controvérsia sobre matéria de direito."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>As 'Portas Fechadas' para o MS:</strong> Perfeito! A Lei do Mandado de Segurança (Lei 12.016/09) estabelece algumas barreiras para evitar o uso inadequado do remédio, especialmente quando já existem outros meios eficazes para resolver o problema.</p>
+                        <p>A hipótese da alternativa correta é uma das mais importantes. Se existe um <strong>recurso administrativo</strong> que, ao ser interposto, já <strong>suspende os efeitos</strong> do ato que te prejudicou, não há necessidade de correr para o Judiciário. Você deve primeiro usar o meio administrativo disponível, que é mais simples e rápido.</p>
+                        <p><strong>Outras hipóteses de não cabimento (Art. 5º da Lei):</strong></p>
+                        <ul>
+                            <li>Contra decisão judicial da qual caiba recurso com efeito suspensivo.</li>
+                            <li>Contra decisão judicial transitada em julgado (Súmula 268 do STF).</li>
+                        </ul>
+                        <p class="example"><strong>Cenário Prático:</strong> Você, servidor público, recebe uma punição de suspensão. A lei do seu estatuto diz que você pode entrar com um recurso para a autoridade superior e que esse recurso, automaticamente, suspende a aplicação da punição até que ele seja julgado. Nesse caso, você não pode impetrar um MS de imediato. Você deve primeiro usar o recurso administrativo. Se, mesmo assim, a decisão for mantida, aí sim você poderá discutir a legalidade do ato na Justiça.</p>
+                        <p><strong>(Fonte: Aula31, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual é o prazo para impetrar o Mandado de Segurança, contado da ciência, pelo interessado, do ato a ser impugnado?",
+                options: [
+                    "30 dias, sendo um prazo prescricional.",
+                    "120 dias, sendo um prazo decadencial.",
+                    "60 dias, sendo um prazo prescricional.",
+                    "180 dias, sendo um prazo decadencial.",
+                    "Não há prazo, pode ser impetrado a qualquer tempo."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O 'Relógio Correndo' do Mandado de Segurança:</strong> Exato! Este é um dos prazos mais famosos e cobrados em concursos. O direito de impetrar o Mandado de Segurança não é eterno. A lei estabelece um prazo de <strong>120 dias</strong>.</p>
+                        <p>É crucial entender a natureza desse prazo:</p>
+                        <ul>
+                            <li><strong>Prazo DECADENCIAL:</strong> Isso significa que ele <strong>não se suspende nem se interrompe</strong>. É um prazo fatal. Se você perder, perde o direito de usar o Mandado de Segurança para aquele ato específico.</li>
+                            <li><strong>Contagem:</strong> O prazo começa a contar a partir do momento em que o interessado tem <strong>ciência oficial</strong> do ato que o prejudicou.</li>
+                        </ul>
+                        <div class="visual-aid">🗓️ 120 dias para agir! ⏳</div>
+                        <p class="example"><strong>Na Prática:</strong> Um ato administrativo ilegal que te prejudica é publicado no Diário Oficial no dia 10 de janeiro. Você tem até o dia 10 de maio (aproximadamente, contando 120 dias corridos) para impetrar o Mandado de Segurança. Se você entrar com o MS no 121º dia, o juiz irá extinguir o processo sem nem analisar o mérito, pois seu direito de usar aquela ação decaiu (acabou). Você ainda poderá, eventualmente, discutir o ato por uma ação comum, mas perdeu a chance de usar o rito mais rápido do MS.</p>
+                        <p><strong>(Fonte: Aula31, p. 3 e 4)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre o Mandado de Segurança. Este é um conhecimento fundamental que o coloca em grande vantagem. Mantenha o foco!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

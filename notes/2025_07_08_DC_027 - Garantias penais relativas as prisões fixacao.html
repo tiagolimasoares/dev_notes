@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 26: Garantias Penais e Relativas à Prisão</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 26: Garantias Penais e Relativas à Prisão</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Garantias Penais e Relativas à Prisão</h1>
+                <p>Teste seus conhecimentos com base na Aula 26. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "O princípio da pessoalidade da pena (Art. 5º, XLV) estabelece que 'nenhuma pena passará da pessoa do condenado'. No entanto, o mesmo dispositivo prevê uma exceção. Qual é ela?",
+                options: [
+                    "A pena de multa, que pode ser cobrada dos familiares.",
+                    "A pena de prestação de serviços à comunidade, que pode ser cumprida por um parente.",
+                    "A obrigação de reparar o dano e o perdimento de bens, que podem ser estendidos aos sucessores até o limite do patrimônio transferido.",
+                    "A pena de prisão, que em caso de doença grave do condenado, pode ser transferida para o filho mais velho.",
+                    "Não há exceções; o princípio é absoluto."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Pena Fica, a Dívida Segue:</strong> Perfeito! Você identificou a clássica distinção entre a sanção penal e seus efeitos civis. É um ponto fundamental.</p>
+                        <p>A regra é clara: a <strong>pena</strong> (prisão, restrição de direitos) é personalíssima, morre com o condenado. O filho não pode 'herdar' a pena de prisão do pai.</p>
+                        <p>No entanto, a <strong>obrigação de reparar o dano</strong> causado pelo crime é uma dívida de natureza <strong>civil</strong>. Como qualquer outra dívida, ela é transmitida aos herdeiros (sucessores), mas com uma limitação importante: a cobrança não pode ultrapassar o valor da herança recebida. Os herdeiros não respondem com seu patrimônio pessoal.</p>
+                        <div class="visual-aid">⛓️ Pena (Criminal) ➡️ Fica com o condenado.<br>💰 Dívida (Civil) ➡️ Segue a herança (até o limite dela).</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> João comete um crime de estelionato, causando um prejuízo de R$ 100 mil à vítima, e é condenado a pagar essa indenização. Antes de pagar, João falece, deixando uma herança de R$ 80 mil para seu filho. A vítima poderá cobrar do filho os R$ 80 mil (o limite da herança). Os outros R$ 20 mil do prejuízo não poderão ser cobrados.</p>
+                        <p><strong>(Fonte: Aula26, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Qual das seguintes penas é expressamente VEDADA pela Constituição Federal de 1988, sem qualquer exceção?",
+                options: [
+                    "Pena de morte.",
+                    "Pena de prisão superior a 40 anos.",
+                    "Pena de trabalhos forçados.",
+                    "Pena de multa.",
+                    "Pena de suspensão de direitos."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Dignidade Humana como Limite Absoluto:</strong> Exato! A Constituição, no Art. 5º, XLVII, lista as penas que são absolutamente proibidas em nosso ordenamento, por serem consideradas cruéis e atentatórias à dignidade humana.</p>
+                        <p>Vamos revisar a lista de vedações:</p>
+                        <ul>
+                            <li><strong>❌ De morte</strong> (Regra geral. Exceção: guerra declarada).</li>
+                            <li><strong>❌ De caráter perpétuo.</strong></li>
+                            <li><strong>❌ De trabalhos forçados.</strong></li>
+                            <li><strong>❌ De banimento</strong> (expulsar um brasileiro do país).</li>
+                            <li><strong>❌ Cruéis.</strong></li>
+                        </ul>
+                        <p>A pena de <strong>trabalhos forçados</strong> é vedada de forma absoluta. É importante não confundir com o trabalho do preso, que é um dever previsto na Lei de Execução Penal e tem caráter educativo e de ressocialização, não sendo considerado 'forçado' no sentido da vedação constitucional.</p>
+                        <p class="example"><strong>Na Prática:</strong> Um juiz não pode condenar alguém a '10 anos de trabalho obrigatório em uma mina de carvão'. Isso seria uma pena de trabalhos forçados, inconstitucional. No entanto, o sistema prisional pode determinar que um preso trabalhe em uma oficina dentro do presídio, com direito a remuneração e remição da pena, o que é perfeitamente legal.</p>
+                        <p><strong>(Fonte: Aula26, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "De acordo com o Art. 5º, LXVII, da CF, e a jurisprudência do STF (Súmula Vinculante 25), qual é a única hipótese de prisão civil por dívida atualmente admitida no Brasil?",
+                options: [
+                    "A do devedor de impostos.",
+                    "A do depositário infiel.",
+                    "A do devedor de aluguel.",
+                    "A do responsável pelo inadimplemento voluntário e inescusável de obrigação alimentícia.",
+                    "Não se admite mais nenhuma hipótese de prisão por dívida."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Exceção que Protege a Vida:</strong> Perfeito! Esta é uma das questões mais consolidadas em concursos. A regra geral é que ninguém pode ser preso por dívidas. A Constituição, originalmente, previa duas exceções: o devedor de pensão alimentícia e o depositário infiel.</p>
+                        <p>Ocorre que o Brasil assinou e internalizou o <strong>Pacto de San José da Costa Rica</strong>, um tratado de direitos humanos que proíbe a prisão do depositário infiel. O STF decidiu que esse tratado tem <strong>status supralegal</strong> (acima das leis, abaixo da Constituição) e, portanto, 'paralisou' a parte da Constituição que permitia essa prisão.</p>
+                        <div class="visual-aid">📜 CF Original: Alimentos + Depositário Infiel.<br>🌍 Pacto de San José: Proíbe prisão de Depositário Infiel.<br>⚖️ STF (Súmula Vinculante 25): Só vale a prisão por alimentos!</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Se uma pessoa deixa de pagar as parcelas do financiamento de um carro (onde ela é, tecnicamente, uma depositária do bem), ela não pode ser presa por isso; o banco terá que executar a dívida na esfera cível. No entanto, se a mesma pessoa deixa de pagar, de forma voluntária e sem justificativa, a pensão alimentícia de seu filho, o juiz pode decretar sua prisão civil como meio de forçá-la a cumprir a obrigação, pois aqui o que está em jogo é a subsistência e a vida do alimentando.</p>
+                        <p><strong>(Fonte: Aula26, p. 5 e 6)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "Ao efetuar uma prisão, qual dos seguintes direitos NÃO é expressamente assegurado ao preso pelo Art. 5º da Constituição?",
+                options: [
+                    "O de ser informado de seus direitos, entre os quais o de permanecer calado.",
+                    "O de ter a assistência da família e de advogado.",
+                    "O de ter sua prisão comunicada imediatamente ao juiz competente e à sua família.",
+                    "O de ter direito a uma cela individual.",
+                    "O de ter a identificação dos responsáveis por sua prisão."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>As Garantias do Momento da Captura:</strong> Exato! Esta questão testa a memorização precisa dos incisos que tratam das garantias do preso. Vamos revisar os direitos assegurados no momento da prisão:</p>
+                        <ul>
+                            <li><strong>LXII:</strong> Comunicação imediata da prisão e do local onde se encontra ao juiz e à família (ou pessoa indicada).</li>
+                            <li><strong>LXIII:</strong> Ser informado de seus direitos, incluindo o de ficar calado, e ter assistência da família e de advogado.</li>
+                            <li><strong>LXIV:</strong> Saber quem são os agentes responsáveis pela sua prisão ou interrogatório.</li>
+                        </ul>
+                        <p>O direito a uma cela individual, embora seja um ideal buscado pela Lei de Execução Penal (Art. 88), <strong>não é uma garantia expressa no Art. 5º da Constituição</strong>. Além disso, o próprio STF já reconheceu que, diante da realidade do sistema carcerário, essa não é uma regra absoluta (ADPF 347).</p>
+                        <p class="example"><strong>Na Prática Policial:</strong> Ao prender alguém em flagrante, o policial deve imediatamente informar o preso: 'O senhor tem o direito de permanecer calado, de contatar sua família e um advogado'. Em seguida, na delegacia, a prisão deve ser comunicada ao juiz. A identificação dos policiais que efetuaram a prisão constará no boletim de ocorrência. A questão da cela só surgirá depois, no sistema prisional, e não é uma garantia absoluta do momento da captura.</p>
+                        <p><strong>(Fonte: Aula26, p. 3 e 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "A regra geral é que ninguém será preso senão em flagrante delito ou por ordem escrita e fundamentada de autoridade judiciária competente. O Art. 5º, LXI, da CF, prevê uma exceção a essa regra. Qual é ela?",
+                options: [
+                    "Prisão para averiguação por suspeita.",
+                    "Prisão por dívida de jogo.",
+                    "Prisão em casos de transgressão militar ou crime propriamente militar.",
+                    "Prisão por desacato à autoridade policial.",
+                    "Prisão de estrangeiro em situação irregular."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Disciplina e a Hierarquia Militar:</strong> Perfeito! Você identificou a única exceção prevista no texto constitucional à regra 'flagrante ou ordem judicial'.</p>
+                        <p>A Constituição reconhece que as Forças Armadas e as Polícias Militares se baseiam em princípios rígidos de <strong>hierarquia e disciplina</strong>. Para manter essa estrutura, os regulamentos militares preveem punições para faltas disciplinares (transgressões) que podem incluir a prisão administrativa do militar, aplicada por uma autoridade militar superior, sem a necessidade de uma ordem judicial prévia.</p>
+                        <div class="visual-aid">⚖️ Civil: Prisão só com Flagrante ou Ordem Judicial<br>🎖️ Militar: Prisão por Transgressão Disciplinar (sem ordem judicial)</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Um soldado do Exército se apresenta para o serviço embriagado e desrespeita seu sargento. Isso é uma transgressão militar grave. Seu comandante de batalhão pode determinar sua prisão administrativa por alguns dias no quartel, como forma de punição disciplinar, sem precisar pedir autorização a um juiz. O mesmo se aplica a crimes propriamente militares, definidos em lei.</p>
+                        <p><strong>(Fonte: Aula26, p. 3 e 4)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de elite!</strong> Você demonstrou total domínio sobre as garantias penais e processuais relativas à pena e à prisão. Este é um conhecimento fundamental para a sua aprovação. Mantenha o foco!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>

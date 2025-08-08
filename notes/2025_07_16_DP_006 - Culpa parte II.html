@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Fato Típico: Culpa (Parte II)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilos Globais e Paleta de Cores */
+        :root {
+            --primary-blue: #0A3D62;
+            --secondary-blue: #1E639B;
+            --light-gray: #F0F2F5;
+            --medium-gray: #D1D5DB;
+            --dark-gray: #4B5563;
+            --text-color: #1F2937;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            display: flex;
+        }
+
+        /* Estilo da Sidebar */
+        #sidebar {
+            width: 250px;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 2rem 1rem;
+            transition: width 0.3s;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        #sidebar h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--secondary-blue);
+            padding-bottom: 1rem;
+        }
+
+        #sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #sidebar ul li a {
+            display: block;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--white);
+            transition: background-color 0.3s, color 0.3s;
+            font-weight: 500;
+        }
+
+        #sidebar ul li a:hover, #sidebar ul li a.active {
+            background-color: var(--white);
+            color: var(--primary-blue);
+        }
+
+        /* Conteúdo Principal */
+        #main-content {
+            margin-left: 250px;
+            padding: 2rem 3rem;
+            width: calc(100% - 250px);
+            transition: margin-left 0.3s, width 0.3s;
+        }
+
+        /* Estilo dos Cards de Questão */
+        .question-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary-blue);
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilo das Alternativas */
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .option:hover {
+            background-color: #EBF5FF;
+            border-color: var(--secondary-blue);
+        }
+        
+        .option.correct {
+            background-color: var(--success-green);
+            color: var(--white);
+            border-color: #059669;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-red);
+            color: var(--white);
+            border-color: #DC2626;
+        }
+        
+        .option.eliminated {
+            text-decoration: line-through;
+            background-color: var(--medium-gray);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 1rem;
+            min-width: 20px;
+        }
+        
+        .scissor-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: color 0.2s;
+        }
+        
+        .scissor-icon:hover {
+            color: var(--error-red);
+        }
+        .option.eliminated .scissor-icon, .option.correct .scissor-icon, .option.incorrect .scissor-icon {
+            display: none;
+        }
+
+        /* Estilo do Feedback */
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #D1FAE5;
+            border-left: 5px solid var(--success-green);
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #FEE2E2;
+            border-left: 5px solid var(--error-red);
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feedback-explanation {
+            line-height: 1.6;
+        }
+        
+        .feedback-example {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            border-left: 3px solid var(--secondary-blue);
+        }
+
+        /* Seção de Relatório */
+        #report-section {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #review-section {
+            margin-top: 2rem;
+        }
+
+        .review-card {
+            background-color: #FFFBEB;
+            border: 1px solid #FBBF24;
+            border-left: 5px solid #F59E0B;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Direito Penal</h2>
+        <ul>
+            <li><a href="#quiz-section" onclick="scrollToSection('quiz-section')" class="active">Questões</a></li>
+            <li><a href="#report-section" onclick="scrollToSection('report-section')">Relatório</a></li>
+        </ul>
+    </div>
+
+    <div id="main-content">
+        <h1 class="text-3xl font-bold mb-2 text-[var(--primary-blue)]">Questões de Fixação: Fato Típico - Culpa (Parte II)</h1>
+        <p class="mb-8 text-[var(--dark-gray)]">Aula 20 - Analise cada questão e selecione a alternativa correta. Use o ícone de tesoura <i class="fas fa-cut"></i> para eliminar as alternativas que julgar incorretas.</p>
+
+        <div id="quiz-section">
+            <!-- As questões serão inseridas aqui via JavaScript -->
+        </div>
+
+        <div id="report-section" class="hidden">
+            <h2 class="text-2xl font-bold mb-6 text-[var(--primary-blue)]">Relatório de Desempenho</h2>
+            <div class="w-full md:w-1/2 mx-auto mb-8">
+                <canvas id="performance-chart"></canvas>
+            </div>
+            <div id="review-section">
+                <!-- A revisão dos erros será inserida aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // DOCUMENTAÇÃO GERAL DO SCRIPT (JavaScript)
+    // Módulo da Aula 20: Culpa (Parte II).
+    // O script aborda as modalidades e espécies de culpa, a distinção entre culpa consciente e dolo eventual,
+    // e o conceito de crime preterdoloso, mantendo o padrão de "mini-aulas" interativas.
+
+    const questions = [
+        {
+            question: "A distinção entre culpa consciente e dolo eventual é um dos temas mais exigidos em provas. Qual das alternativas apresenta a diferença fundamental entre os dois institutos?",
+            options: [
+                "Na culpa consciente, o agente não prevê o resultado, enquanto no dolo eventual, ele prevê.",
+                "Em ambos, o agente prevê o resultado. A diferença é que na culpa consciente ele se importa com o resultado, e no dolo eventual, não.",
+                "Na culpa consciente, o agente prevê o resultado como possível, mas acredita sinceramente que pode evitá-lo. No dolo eventual, o agente prevê o resultado e age com indiferença, aceitando-o ('dane-se se acontecer').",
+                "A culpa consciente só é aplicável a crimes de trânsito, enquanto o dolo eventual se aplica aos demais crimes.",
+                "No dolo eventual, o agente quer o resultado, enquanto na culpa consciente, ele apenas assume o risco de produzi-lo."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>Este é o ponto nevrálgico que define a fronteira entre dolo e culpa em situações-limite. O elemento comum é a <strong>previsão do resultado</strong>. A diferença está na <strong>atitude do agente</strong> em relação a essa previsão:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Culpa Consciente (com previsão):</strong> O agente prevê que o resultado ruim pode acontecer. No entanto, ele confia em suas habilidades ou na sorte e acredita firmemente que o resultado não ocorrerá. Ele pensa: "Isso pode acontecer, mas eu vou evitar". Há uma aposta na não ocorrência.</li>' +
+                        '<li class="mt-1"><strong>- Dolo Eventual:</strong> O agente também prevê o resultado. A diferença é que ele é <strong>indiferente</strong>. Ele não se importa se o resultado ocorrer ou não. A expressão que resume sua atitude é "dane-se", "não estou nem aí". Ele assume o risco e consente com o resultado.</li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong><br><strong>Culpa Consciente:</strong> Um atirador experiente decide atirar numa maçã sobre a cabeça de uma pessoa, confiando em sua mira perfeita. Ele prevê o risco de errar, mas acredita que isso não vai acontecer. Se ele erra e mata, é homicídio culposo.<br><strong>Dolo Eventual:</strong> Um indivíduo, para testar um colete à prova de balas em um amigo, atira em sua direção. Ele não quer matar o amigo, mas prevê que o colete pode falhar e é indiferente a esse risco. Se o colete falha e o amigo morre, é homicídio com dolo eventual.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 20, p. 3</em></p>',
+            topic: "Diferença entre Culpa Consciente e Dolo Eventual"
+        },
+        {
+            question: "O crime preterdoloso é uma forma de crime qualificado pelo resultado. Qual é a sua estrutura subjetiva?",
+            options: [
+                "Dolo na conduta antecedente e dolo no resultado mais grave.",
+                "Culpa na conduta antecedente e culpa no resultado mais grave.",
+                "Culpa na conduta antecedente e dolo no resultado mais grave.",
+                "Dolo na conduta antecedente e culpa no resultado mais grave.",
+                "Dolo em toda a extensão do resultado, tanto no antecedente quanto no consequente."
+            ],
+            answer: 3,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (D):</strong></p>' +
+                    '<p>A palavra "preterdolo" significa "além do dolo". A estrutura do crime preterdoloso é híbrida, combinando os dois elementos subjetivos:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>1. Conduta Antecedente (Inicial):</strong> O agente age com <strong>DOLO</strong>. Ele quer praticar um crime menos grave.</li>' +
+                        '<li class="mt-1"><strong>2. Resultado Consequente (Final):</strong> O resultado mais grave que ocorre não era querido nem aceito pelo agente, mas decorre de sua conduta inicial por <strong>CULPA</strong>.</li>' +
+                    '</ul>' +
+                    '<p>Portanto, a fórmula é: <strong>DOLO + CULPA = PRETERDOLO</strong>. É fundamental que o resultado mais grave seja ao menos previsível, para não haver responsabilidade penal objetiva (vedada pelo art. 19 do CP).</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> O exemplo clássico é a lesão corporal seguida de morte (art. 129, §3º, CP). "A" quer apenas lesionar "B" e lhe dá um soco (dolo na lesão). "B" se desequilibra, cai, bate a cabeça na guia da calçada e morre (resultado morte culposo). "A" não queria matar, mas o resultado morte era previsível a partir de uma agressão física. Ele responderá por lesão corporal seguida de morte.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 20, p. 5</em></p>',
+            topic: "Crime Preterdoloso"
+        },
+        {
+            question: "No Direito Penal, vigora o princípio da impossibilidade de compensação de culpas. O que isso significa?",
+            options: [
+                "Se o agente e a vítima agem com culpa, a culpa de um anula a do outro, e não há crime.",
+                "A culpa da vítima pode ser usada para diminuir a pena do agente, mas não para excluir o crime.",
+                "A eventual culpa da vítima não elimina nem diminui a responsabilidade penal do agente que também agiu com culpa; ambas as condutas são analisadas de forma independente.",
+                "A compensação de culpas só é permitida nos crimes de trânsito.",
+                "Se a culpa da vítima for mais grave que a do agente, apenas a vítima responde pelo resultado."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>Diferentemente do Direito Civil, onde a culpa concorrente da vítima pode reduzir ou excluir a indenização, no Direito Penal as responsabilidades são individuais e não se compensam. O princípio é claro: <strong>a culpa de um não apaga a culpa do outro</strong>.</p>' +
+                    '<p>Se duas ou mais pessoas, por meio de suas condutas culposas, contribuem para um resultado lesivo, cada uma delas responderá penalmente na medida de sua própria culpa. A análise é autônoma para cada envolvido.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> O motorista "A" avança o sinal vermelho (imprudência). O motociclista "B", que vinha na outra via, estava em excesso de velocidade (imprudência). Eles colidem, e ambos sofrem lesões corporais. "A" responderá por lesão corporal culposa em "B", e "B" responderá por lesão corporal culposa em "A". A culpa de um não justifica nem elimina a do outro.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 20, p. 5</em></p>',
+            topic: "Compensação de Culpas"
+        },
+        {
+            question: "As modalidades de culpa estão previstas no art. 18, II, do Código Penal. Um engenheiro que, por erro de cálculo, projeta um edifício com falha estrutural que vem a desabar, age com:",
+            options: [
+                "Negligência, pois se omitiu em fazer o cálculo correto.",
+                "Imprudência, pois foi uma conduta positiva e descuidada.",
+                "Imperícia, pois a falha se deu no exercício de sua profissão ou arte, por falta de aptidão ou conhecimento técnico.",
+                "Culpa consciente, pois previu o risco.",
+                "Dolo eventual, pois assumiu o risco do desabamento."
+            ],
+            answer: 2,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (C):</strong></p>' +
+                    '<p>As modalidades de culpa descrevem como o dever de cuidado foi violado:</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Imprudência:</strong> É a culpa de quem age, a culpa "positiva". É fazer algo que não deveria ser feito, é ser precipitado, afoito. Ex: Dirigir em alta velocidade.</li>' +
+                        '<li class="mt-1"><strong>- Negligência:</strong> É a culpa de quem se omite, a culpa "negativa". É deixar de fazer algo que deveria ser feito, é ser desatento, displicente. Ex: Deixar de dar manutenção nos freios do carro.</li>' +
+                        '<li class="mt-1"><strong>- Imperícia:</strong> É a "culpa profissional". Ocorre quando a pessoa, no exercício de sua arte, profissão ou ofício, demonstra falta de habilidade técnica ou conhecimento que deveria possuir. É a inaptidão para aquela atividade específica.</li>' +
+                    '</ul>' +
+                    '<p>No caso, o erro de cálculo do engenheiro é uma falha técnica específica de sua profissão, caracterizando a imperícia.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático:</strong> Um médico que, durante uma cirurgia, esquece uma gaze dentro do paciente, age com negligência (se foi por desatenção na contagem) ou com imperícia (se usou uma técnica cirúrgica completamente inadequada e errônea).</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 20, p. 2</em></p>',
+            topic: "Modalidades de Culpa (Imprudência, Negligência, Imperícia)"
+        },
+        {
+            question: "Todo crime preterdoloso é um crime qualificado pelo resultado, mas nem todo crime qualificado pelo resultado é preterdoloso. Essa afirmação está correta por quê?",
+            options: [
+                "Está incorreta, pois os termos são sinônimos.",
+                "Está correta, pois o crime qualificado pelo resultado também pode ocorrer com dolo na conduta antecedente e dolo no resultado mais grave.",
+                "Está correta, pois o crime qualificado pelo resultado só admite culpa na conduta antecedente e culpa na consequente.",
+                "Está incorreta, pois o crime preterdoloso é gênero do qual o crime qualificado pelo resultado é espécie.",
+                "Está correta, pois o crime qualificado pelo resultado não exige nexo causal entre a conduta e o resultado agravador."
+            ],
+            answer: 1,
+            explanation:
+                '<div class="feedback-explanation">' +
+                    '<p><strong>Mini-Aula sobre a Alternativa Correta (B):</strong></p>' +
+                    '<p>A relação entre os dois conceitos é de <strong>gênero e espécie</strong>.</p>' +
+                    '<ul>' +
+                        '<li class="mt-2"><strong>- Gênero: Crime Qualificado pelo Resultado.</strong> É qualquer crime em que a ocorrência de um resultado mais grave aumenta a pena. A lei exige que esse resultado agravador seja causado pelo agente com, no mínimo, culpa (art. 19 do CP).</li>' +
+                        '<li class="mt-1"><strong>- Espécie 1: Crime Preterdoloso.</strong> Ocorre quando há <strong>DOLO</strong> na conduta inicial e <strong>CULPA</strong> no resultado agravador. (Ex: Lesão corporal seguida de morte).</li>' +
+                        '<li class="mt-1"><strong>- Espécie 2: Dolo + Dolo.</strong> Ocorre quando há <strong>DOLO</strong> na conduta inicial e também <strong>DOLO</strong> (direto ou eventual) no resultado agravador. (Ex: Roubo seguido de morte - Latrocínio).</li>' +
+                    '</ul>' +
+                    '<p>Portanto, o latrocínio é um crime qualificado pelo resultado, mas pode ser preterdoloso (se a morte foi culposa) ou integralmente doloso (se a morte foi dolosa). Isso prova que nem todo crime qualificado pelo resultado é preterdoloso.</p>' +
+                '</div>' +
+                '<div class="feedback-example">' +
+                    '<p><strong>Exemplo Prático (Latrocínio):</strong><br><strong>Qualificado pelo resultado (doloso):</strong> O ladrão atira para matar a vítima e garantir a subtração. Há dolo no roubo e dolo na morte.<br><strong>Qualificado pelo resultado (preterdoloso):</strong> Durante o roubo, o ladrão dá uma coronhada na vítima para desmaiá-la (dolo na lesão), mas a pancada acaba sendo fatal (culpa no resultado morte). Em ambos os casos, o crime é de latrocínio (art. 157, §3º, II), mas a estrutura subjetiva é diferente.</p>' +
+                '</div>' +
+                '<p class="mt-3 text-sm text-gray-600"><em>Referência: Aula 20, p. 6</em></p>',
+            topic: "Crime Preterdoloso vs. Crime Qualificado pelo Resultado"
+        }
+    ];
+
+    const userAnswers = new Array(questions.length).fill(null);
+    const quizContainer = document.getElementById('quiz-section');
+    const reportSection = document.getElementById('report-section');
+    let performanceChart = null;
+
+    function renderQuestions() {
+        let quizHTML = '';
+        questions.forEach((q, index) => {
+            quizHTML +=
+                '<div class="question-card" id="question-' + index + '">' +
+                    '<p class="question-title">' + (index + 1) + '. ' + q.question + '</p>' +
+                    '<div class="options-container">';
+            q.options.forEach((option, optionIndex) => {
+                quizHTML +=
+                    '<div class="option" data-question="' + index + '" data-option="' + optionIndex + '">' +
+                        '<span class="option-letter">' + String.fromCharCode(65 + optionIndex) + '</span>' +
+                        '<span class="option-text">' + option + '</span>' +
+                        '<i class="fas fa-cut scissor-icon" title="Eliminar alternativa"></i>' +
+                    '</div>';
+            });
+            quizHTML +=
+                    '</div>' +
+                    '<div class="feedback" id="feedback-' + index + '"></div>' +
+                '</div>';
+        });
+        quizContainer.innerHTML = quizHTML;
+        addEventListeners();
+    }
+
+    function addEventListeners() {
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', handleOptionSelect);
+        });
+        document.querySelectorAll('.scissor-icon').forEach(icon => {
+            icon.addEventListener('click', handleEliminateOption);
+        });
+    }
+
+    function handleEliminateOption(e) {
+        e.stopPropagation();
+        const optionDiv = e.target.parentElement;
+        if (!optionDiv.classList.contains('eliminated') && userAnswers[optionDiv.dataset.question] === null) {
+            optionDiv.classList.add('eliminated');
+        }
+    }
+
+    function handleOptionSelect(e) {
+        const selectedOption = e.currentTarget;
+        const questionIndex = parseInt(selectedOption.dataset.question);
+        const optionIndex = parseInt(selectedOption.dataset.option);
+
+        if (userAnswers[questionIndex] !== null || selectedOption.classList.contains('eliminated')) {
+            return;
+        }
+
+        const isCorrect = optionIndex === questions[questionIndex].answer;
+        userAnswers[questionIndex] = { answered: optionIndex, correct: isCorrect };
+
+        const optionsContainer = selectedOption.parentElement;
+        optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+
+        selectedOption.classList.add(isCorrect ? 'correct' : 'incorrect');
+        
+        optionsContainer.querySelectorAll('.scissor-icon').forEach(icon => icon.style.display = 'none');
+
+        showFeedback(questionIndex, isCorrect);
+        
+        if (userAnswers.every(answer => answer !== null)) {
+            reportSection.classList.remove('hidden');
+            generateReport();
+            scrollToSection('report-section');
+        }
+    }
+
+    function showFeedback(questionIndex, isCorrect) {
+        const feedbackDiv = document.getElementById('feedback-' + questionIndex);
+        const questionData = questions[questionIndex];
+        
+        let feedbackHTML = 
+            '<p class="feedback-title">' + (isCorrect ? 'Resposta Correta! Análise do Professor:' : 'Resposta Incorreta. Análise do Professor:') + '</p>' +
+            '<div>' + questionData.explanation + '</div>';
+        
+        feedbackDiv.innerHTML = feedbackHTML;
+        feedbackDiv.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    }
+    
+    function generateReport() {
+        const correctAnswers = userAnswers.filter(a => a.correct).length;
+        const incorrectAnswers = questions.length - correctAnswers;
+
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        if (performanceChart) {
+            performanceChart.destroy();
+        }
+        performanceChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Acertos', 'Erros'],
+                datasets: [{
+                    data: [correctAnswers, incorrectAnswers],
+                    backgroundColor: ['var(--success-green)', 'var(--error-red)'],
+                    borderColor: ['var(--white)'],
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 14 }, padding: 20 } },
+                    title: { display: true, text: 'Seu Desempenho Geral', font: { size: 18, weight: 'bold' }, padding: { bottom: 20 } }
+                }
+            }
+        });
+
+        const reviewSection = document.getElementById('review-section');
+        let reviewHTML = '<h3 class="text-xl font-bold mb-4 text-[var(--primary-blue)]">Pontos para Revisão</h3>';
+        const incorrectQuestions = userAnswers
+            .map((answer, index) => ({...answer, index}))
+            .filter(answer => !answer.correct);
+
+        if (incorrectQuestions.length === 0) {
+            reviewHTML += '<p class="text-lg text-[var(--success-green)] font-semibold">Excelente desempenho! Você demonstrou sólida compreensão das modalidades e espécies de culpa. Avante!</p>';
+        } else {
+            reviewHTML += '<p class="mb-4 text-[var(--dark-gray)]">Você errou ' + incorrectQuestions.length + ' questão(ões). A aprovação é construída sobre a correção dos erros. Revise com atenção:</p>';
+            incorrectQuestions.forEach(q => {
+                const originalQuestion = questions[q.index];
+                reviewHTML +=
+                    '<div class="review-card">' +
+                        '<h4 class="font-bold text-lg mb-2 text-[#D97706]">' + originalQuestion.topic + '</h4>' +
+                        '<p class="mb-3"><strong>Na questão:</strong> "' + originalQuestion.question + '"</p>' +
+                        '<p class="font-semibold">Relembre o ponto-chave:</p>' +
+                        originalQuestion.explanation +
+                    '</div>';
+            });
+        }
+        reviewSection.innerHTML = reviewHTML;
+    }
+
+    function scrollToSection(sectionId) {
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+        const sections = ['quiz-section', 'report-section'];
+        let currentSection = '';
+
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 150 && rect.bottom >= 150) {
+                    currentSection = sectionId;
+                }
+            }
+        });
+        
+        const sidebarLinks = document.querySelectorAll('#sidebar ul li a');
+        sidebarLinks.forEach(link => {
+            link.classList.remove('active');
+            if(link.getAttribute('href') === '#' + currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', renderQuestions);
+    </script>
+
+</body>
+</html>

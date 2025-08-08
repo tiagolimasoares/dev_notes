@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões de Fixação - Aula 22: Direitos Fundamentais Diversos</title>
+    <!-- Importação da biblioteca de gráficos Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 
+        DOCUMENTAÇÃO: CSS INCORPORADO
+        -----------------------------
+        O estilo da página segue um padrão profissional e responsivo, garantindo uma boa experiência 
+        tanto em desktops quanto em dispositivos móveis. As justificativas suportam um conteúdo
+        mais rico, com parágrafos, listas e ênfases visuais.
+    -->
+    <style>
+        /* Paleta de Cores:
+           - Azul Profissional: #3498db
+           - Cinza Escuro (Sidebar/Texto): #2c3e50
+           - Cinza Claro (Fundo): #f4f7f9
+           - Branco: #ffffff
+           - Verde (Correto): #2ecc71
+           - Vermelho (Incorreto): #e74c3c
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        /* Reset e Configurações Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Adaptação para mobile-first */
+            min-height: 100vh;
+        }
+
+        /* --- Barra Lateral (Sidebar) --- */
+        .sidebar {
+            width: 100%; /* Ocupa toda a largura em telas pequenas */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar .logo h2 {
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sidebar .logo p {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            text-align: center;
+        }
+
+        .sidebar .navigation {
+            margin-top: 20px;
+        }
+
+        .sidebar #progress-container {
+            margin-top: 10px;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sidebar #progress-tracker {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .sidebar .footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            color: #7f8c8d;
+        }
+
+        /* --- Conteúdo Principal --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* --- Cartão da Questão --- */
+        .question-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .question-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* --- Alternativas --- */
+        .options {
+            list-style: none;
+        }
+
+        .options li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        
+        .options li label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .options li:hover {
+            background-color: #ecf0f1;
+            border-color: #3498db;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options label::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .options input[type="radio"]:checked + label::before {
+            background-color: #3498db;
+            border-color: #3498db;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .eliminate-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .eliminate-btn:hover {
+            color: #e74c3c;
+        }
+
+        .options li.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #fbeaea;
+            pointer-events: none;
+        }
+
+        /* --- Feedback (Mini-Aula) --- */
+        .feedback {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .feedback.correct {
+            background-color: #eafaf1;
+            border-left-color: #2ecc71;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fbeaea;
+            border-left-color: #e74c3c;
+            display: block;
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .feedback-title.correct-title { color: #27ae60; }
+        .feedback-title.incorrect-title { color: #c0392b; }
+        
+        .feedback-content p {
+            margin-bottom: 10px;
+        }
+        .feedback-content strong {
+            color: #2c3e50;
+        }
+        .feedback-content .example {
+            border-left: 3px solid #bdc3c7;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .feedback-content .visual-aid {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+        }
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .options li.correct-answer {
+            background-color: #eafaf1;
+            border-color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .options li.incorrect-selection {
+            background-color: #fbeaea;
+            border-color: #e74c3c;
+        }
+
+        /* --- Seção de Resultados --- */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #results-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-wrapper {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        #remedial-lesson h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .remedial-item {
+            margin-bottom: 25px;
+        }
+        
+        .remedial-item .question-text { font-weight: bold; }
+        .remedial-item .user-answer { color: #e74c3c; }
+        .remedial-item .correct-answer { color: #2ecc71; }
+        
+        .remedial-item .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f4f7f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .remedial-item .explanation .feedback-content p {
+            font-size: 1em; /* Ajuste para melhor leitura */
+        }
+
+
+        /* --- Media Queries para Responsividade --- */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row; /* Layout lado a lado em telas maiores */
+            }
+            .sidebar {
+                width: 280px;
+                position: fixed;
+                height: 100%;
+            }
+            .main-content {
+                margin-left: 280px; /* Espaço para a sidebar fixa */
+                padding: 40px;
+            }
+            .quiz-header h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Container Principal que organiza o layout -->
+    <div class="container">
+        
+        <!-- Barra Lateral para Navegação e Status -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Mentor Constitucional</h2>
+                <p>Aula 22: Direitos Fundamentais Diversos</p>
+            </div>
+            <nav class="navigation">
+                <h3>Progresso</h3>
+                <div id="progress-container">
+                    <p>Questões Respondidas:</p>
+                    <span id="progress-tracker">0 de 5</span>
+                </div>
+            </nav>
+            <div class="footer">
+                <p>&copy; 2024 - Preparação Elite</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal da Página -->
+        <main class="main-content">
+            <header class="quiz-header">
+                <h1>Direitos Individuais: Direitos Fundamentais Diversos</h1>
+                <p>Teste seus conhecimentos com base na Aula 22. Elimine as alternativas que julgar incorretas com o ícone (✂️) e selecione a correta.</p>
+            </header>
+
+            <!-- Onde as questões do quiz serão inseridas pelo JavaScript -->
+            <div id="quiz-container"></div>
+
+            <!-- Botão para finalizar e gerar o relatório -->
+            <button id="submit-btn" class="hidden">Gerar Relatório de Desempenho</button>
+
+            <!-- Seção de Resultados (inicialmente oculta) -->
+            <section id="results-container" class="hidden">
+                <h2>Relatório de Desempenho</h2>
+                <div class="chart-wrapper">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div id="remedial-lesson">
+                    <h3>Plano de Reforço Personalizado</h3>
+                    <p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>
+                    <!-- A aula de reforço será inserida aqui -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 
+        DOCUMENTAÇÃO: JAVASCRIPT INCORPORADO
+        ------------------------------------
+        A lógica do quiz está aqui. A propriedade `explanation` de cada questão
+        foi elaborada como uma "mini-aula" detalhada, seguindo as diretrizes de
+        excelência para garantir o aprendizado profundo.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const questions = [
+            {
+                question: "Um cidadão que tem seu pedido de certidão de tempo de serviço negado por uma repartição pública, para fins de aposentadoria, deve utilizar qual remédio constitucional para garantir seu direito?",
+                options: [
+                    "Habeas Corpus, pois seu direito de ir e vir está sendo ameaçado.",
+                    "Habeas Data, pois se trata de uma informação de interesse pessoal.",
+                    "Mandado de Injunção, pois falta uma norma regulamentadora.",
+                    "Mandado de Segurança, pois é o remédio para proteger direito líquido e certo não amparado por Habeas Corpus ou Habeas Data.",
+                    "Ação Popular, para anular o ato da repartição."
+                ],
+                answer: 3,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Distinção Crucial entre Remédios:</strong> Perfeito! Esta é uma das 'pegadinhas' mais clássicas de concurso. As bancas adoram confundir o candidato com as hipóteses de cabimento do Mandado de Segurança e do Habeas Data.</p>
+                        <p>Vamos fixar a diferença:</p>
+                        <ul>
+                            <li><strong>Habeas Data (Art. 5º, LXXII):</strong> Serve para duas coisas: <strong>1)</strong> ter acesso a <strong>informações</strong> relativas à pessoa do impetrante que constem em bancos de dados públicos ou de caráter público; <strong>2)</strong> para retificar esses dados. A palavra-chave é <strong>INFORMAÇÃO SOBRE SI MESMO</strong>.</li>
+                            <li><strong>Mandado de Segurança (Art. 5º, LXIX):</strong> É o remédio <strong>residual</strong>. Ele protege todo direito líquido e certo que não seja amparado por Habeas Corpus (liberdade de locomoção) ou Habeas Data. A negativa de uma <strong>CERTIDÃO</strong> é o exemplo clássico de cabimento do MS.</li>
+                        </ul>
+                        <div class="visual-aid">ℹ️ Acessar/Retificar Informação Pessoal ➡️ Habeas Data<br>📄 Obter Certidão / Outros Direitos ➡️ Mandado de Segurança</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Se você vai a um órgão público e pede para <strong>ver a sua ficha cadastral</strong> e eles negam, o remédio é o Habeas Data. Se você pede para que eles emitam um <strong>documento oficial (certidão)</strong> atestando uma situação sua (como tempo de serviço) e eles negam, o remédio é o Mandado de Segurança.</p>
+                        <p><strong>(Fonte: Aula22, p. 3 e 4)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O princípio da inafastabilidade de jurisdição (Art. 5º, XXXV) estabelece que a lei não excluirá da apreciação do Poder Judiciário lesão ou ameaça a direito. No entanto, a própria Constituição prevê exceções a essa regra. Qual das alternativas abaixo é uma exceção constitucionalmente prevista?",
+                options: [
+                    "A necessidade de esgotar a via administrativa em litígios trabalhistas antes de acionar a Justiça do Trabalho.",
+                    "A necessidade de esgotar as instâncias da justiça desportiva para questões relativas à disciplina e às competições desportivas.",
+                    "A obrigatoriedade de tentar uma conciliação no PROCON antes de processar uma empresa.",
+                    "A impossibilidade de o Judiciário revisar o mérito de um ato administrativo discricionário.",
+                    "A proibição de discutir judicialmente decisões de um Tribunal de Contas."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A 'Condição de Procedibilidade' Desportiva:</strong> Exato! A regra geral é que você não precisa 'tentar resolver administrativamente' antes de ir à Justiça. Você pode ir direto ao Judiciário. A isso se chama 'jurisdição una'.</p>
+                        <p>No entanto, a Constituição criou uma exceção expressa para o mundo dos esportes. O Art. 217, § 1º, estabelece que o Poder Judiciário só admitirá ações relativas à <strong>disciplina e às competições desportivas</strong> após se <strong>esgotarem as instâncias da justiça desportiva</strong>. Isso é uma condição para que a ação possa ser proposta (condição de procedibilidade).</p>
+                        <div class="visual-aid">⚽ Justiça Desportiva (STJD, etc.) ➡️ ✅ Esgotamento Obrigatório<br>⚖️ Demais Áreas (INSS, Multa de Trânsito) ➡️ ❌ Esgotamento Facultativo</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Um jogador de futebol é suspenso por 4 jogos pelo STJD por uma expulsão. Ele não pode ir diretamente a um juiz comum para anular a punição. Ele precisa primeiro recorrer a todas as instâncias possíveis dentro da própria justiça desportiva. Somente se, ao final, ele ainda se sentir lesado, é que poderá levar o caso ao Poder Judiciário.</p>
+                        <p><strong>(Fonte: Aula22, p. 5)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "No que tange à sucessão de bens de um estrangeiro falecido que possuía imóveis no Brasil e deixou filhos brasileiros, qual lei será aplicada?",
+                options: [
+                    "Sempre a lei brasileira, por uma questão de soberania nacional.",
+                    "Sempre a lei pessoal do falecido (a lei de seu país de origem).",
+                    "A lei brasileira, salvo se a lei pessoal do falecido for mais favorável aos filhos brasileiros.",
+                    "A lei do local onde os imóveis estão situados, sem exceções.",
+                    "A lei escolhida pelos herdeiros em comum acordo."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Regra de Proteção ao Herdeiro Brasileiro:</strong> Perfeito! O Art. 5º, XXXI, da CF, estabelece uma regra protetiva, que visa beneficiar o cônjuge ou os filhos brasileiros.</p>
+                        <p>A lógica é a seguinte:</p>
+                        <ol>
+                            <li><strong>Regra Geral:</strong> Aplica-se a <strong>lei brasileira</strong> para a sucessão dos bens situados aqui.</li>
+                            <li><strong>Exceção Protetiva:</strong> Compara-se a lei brasileira com a lei do país do falecido. Se a lei estrangeira for <strong>mais benéfica</strong> para os herdeiros brasileiros (ex: concede uma parte maior da herança, tem menos impostos), então o juiz brasileiro aplicará a lei estrangeira.</li>
+                        </ol>
+                        <div class="visual-aid">🇧🇷 Lei Brasileira vs. 🌍 Lei Estrangeira ➡️ Aplica-se a que for <strong>MELHOR</strong> para o herdeiro brasileiro.</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Um cidadão alemão falece, deixando um apartamento no Rio de Janeiro para seu único filho, que é brasileiro. A lei brasileira diz que o filho tem direito a 50% do bem. A lei alemã, hipoteticamente, diz que ele tem direito a 75%. Nesse caso, o juiz brasileiro aplicará a lei alemã, por ser mais favorável ao herdeiro brasileiro, que ficará com 75% do apartamento.</p>
+                        <p><strong>(Fonte: Aula22, p. 2)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O direito de petição (Art. 5º, XXXIV, 'a') e o direito de certidão (Art. 5º, XXXIV, 'b') são ambos gratuitos. Qual a finalidade principal do direito de petição?",
+                options: [
+                    "Obter documentos oficiais para comprovar uma situação.",
+                    "Levar ao conhecimento dos Poderes Públicos uma ilegalidade ou abuso de poder, em defesa de direitos.",
+                    "Acessar informações pessoais em bancos de dados governamentais.",
+                    "Defender a própria liberdade de locomoção.",
+                    "Contestar a constitucionalidade de uma lei."
+                ],
+                answer: 1,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>O 'Alerta' do Cidadão ao Poder Público:</strong> Exato! O direito de petição é um instrumento de cidadania e de controle social. É o canal formal que qualquer pessoa (brasileira ou estrangeira) tem para 'bater na porta' de um órgão público e dizer: 'Ei, tem algo errado acontecendo aqui!'.</p>
+                        <p>Sua finalidade é:</p>
+                        <ul>
+                            <li><strong>Defender direitos próprios ou da coletividade.</strong></li>
+                            <li><strong>Denunciar uma ilegalidade</strong> (um ato contrário à lei).</li>
+                            <li><strong>Denunciar um abuso de poder</strong> (um ato praticado por uma autoridade além de suas competências).</li>
+                        </ul>
+                        <div class="visual-aid">🗣️ Cidadão ➡️ 📝 Petição ➡️ 🏛️ Poder Público (para denunciar algo errado)</div>
+                        <p class="example"><strong>Exemplo Prático:</strong> Você mora em uma rua e percebe que uma obra da prefeitura está causando rachaduras em todas as casas. Você e seus vizinhos podem redigir uma <strong>petição</strong>, assiná-la e protocolá-la na prefeitura, relatando o problema, denunciando a possível negligência e pedindo providências. Este é um exercício clássico do direito de petição, e é gratuito.</p>
+                        <p><strong>(Fonte: Aula22, p. 3)</strong></p>
+                    </div>
+                `
+            },
+            {
+                question: "O direito à informação, previsto no Art. 5º, XXXIII, garante a todos o direito de receber informações de órgãos públicos, de interesse particular, coletivo ou geral. Esse direito é absoluto?",
+                options: [
+                    "Sim, o Estado é obrigado a fornecer toda e qualquer informação solicitada.",
+                    "Sim, desde que o solicitante pague as taxas correspondentes.",
+                    "Não, o direito pode ser restringido caso a informação seja sigilosa e imprescindível à segurança da sociedade e do Estado.",
+                    "Não, pois o direito só se aplica a informações de interesse particular do solicitante.",
+                    "Sim, e a negativa pode ser combatida com Mandado de Segurança."
+                ],
+                answer: 2,
+                explanation: `
+                    <div class="feedback-title correct-title">Análise da Resposta Correta</div>
+                    <div class="feedback-content">
+                        <p><strong>A Transparência e seus Limites:</strong> Perfeito! A regra é a publicidade e a transparência. No entanto, como nenhum direito fundamental é absoluto, o direito à informação também encontra limites na própria Constituição.</p>
+                        <p>A exceção é clara: informações cujo sigilo seja <strong>imprescindível</strong> para a <strong>segurança da sociedade e do Estado</strong>. Essa é uma ponderação de valores. A transparência é importante, mas a segurança nacional e a proteção da coletividade contra ameaças graves são ainda mais.</p>
+                        <div class="visual-aid">📂 Informação Pública (Regra) vs. 🛡️ Segurança Nacional (Exceção)</div>
+                        <p class="example"><strong>Cenário Prático:</strong> Um jornalista solicita ao Ministério da Defesa os planos detalhados de defesa de nossas fronteiras, incluindo a localização de todos os postos militares e o tipo de armamento utilizado. O Ministério da Defesa negará o acesso a essa informação, alegando que sua divulgação colocaria em risco a segurança do Estado, tornando o país vulnerável. Essa negativa é constitucional e legítima.</p>
+                        <p><strong>(Fonte: Aula22, p. 2 e 3)</strong></p>
+                    </div>
+                `
+            }
+        ];
+        
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const progressTracker = document.getElementById('progress-tracker');
+        
+        let userAnswers = {}; 
+        let answeredQuestionsCount = 0;
+
+        function renderQuiz() {
+            let quizHTML = '';
+            questions.forEach((q, index) => {
+                quizHTML += `
+                    <div class="question-card" id="q-${index}">
+                        <h3>${index + 1}. ${q.question}</h3>
+                        <ul class="options" data-question-index="${index}">
+                            ${q.options.map((option, i) => `
+                                <li>
+                                    <input type="radio" name="q${index}" id="q${index}o${i}" value="${i}">
+                                    <label for="q${index}o${i}">${String.fromCharCode(65 + i)}) ${option}</label>
+                                    <button class="eliminate-btn" title="Eliminar esta alternativa">✂️</button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            });
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function handleOptionSelect(questionIndex, selectedIndex) {
+            if (userAnswers.hasOwnProperty(questionIndex)) return;
+
+            userAnswers[questionIndex] = parseInt(selectedIndex);
+            answeredQuestionsCount++;
+            updateProgress();
+
+            const questionCard = document.getElementById(`q-${questionIndex}`);
+            const feedbackEl = questionCard.querySelector('.feedback');
+            const optionsList = questionCard.querySelector('.options');
+            const correctIndex = questions[questionIndex].answer;
+
+            const isCorrect = userAnswers[questionIndex] === correctIndex;
+
+            if (isCorrect) {
+                feedbackEl.classList.add('correct');
+                feedbackEl.innerHTML = questions[questionIndex].explanation;
+            } else {
+                feedbackEl.classList.add('incorrect');
+                const incorrectExplanation = questions[questionIndex].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise da Resposta Incorreta');
+                feedbackEl.innerHTML = incorrectExplanation;
+                optionsList.children[selectedIndex].classList.add('incorrect-selection');
+            }
+            
+            optionsList.children[correctIndex].classList.add('correct-answer');
+
+            Array.from(optionsList.children).forEach(li => {
+                li.style.pointerEvents = 'none';
+                li.querySelector('.eliminate-btn').style.display = 'none';
+            });
+        }
+
+        function handleEliminate(target) {
+            const listItem = target.closest('li');
+            if (listItem) {
+                listItem.classList.add('eliminated');
+                listItem.querySelector('input').disabled = true;
+            }
+        }
+
+        function updateProgress() {
+            progressTracker.textContent = `${answeredQuestionsCount} de ${questions.length}`;
+            if (answeredQuestionsCount === questions.length) {
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            let score = 0;
+            questions.forEach((q, i) => {
+                if (userAnswers[i] === q.answer) {
+                    score++;
+                }
+            });
+            const incorrect = questions.length - score;
+
+            renderChart(score, incorrect);
+            generateRemedialLesson();
+        }
+        
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Acertos', 'Erros'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#2ecc71', '#e74c3c'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Seu Desempenho Geral' }
+                    }
+                }
+            });
+        }
+
+        function generateRemedialLesson() {
+            const lessonContainer = document.getElementById('remedial-lesson');
+            let lessonHTML = `<h3>Plano de Reforço Personalizado</h3>`; 
+            
+            let hasErrors = false;
+            questions.forEach((question, i) => {
+                if (userAnswers[i] !== question.answer) {
+                    hasErrors = true;
+                    const userAnswerText = question.options[userAnswers[i]];
+                    
+                    lessonHTML += `
+                        <div class="remedial-item">
+                            <p class="question-text">${i + 1}. ${question.question}</p>
+                            <p><strong>Sua resposta (incorreta):</strong> <span class="user-answer">${String.fromCharCode(65 + userAnswers[i])}) ${userAnswerText}</span></p>
+                            <div class="explanation">
+                                ${questions[i].explanation.replace('feedback-title correct-title', 'feedback-title incorrect-title').replace('Análise da Resposta Correta', 'Análise Detalhada da Questão')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasErrors) {
+                lessonHTML += "<p><strong>Desempenho de excelência!</strong> Você demonstrou total domínio sobre os direitos fundamentais diversos e suas aplicações práticas. Este é um conhecimento que o diferencia. Continue com essa dedicação!</p>";
+            } else {
+                 lessonHTML = `<h3>Plano de Reforço Personalizado</h3><p>Abaixo estão os pontos que exigem sua atenção. Revise as mini-aulas para solidificar o conhecimento e não errar mais.</p>` + lessonHTML.replace('<h3>Plano de Reforço Personalizado</h3>', '');
+            }
+
+            lessonContainer.innerHTML = lessonHTML;
+        }
+
+        renderQuiz();
+
+        quizContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('eliminate-btn')) {
+                handleEliminate(e.target);
+                return;
+            }
+
+            const label = e.target.closest('label');
+            if (label) {
+                const radio = document.getElementById(label.htmlFor);
+                if (radio && !radio.disabled) {
+                    const questionIndex = radio.name.replace('q', '');
+                    handleOptionSelect(questionIndex, radio.value);
+                }
+            }
+        });
+
+        submitBtn.addEventListener('click', showResults);
+    });
+    </script>
+</body>
+</html>
